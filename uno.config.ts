@@ -62,7 +62,20 @@ export function sharedUnoConfig() {
       presetTypography(),
       presetWebFonts({
         fonts: {
-          sans: 'DM Sans',
+          sans: {
+            name: 'DM Sans',
+            weights: [
+              100,
+              200,
+              300,
+              400,
+              500,
+              600,
+              700,
+              800,
+              900,
+            ],
+          },
           serif: 'DM Serif Display',
           mono: 'DM Mono',
           cute: 'Kiwi Maru',

@@ -1,5 +1,8 @@
+import { resolve } from 'node:path'
 import { env } from 'node:process'
 import Vue from '@vitejs/plugin-vue'
+import UnoCSS from 'unocss/vite'
+import VueRouter from 'unplugin-vue-router/vite'
 import { defineConfig } from 'vite'
 import Layouts from 'vite-plugin-vue-layouts'
 
@@ -9,8 +12,14 @@ const host = env.TAURI_DEV_HOST!
 export default defineConfig(async () => ({
   plugins: [
     Vue(),
+    // https://github.com/posva/unplugin-vue-router
+    VueRouter({
+      extensions: ['.vue', '.md'],
+      dts: resolve(import.meta.dirname, 'src/typed-router.d.ts'),
+    }),
     // https://github.com/JohnCampionJr/vite-plugin-vue-layouts
     Layouts(),
+    UnoCSS(),
   ],
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
