@@ -21,7 +21,7 @@ onMounted(() => {
       @mouseenter="isNavExpanded = true"
       @mouseleave="isNavExpanded = false"
     >
-      <div absolute left--3 top--2 size-20 rounded-full bg="primary-500/60" blur-2xl />
+      <div absolute left--3 top--2 size-20 rounded-full bg="primary-500/80" blur-xl />
       <div
         :class="[isNavExpanded ? 'w-50' : 'w-14']"
         bg="neutral-800/70" h-full flex flex-col gap-6 px-2 py-3
