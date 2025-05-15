@@ -23,9 +23,9 @@ onMounted(() => {
     >
       <div absolute left--3 top--2 size-20 rounded-full bg="primary-500/80" blur-xl />
       <div
-        :class="[isNavExpanded ? 'w-50' : 'w-14']"
+        :class="[isNavExpanded ? 'w-70' : 'w-14']"
         bg="neutral-800/70" h-full flex flex-col gap-6 px-2 py-3
-        shadow-lg backdrop-blur-sm
+        shadow-lg backdrop-blur-md
         transition="all duration-300 ease-in-out"
       >
         <!-- Nav Header -->
@@ -42,10 +42,10 @@ onMounted(() => {
           </div>
         </div>
         <!-- Nav Content -->
-        <div flex flex-1 flex-col gap-2>
+        <div flex flex-1 flex-col justify-center gap-2>
           <RouterLink
             to="/"
-            flex items-center gap-1 whitespace-nowrap rounded-xl p-1
+            flex items-center gap-1 whitespace-nowrap rounded-xl p-1 outline-none
             active-class="bg-neutral-500/20 font-bold"
             transition="all duration-300 ease-in-out"
           >
@@ -63,8 +63,27 @@ onMounted(() => {
             </div>
           </RouterLink>
           <RouterLink
+            to="/explore"
+            flex items-center gap-1 whitespace-nowrap rounded-xl p-1 outline-none
+            active-class="bg-neutral-500/20 font-bold"
+            transition="all duration-300 ease-in-out"
+          >
+            <div h-full max-h-8 max-w-8 min-h-8 min-w-8 w-full flex items-center justify-center>
+              <div i-ph:popcorn-fill text-lg />
+            </div>
+            <div
+              v-if="isNavExpanded"
+              v-motion
+              :initial="{ opacity: 0.3, x: -10 }"
+              :enter="{ opacity: 1, x: 0 }"
+              whitespace-nowrap text-sm
+            >
+              Explore
+            </div>
+          </RouterLink>
+          <RouterLink
             to="/datasets"
-            flex items-center gap-1 whitespace-nowrap rounded-xl p-1
+            flex items-center gap-1 whitespace-nowrap rounded-xl p-1 outline-none
             active-class="bg-neutral-500/20 font-bold"
             transition="all duration-300 ease-in-out"
           >

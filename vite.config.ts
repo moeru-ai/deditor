@@ -1,46 +1,37 @@
 import { resolve } from 'node:path'
-import { env } from 'node:process'
+import { fileURLToPath, URL } from 'node:url'
 import Vue from '@vitejs/plugin-vue'
 import UnoCSS from 'unocss/vite'
+import VueMacros from 'unplugin-vue-macros/vite'
 import VueRouter from 'unplugin-vue-router/vite'
 import { defineConfig } from 'vite'
 import Layouts from 'vite-plugin-vue-layouts'
 
-const host = env.TAURI_DEV_HOST!
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
+  optimizeDeps: {
+    exclude: [
+      '@proj-airi/ui',
+    ],
+  },
   plugins: [
-    Vue(),
+    VueMacros({
+      plugins: {
+        vue: Vue({
+          include: [/\.vue$/],
+        }),
+        vueJsx: false,
+      },
+    }),
     // https://github.com/posva/unplugin-vue-router
     VueRouter({
-      extensions: ['.vue', '.md'],
+      extensions: ['.vue'],
       dts: resolve(import.meta.dirname, 'src/typed-router.d.ts'),
     }),
     // https://github.com/JohnCampionJr/vite-plugin-vue-layouts
     Layouts(),
     UnoCSS(),
   ],
-
-  // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
-  //
-  // 1. prevent vite from obscuring rust errors
-  clearScreen: false,
-  // 2. tauri expects a fixed port, fail if that port is not available
-  server: {
-    port: 1420,
-    strictPort: true,
-    host: host || false,
-    hmr: host
-      ? {
-          protocol: 'ws',
-          host,
-          port: 1421,
-        }
-      : undefined,
-    watch: {
-      // 3. tell vite to ignore watching `src-tauri`
-      ignored: ['**/src-tauri/**'],
-    },
-  },
 }))

@@ -2,7 +2,9 @@ import type { PresetOrFactoryAwaitable } from 'unocss'
 
 import { colorToString } from '@unocss/preset-mini/utils'
 import { defineConfig, mergeConfigs, presetAttributify, presetIcons, presetTypography, presetWebFonts, presetWind3, transformerDirectives, transformerVariantGroup } from 'unocss'
+import presetAnimations from 'unocss-preset-animations'
 import { presetScrollbar } from 'unocss-preset-scrollbar'
+import { presetShadcn } from 'unocss-preset-shadcn'
 import { parseColor } from 'unocss/preset-mini'
 
 function createColorSchemeConfig(hueOffset = 0) {
@@ -101,6 +103,11 @@ export function sharedUnoConfig() {
         scale: 1.2,
       }),
       presetScrollbar(),
+      presetAnimations(),
+      presetShadcn(
+        { color: 'neutral' },
+        { componentLibrary: 'reka' },
+      ),
     ],
     transformers: [
       transformerDirectives({
@@ -116,7 +123,6 @@ export function sharedUnoConfig() {
     //
     // Thanks to
     // https://github.com/unovue/shadcn-vue/issues/34#issuecomment-2467318118
-    // https://github.com/hyoban-template/shadcn-vue-unocss-starter
     //
     // By default, `.ts` and `.js` files are NOT extracted.
     // If you want to extract them, use the following configuration.
@@ -124,10 +130,10 @@ export function sharedUnoConfig() {
     content: {
       pipeline: {
         include: [
-          // the default
+        // the default
           /\.(vue|svelte|[jt]sx|mdx?|astro|elm|php|phtml|html)($|\?)/,
           // include js/ts files
-          '(components|src)/**/*.{js,ts,vue}',
+          '(components|src)/**/*.{js,ts}',
         ],
       },
     },
