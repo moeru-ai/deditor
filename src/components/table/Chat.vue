@@ -21,7 +21,7 @@ import {
 } from '@tanstack/vue-table'
 import { computed, h, ref } from 'vue'
 
-import { valueUpdater } from '../../lib/utils'
+import { valueUpdater } from '../../libs/utils'
 import { Button } from '../ui/button'
 import { Checkbox } from '../ui/checkbox'
 import {
