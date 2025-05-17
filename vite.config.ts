@@ -1,5 +1,4 @@
 import { resolve } from 'node:path'
-import { fileURLToPath, URL } from 'node:url'
 import Vue from '@vitejs/plugin-vue'
 import UnoCSS from 'unocss/vite'
 import VueMacros from 'unplugin-vue-macros/vite'
@@ -7,8 +6,6 @@ import VueRouter from 'unplugin-vue-router/vite'
 import { defineConfig } from 'vite'
 import DevTools from 'vite-plugin-vue-devtools'
 import Layouts from 'vite-plugin-vue-layouts'
-
-const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
@@ -38,4 +35,12 @@ export default defineConfig(async () => ({
     Layouts(),
     UnoCSS(),
   ],
+  server: {
+    watch: {
+      ignored: [
+        '**/node_modules/**',
+        '**/src-tauri/**',
+      ],
+    },
+  },
 }))
