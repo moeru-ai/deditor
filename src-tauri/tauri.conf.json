@@ -10,13 +10,6 @@
     "beforeBuildCommand": "pnpm run build"
   },
   "app": {
-    "windows": [
-      {
-        "title": "deditor",
-        "width": 800,
-        "height": 600
-      }
-    ],
     "security": {
       "csp": null
     },
