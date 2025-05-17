@@ -31,7 +31,7 @@ pub fn run() {
             match builder.build() {
                 Ok(_) => {}
                 Err(e) => {
-                    eprintln!("Failed to build webview window: {}", e.to_string());
+                    eprintln!("Failed to build webview window: {}", e);
                     std::process::exit(1);
                 }
             }
