@@ -2,7 +2,6 @@
 import type { CheckboxRootEmits, CheckboxRootProps } from 'reka-ui'
 import type { HTMLAttributes } from 'vue'
 
-import { CheckIcon } from '@radix-icons/vue'
 import { CheckboxIndicator, CheckboxRoot, useForwardPropsEmits } from 'reka-ui'
 import { computed } from 'vue'
 
@@ -29,7 +28,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
   >
     <CheckboxIndicator class="h-full w-full flex items-center justify-center text-current">
       <slot>
-        <CheckIcon class="h-4 w-4" />
+        <div i-ph:check h-3 w-3 />
       </slot>
     </CheckboxIndicator>
   </CheckboxRoot>
