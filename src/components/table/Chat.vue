@@ -173,28 +173,38 @@ const columnSizeVars = computed(() => {
 </script>
 
 <template>
-  <div class="flex flex-col gap-2 flex-1 overflow-y-scroll">
+  <div class="flex flex-1 flex-col gap-2 overflow-y-scroll">
     <div class="flex items-center gap-2">
-      <Input class="max-w-sm" placeholder="Filter questions..."
+      <Input
+        text-sm
+        class="max-w-sm"
+        placeholder="Filter questions..."
         :model-value="table.getColumn('question')?.getFilterValue() as string"
-        @update:model-value=" table.getColumn('question')?.setFilterValue($event)" />
+        @update:model-value="table.getColumn('question')?.setFilterValue($event)"
+      />
       <DropdownMenu>
         <DropdownMenuTrigger as-child>
-          <Button class="ml-auto" flex items-center>
+          <Button class="ml-auto" flex items-center text-sm>
             Columns
-            <div i-ph:caret-down class="ml-2 h-4 w-4" />
+            <div
+              i-ph:caret-down
+              class="ml-2 h-4 w-4"
+            />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuCheckboxItem v-for="column in table.getAllColumns().filter((column) => column.getCanHide())"
-            :key="column.id" class="capitalize" :model-value="column.getIsVisible()"
-            @update:model-value="(value) => column.toggleVisibility(!!value)">
+        <DropdownMenuContent align="end" class="bg-neutral-900">
+          <DropdownMenuCheckboxItem
+            v-for="column in table.getAllColumns().filter((column) => column.getCanHide())"
+            :key="column.id" class="capitalize"
+            :model-value="column.getIsVisible()"
+            @update:model-value="(value) => column.toggleVisibility(!!value)"
+          >
             {{ column.id }}
           </DropdownMenuCheckboxItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
-    <div class="border rounded-md flex-1 overflow-y-scroll">
+    <div class="flex-1 overflow-y-scroll border rounded-md">
       <Table :style="{ width: `${table.getCenterTotalSize()}px`, ...columnSizeVars }" class="table-fixed">
         <TableHeader>
           <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id" class="relative">
@@ -214,9 +224,13 @@ const columnSizeVars = computed(() => {
                 </div>
 
                 <!-- Column resize handle -->
-                <div v-if="header.column.getCanResize()" class="resizer"
-                  :class="{ isResizing: header.column.getIsResizing() }" @dblclick="header.column.resetSize()"
-                  @mousedown="header.getResizeHandler()?.($event)" @touchstart="header.getResizeHandler()?.($event)" />
+                <div
+                  v-if="header.column.getCanResize()" class="resizer"
+                  :class="{ isResizing: header.column.getIsResizing() }"
+                  @dblclick="header.column.resetSize()"
+                  @mousedown="header.getResizeHandler()?.($event)"
+                  @touchstart="header.getResizeHandler()?.($event)"
+                />
               </div>
             </TableHead>
           </TableRow>
@@ -225,8 +239,10 @@ const columnSizeVars = computed(() => {
           <template v-if="table.getRowModel().rows?.length">
             <template v-for="row in table.getRowModel().rows" :key="row.id">
               <TableRow :data-state="row.getIsSelected() && 'selected'">
-                <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id"
-                  :style="{ width: `var(--col-${cell.column.id}-size)` }" class="truncate">
+                <TableCell
+                  v-for="cell in row.getVisibleCells()" :key="cell.id"
+                  :style="{ width: `var(--col-${cell.column.id}-size)` }" class="truncate"
+                >
                   <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
                 </TableCell>
               </TableRow>
@@ -252,10 +268,10 @@ const columnSizeVars = computed(() => {
         {{ table.getFilteredRowModel().rows.length }} row(s) selected.
       </div>
       <div class="flex items-center gap-2">
-        <Button @click="emits('pagePrevious')">
+        <Button text-sm @click="emits('pagePrevious')">
           <div i-ph:caret-left />
         </Button>
-        <Button @click="emits('pageNext')">
+        <Button text-sm @click="emits('pageNext')">
           <div i-ph:caret-right />
         </Button>
       </div>

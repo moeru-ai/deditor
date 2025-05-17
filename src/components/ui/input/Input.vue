@@ -23,8 +23,8 @@ const modelValue = useVModel(props, 'modelValue', emits, {
   <input
     v-model="modelValue"
     bg="neutral-900/80 hover:neutral-900"
-    border="2 solid neutral-700/20 hover:primary-700/50"
-    rounded-lg px-3 py-2 text-sm outline-none
+    border="2 solid neutral-700/40 hover:primary-700/50"
+    rounded-lg px-2 py-1 text-sm outline-none
     transition="colors duration-300 ease-in-out"
   >
 </template>

@@ -3,10 +3,11 @@
 
 <template>
   <button
-    bg="neutral-900/80 hover:neutral-900"
-    border="2 solid neutral-700/20 hover:primary-700/50"
-    rounded-lg px-3 py-2 text-sm outline-none
-    transition="colors duration-300 ease-in-out"
+    bg="neutral-700/50 hover:neutral-700/80"
+    border="2 solid neutral-700/20 hover:neutral-700/50"
+    transition="all duration-300 ease-in-out"
+    flex cursor-pointer items-center gap-2
+    rounded-lg px-2 py-1
   >
     <slot />
   </button>

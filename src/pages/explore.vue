@@ -7,6 +7,7 @@ import { BasicTextarea } from '@proj-airi/ui'
 import { Pane, Splitpanes } from 'splitpanes'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 
+import Button from '../components/basic/Button.vue'
 import Chat from '../components/table/Chat.vue'
 
 const input = ref(`[${Array.from({ length: 100 }, (_, i) => `{"question": "${i}", "answer": "${-i}"}`).join(',')}]`)
@@ -52,6 +53,24 @@ onMounted(async () => {
 onUnmounted(async () => {
   (await db.value?.$client)?.close()
 })
+
+function canPagePrevious() {
+  return page.value > 1
+}
+
+function canPageNext() {
+  return page.value * pageSize.value < total.value
+}
+
+function handlePagePrevious() {
+  if (canPagePrevious())
+    page.value--
+}
+
+function handlePageNext() {
+  if (canPageNext())
+    page.value++
+}
 </script>
 
 <template>
@@ -77,18 +96,18 @@ onUnmounted(async () => {
                 </div>
               </h2>
               <div flex gap-2 text-sm>
-                <div bg="neutral-700/50 hover:neutral-700/80" border="2 solid neutral-700/20 hover:neutral-700/50" transition="all duration-300 ease-in-out" flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2>
+                <Button>
                   <div i-ph:folder-dotted-fill />
                   <div>One-Time</div>
-                </div>
-                <div bg="neutral-700/50 hover:neutral-700/80" border="2 solid neutral-700/20 hover:neutral-700/50" transition="all duration-300 ease-in-out" flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2>
+                </Button>
+                <Button>
                   <div i-ph:folder-notch-plus-fill />
                   <div>Files</div>
-                </div>
-                <div bg="neutral-700/50 hover:neutral-700/80" border="2 solid neutral-700/20 hover:neutral-700/50" transition="all duration-300 ease-in-out" flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2>
+                </Button>
+                <Button>
                   <div i-ph:database-fill />
                   <div>Datasets</div>
-                </div>
+                </Button>
               </div>
               <div h-full max-h-full flex flex-col gap-2 overflow-y-scroll rounded-lg>
                 <BasicTextarea
@@ -118,7 +137,14 @@ onUnmounted(async () => {
                   Results
                 </div>
               </h2>
-              <Chat :data="results" :total="Number(total)" :page="page" :page-size="pageSize" @page-previous="page--" @page-next="page++" />
+              <Chat
+                :data="results"
+                :total="Number(total)"
+                :page="page"
+                :page-size="pageSize"
+                @page-previous="handlePagePrevious"
+                @page-next="handlePageNext"
+              />
             </div>
           </Pane>
         </Splitpanes>
