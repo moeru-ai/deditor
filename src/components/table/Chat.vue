@@ -101,6 +101,18 @@ const columns = computed<ColumnDef<Record<string, unknown>>[]>(() => {
       enableResizing: false,
     },
     ...fields,
+    // Add a spacer column that will expand to fill available space
+    {
+      id: 'spacer',
+      header: '',
+      cell: () => null,
+      enableSorting: false,
+      enableHiding: false,
+      enableResizing: false,
+      size: 10,
+      minSize: 10,
+      maxSize: 2000,
+    },
   ]
 })
 
@@ -118,10 +130,6 @@ const table = useVueTable({
     return columns.value || []
   },
   enableSorting: false,
-  defaultColumn: {
-    minSize: 60,
-    maxSize: 800,
-  },
   columnResizeMode: columnResizeMode.value,
   enableColumnResizing: true,
   manualPagination: true,
@@ -214,8 +222,8 @@ function handleRowClick(index: number) {
     </div>
 
     <!-- Table -->
-    <div class="flex-1 overflow-y-scroll border rounded-md">
-      <Table :style="{ width: `${table.getCenterTotalSize()}px`, ...columnSizeVars }" class="table-fixed">
+    <div class="w-full flex-1 overflow-y-scroll border rounded-lg">
+      <Table :style="columnSizeVars" class="w-full table-fixed">
         <TableHeader>
           <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id" class="relative">
             <TableHead
@@ -226,7 +234,8 @@ function handleRowClick(index: number) {
                 position: 'relative',
               }"
               :colspan="header.colSpan"
-              class="relative select-none"
+              :data-column-id="header.column.id"
+              class="relative select-none bg-neutral-900/50"
             >
               <div class="flex items-center justify-between gap-2">
                 <div v-if="!header.isPlaceholder" class="truncate">
@@ -248,10 +257,16 @@ function handleRowClick(index: number) {
         <TableBody>
           <template v-if="table.getRowModel().rows?.length">
             <template v-for="row in table.getRowModel().rows" :key="row.id">
-              <TableRow :data-state="row.getIsSelected() && 'selected'" @click="handleRowClick(row.index)">
+              <TableRow
+                :data-state="row.getIsSelected() && 'selected'"
+                class="w-full bg-neutral-900/20"
+                @click="handleRowClick(row.index)"
+              >
                 <TableCell
                   v-for="cell in row.getVisibleCells()" :key="cell.id"
-                  :style="{ width: `var(--col-${cell.column.id}-size)` }" class="truncate"
+                  :style="{ width: `var(--col-${cell.column.id}-size)` }"
+                  :data-column-id="cell.column.id"
+                  class="truncate"
                 >
                   <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
                 </TableCell>
@@ -300,14 +315,16 @@ function handleRowClick(index: number) {
   position: absolute;
   right: 0;
   top: 0;
-  height: 100%;
-  width: 5px;
-  background: rgba(0, 0, 0, 0.1);
+  height: 90%;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.2);
   cursor: col-resize;
   user-select: none;
   touch-action: none;
-  opacity: 0;
+  opacity: 0.2;
   z-index: 10;
+  border-radius: 999px;
+  transform: translateY(5%);
 }
 
 .resizer:hover {
@@ -325,5 +342,17 @@ function handleRowClick(index: number) {
     height: 100%;
     right: 0;
   }
+}
+
+/* Style for the spacer column to allow it to expand */
+:deep([data-column-id="spacer"]) {
+  width: 100% !important;
+  min-width: 10px;
+}
+
+/* Ensure table rows have consistent styling */
+:deep(tr) {
+  background-color: rgba(23, 23, 23, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 </style>
