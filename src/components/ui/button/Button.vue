@@ -6,7 +6,7 @@ import type { ButtonVariants } from '.'
 import { Primitive } from 'reka-ui'
 
 import { buttonVariants } from '.'
-import { cn } from '../../../libs/utils'
+import { cn } from '../../../libs/shadcn/utils'
 
 interface Props extends PrimitiveProps {
   variant?: ButtonVariants['variant']

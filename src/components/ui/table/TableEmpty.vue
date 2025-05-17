@@ -3,7 +3,7 @@ import type { HTMLAttributes } from 'vue'
 
 import { computed } from 'vue'
 
-import { cn } from '../../../libs/utils'
+import { cn } from '../../../libs/shadcn/utils'
 import TableCell from './TableCell.vue'
 import TableRow from './TableRow.vue'
 

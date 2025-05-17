@@ -11,7 +11,7 @@ import {
 } from 'reka-ui'
 import { computed } from 'vue'
 
-import { cn } from '../../../libs/utils'
+import { cn } from '../../../libs/shadcn/utils'
 
 const props = defineProps<DropdownMenuRadioItemProps & { class?: HTMLAttributes['class'] }>()
 
