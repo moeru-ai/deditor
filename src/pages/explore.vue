@@ -10,12 +10,14 @@ import { onMounted, onUnmounted, ref, watch } from 'vue'
 import Button from '../components/basic/Button.vue'
 import Chat from '../components/table/Chat.vue'
 
-const input = ref(`[${Array.from({ length: 100 }, (_, i) => `{"question": "${i}", "answer": "${-i}"}`).join(',')}]`)
+const input = ref(`[${Array.from({ length: 100 }, (_, i) => `{"question": "What is the answer to ${i}?", "answer": "It's ${i}."}`).join(',')}]`)
 
 const results = ref<Record<string, unknown>[]>([])
 const total = ref(0)
 const page = ref(1)
 const pageSize = ref(10)
+
+const selectedRow = ref<Record<string, unknown>>()
 
 const db = ref<DuckDBWasmDrizzleDatabase>()
 
@@ -70,6 +72,10 @@ function handlePagePrevious() {
 function handlePageNext() {
   if (canPageNext())
     page.value++
+}
+
+function handleRowClick(_index: number, row: Record<string, unknown>) {
+  selectedRow.value = row
 }
 </script>
 
@@ -144,6 +150,7 @@ function handlePageNext() {
                 :page-size="pageSize"
                 @page-previous="handlePagePrevious"
                 @page-next="handlePageNext"
+                @row-click="handleRowClick"
               />
             </div>
           </Pane>
@@ -164,32 +171,30 @@ function handlePageNext() {
             </div>
           </h2>
           <div flex flex-col gap-2>
-            <!-- <div v-for="(value, key) in data" :key="key">
-              <template v-if="typeof value === 'object'">
-                <template v-if="'question' in value">
-                  <div>
-                    <div
-                      bg="neutral-900/50" transition="all duration-300 ease-in-out"
-                      mb-2 mr-6 self-end
-                      rounded-lg p-3 text-white
-                    >
-                      {{ value.question }}
-                    </div>
-                    <div
-                      mb-2 ml-6 self-start
-                      rounded-lg
-                      bg="primary-900/50" transition="all duration-300 ease-in-out"
-                      p-3
-                      text-white
-                    >
-                      <div whitespace-pre-wrap>
-                        {{ value.answer }}
-                      </div>
+            <template v-if="typeof selectedRow === 'object'">
+              <template v-if="'question' in selectedRow">
+                <div>
+                  <div
+                    bg="neutral-900/50" transition="all duration-300 ease-in-out"
+                    mb-2 mr-6 self-end
+                    rounded-lg p-3 text-white
+                  >
+                    {{ selectedRow.question }}
+                  </div>
+                  <div
+                    mb-2 ml-6 self-start
+                    rounded-lg
+                    bg="primary-900/50" transition="all duration-300 ease-in-out"
+                    p-3
+                    text-white
+                  >
+                    <div whitespace-pre-wrap>
+                      {{ selectedRow.answer }}
                     </div>
                   </div>
-                </template>
+                </div>
               </template>
-            </div> -->
+            </template>
           </div>
         </div>
       </Pane>

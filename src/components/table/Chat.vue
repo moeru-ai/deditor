@@ -53,6 +53,7 @@ const props = withDefaults(defineProps<{
 const emits = defineEmits<{
   (e: 'pagePrevious'): void
   (e: 'pageNext'): void
+  (e: 'rowClick', index: number, row: Record<string, unknown>): void
 }>()
 
 // Define default column sizes
@@ -170,11 +171,16 @@ const columnSizeVars = computed(() => {
 
   return colSizes
 })
+
+function handleRowClick(index: number) {
+  emits('rowClick', index, table.getRowModel().rows[index].original)
+}
 </script>
 
 <template>
   <div class="flex flex-1 flex-col gap-2 overflow-y-scroll">
     <div class="flex items-center gap-2">
+      <!-- Filters -->
       <Input
         text-sm
         class="max-w-sm"
@@ -182,6 +188,8 @@ const columnSizeVars = computed(() => {
         :model-value="table.getColumn('question')?.getFilterValue() as string"
         @update:model-value="table.getColumn('question')?.setFilterValue($event)"
       />
+
+      <!-- Columns -->
       <DropdownMenu>
         <DropdownMenuTrigger as-child>
           <Button class="ml-auto" flex items-center text-sm>
@@ -204,6 +212,8 @@ const columnSizeVars = computed(() => {
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
+
+    <!-- Table -->
     <div class="flex-1 overflow-y-scroll border rounded-md">
       <Table :style="{ width: `${table.getCenterTotalSize()}px`, ...columnSizeVars }" class="table-fixed">
         <TableHeader>
@@ -238,7 +248,7 @@ const columnSizeVars = computed(() => {
         <TableBody>
           <template v-if="table.getRowModel().rows?.length">
             <template v-for="row in table.getRowModel().rows" :key="row.id">
-              <TableRow :data-state="row.getIsSelected() && 'selected'">
+              <TableRow :data-state="row.getIsSelected() && 'selected'" @click="handleRowClick(row.index)">
                 <TableCell
                   v-for="cell in row.getVisibleCells()" :key="cell.id"
                   :style="{ width: `var(--col-${cell.column.id}-size)` }" class="truncate"
@@ -262,10 +272,11 @@ const columnSizeVars = computed(() => {
         </TableBody>
       </Table>
     </div>
+
+    <!-- Pagination -->
     <div class="flex items-center justify-end gap-2">
       <div class="flex-1 text-sm text-muted-foreground">
-        {{ table.getFilteredSelectedRowModel().rows.length }} of
-        {{ table.getFilteredRowModel().rows.length }} row(s) selected.
+        Selected {{ table.getFilteredSelectedRowModel().rows.length }}/{{ table.getFilteredRowModel().rows.length }}
       </div>
       <div class="flex items-center gap-2">
         <Button text-sm @click="emits('pagePrevious')">
