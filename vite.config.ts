@@ -5,6 +5,7 @@ import UnoCSS from 'unocss/vite'
 import VueMacros from 'unplugin-vue-macros/vite'
 import VueRouter from 'unplugin-vue-router/vite'
 import { defineConfig } from 'vite'
+import DevTools from 'vite-plugin-vue-devtools'
 import Layouts from 'vite-plugin-vue-layouts'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
@@ -14,6 +15,8 @@ export default defineConfig(async () => ({
   optimizeDeps: {
     exclude: [
       '@proj-airi/ui',
+      '@proj-airi/duckdb-wasm',
+      '@proj-airi/drizzle-duckdb-wasm',
     ],
   },
   plugins: [
@@ -30,6 +33,7 @@ export default defineConfig(async () => ({
       extensions: ['.vue'],
       dts: resolve(import.meta.dirname, 'src/typed-router.d.ts'),
     }),
+    DevTools(),
     // https://github.com/JohnCampionJr/vite-plugin-vue-layouts
     Layouts(),
     UnoCSS(),

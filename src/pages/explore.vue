@@ -1,22 +1,56 @@
 <script setup lang="ts">
+import type { DuckDBWasmDrizzleDatabase } from '@proj-airi/drizzle-duckdb-wasm'
+
+import { drizzle } from '@proj-airi/drizzle-duckdb-wasm'
+import { getImportUrlBundles } from '@proj-airi/duckdb-wasm/bundles/import-url-browser'
 import { BasicTextarea } from '@proj-airi/ui'
 import { Pane, Splitpanes } from 'splitpanes'
-import { computed, ref } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 
 import Chat from '../components/table/Chat.vue'
 
-const input = ref('[{"question": "What is the capital of France?", "answer": "Paris"}, {"question": "What is the capital of Germany?", "answer": "Berlin"}]')
-const data = computed<Record<string, unknown>[]>(() => {
-  if (!input.value)
-    return {}
+const input = ref(`[${Array.from({ length: 100 }, (_, i) => `{"question": "${i}", "answer": "${-i}"}`).join(',')}]`)
 
-  try {
-    return JSON.parse(input.value)
-  }
-  catch (error) {
-    console.error(error)
-    return {}
-  }
+const results = ref<Record<string, unknown>[]>([])
+const total = ref(0)
+const page = ref(1)
+const pageSize = ref(10)
+
+const db = ref<DuckDBWasmDrizzleDatabase>()
+
+async function client() {
+  return (await db.value!.$client)
+}
+
+async function loadDataset() {
+  if (!db.value)
+    return
+
+  const c = await client()
+  await c.db.registerFileText('qa.jsonl', input.value)
+  const [{ count }] = await db.value.execute<{ count: number }>(`SELECT COUNT(*) AS count FROM read_json('qa.jsonl')`)
+  total.value = count
+
+  const res = await db.value.execute<Record<string, unknown>>(`
+SELECT *
+FROM read_json('qa.jsonl')
+LIMIT ${pageSize.value} OFFSET ${(page.value - 1) * pageSize.value}
+`)
+
+  results.value = res
+}
+
+watch(page, async () => {
+  await loadDataset()
+})
+
+onMounted(async () => {
+  db.value = drizzle({ connection: { bundles: getImportUrlBundles(), logger: false } })
+  await loadDataset()
+})
+
+onUnmounted(async () => {
+  (await db.value?.$client)?.close()
 })
 </script>
 
@@ -42,7 +76,7 @@ const data = computed<Record<string, unknown>[]>(() => {
                   Query From
                 </div>
               </h2>
-              <div flex flex-col gap-2 text-sm>
+              <div flex gap-2 text-sm>
                 <div bg="neutral-700/50 hover:neutral-700/80" border="2 solid neutral-700/20 hover:neutral-700/50" transition="all duration-300 ease-in-out" flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2>
                   <div i-ph:folder-dotted-fill />
                   <div>One-Time</div>
@@ -61,7 +95,7 @@ const data = computed<Record<string, unknown>[]>(() => {
                   v-model="input"
                   placeholder="请输入"
                   bg="neutral-900/80 hover:neutral-900" border="2 solid neutral-700/20 hover:primary-700/50"
-                  min-h-30 border-none px-3 py-2 text-sm outline-none rounded-lg
+                  min-h-30 rounded-lg border-none px-3 py-2 text-sm font-mono outline-none
                   transition="colors duration-300 ease-in-out"
                 />
               </div>
@@ -84,7 +118,7 @@ const data = computed<Record<string, unknown>[]>(() => {
                   Results
                 </div>
               </h2>
-              <Chat :data="data" />
+              <Chat :data="results" :total="Number(total)" :page="page" :page-size="pageSize" @page-previous="page--" @page-next="page++" />
             </div>
           </Pane>
         </Splitpanes>
@@ -104,7 +138,7 @@ const data = computed<Record<string, unknown>[]>(() => {
             </div>
           </h2>
           <div flex flex-col gap-2>
-            <div v-for="(value, key) in data" :key="key">
+            <!-- <div v-for="(value, key) in data" :key="key">
               <template v-if="typeof value === 'object'">
                 <template v-if="'question' in value">
                   <div>
@@ -129,7 +163,7 @@ const data = computed<Record<string, unknown>[]>(() => {
                   </div>
                 </template>
               </template>
-            </div>
+            </div> -->
           </div>
         </div>
       </Pane>

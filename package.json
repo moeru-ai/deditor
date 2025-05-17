@@ -19,6 +19,8 @@
     "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
+    "@proj-airi/drizzle-duckdb-wasm": "^0.4.24",
+    "@proj-airi/duckdb-wasm": "^0.4.24",
     "@tanstack/vue-table": "^8.21.3",
     "@tanstack/vue-virtual": "^3.13.8",
     "@tauri-apps/api": "^2",
