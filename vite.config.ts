@@ -38,7 +38,6 @@ export default defineConfig(async () => ({
   server: {
     watch: {
       ignored: [
-        '**/node_modules/**',
         '**/src-tauri/**',
       ],
     },

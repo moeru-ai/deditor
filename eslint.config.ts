@@ -6,9 +6,7 @@ export default await antfu(
     vue: true,
     toml: false,
     ignores: [
-      'crates/**',
       '**/src-tauri/**',
-      '**/drizzle/**',
     ],
     rules: {
       'import/order': [
