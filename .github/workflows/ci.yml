@@ -63,7 +63,6 @@ jobs:
       - name: Build
         run: |
           pnpm run build
-          pnpm run build:unpack
 
   typecheck:
     name: Type Check
