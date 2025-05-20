@@ -1,19 +1,25 @@
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { env } from 'node:process'
+import { fileURLToPath } from 'node:url'
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
-import { isLinux, isMacOS } from 'std-env'
+import { isMacOS } from 'std-env'
 
 import icon from '../../resources/icon.png?asset'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+
+app.dock?.setIcon(icon)
 
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    title: 'Deditor',
+    width: 1920,
+    height: 1080,
     show: false,
     autoHideMenuBar: true,
-    ...(isLinux ? { icon } : {}),
+    icon,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
