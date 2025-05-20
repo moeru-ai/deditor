@@ -16,6 +16,11 @@ export default defineConfig(async () => ({
       '@proj-airi/drizzle-duckdb-wasm',
     ],
   },
+  resolve: {
+    alias: {
+      '@renderer': resolve('src/renderer/src'),
+    },
+  },
   plugins: [
     VueMacros({
       plugins: {

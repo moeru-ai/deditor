@@ -5,3 +5,4 @@ onlyBuiltDependencies:
   - sharp
   - unrs-resolver
   - vue-demi
+  - electron
