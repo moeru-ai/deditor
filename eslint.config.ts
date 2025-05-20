@@ -6,7 +6,7 @@ export default await antfu(
     vue: true,
     toml: false,
     ignores: [
-      '**/src-tauri/**',
+      'build/**',
     ],
     rules: {
       'import/order': [
