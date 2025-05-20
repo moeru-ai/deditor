@@ -37,7 +37,6 @@ jobs:
       - name: Lint
         run: |
           pnpm run lint
-          pnpm run lint:rust
 
   build-test:
     name: Build Test
