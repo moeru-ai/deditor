@@ -222,7 +222,7 @@ function handleRowClick(index: number) {
     </div>
 
     <!-- Table -->
-    <div class="w-full flex-1 overflow-y-scroll border rounded-lg">
+    <div class="w-full flex-1 overflow-y-scroll border border-neutral-700/50 rounded-lg">
       <Table :style="columnSizeVars" class="w-full table-fixed">
         <TableHeader>
           <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id" class="relative">
@@ -279,7 +279,7 @@ function handleRowClick(index: number) {
             </template>
           </template>
 
-          <TableRow v-else>
+          <TableRow v-else class="border-b border-neutral-700/50">
             <TableCell :colspan="columns.length" class="h-24 text-center">
               No results.
             </TableCell>

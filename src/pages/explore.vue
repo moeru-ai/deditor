@@ -101,16 +101,16 @@ function handleRowClick(_index: number, row: Record<string, unknown>) {
                   Query From
                 </div>
               </h2>
-              <div flex gap-2 text-sm>
-                <Button>
+              <div w-full flex gap-2 text-sm>
+                <Button w-full>
                   <div i-ph:folder-dotted-fill />
                   <div>One-Time</div>
                 </Button>
-                <Button>
+                <Button w-full>
                   <div i-ph:folder-notch-plus-fill />
                   <div>Files</div>
                 </Button>
-                <Button>
+                <Button w-full>
                   <div i-ph:database-fill />
                   <div>Datasets</div>
                 </Button>
@@ -177,7 +177,7 @@ function handleRowClick(_index: number, row: Record<string, unknown>) {
                   <div
                     bg="neutral-900/50" transition="all duration-300 ease-in-out"
                     mb-2 mr-6 self-end
-                    rounded-lg p-3 text-white
+                    rounded-lg p-2 text-white
                   >
                     {{ selectedRow.question }}
                   </div>
@@ -185,7 +185,7 @@ function handleRowClick(_index: number, row: Record<string, unknown>) {
                     mb-2 ml-6 self-start
                     rounded-lg
                     bg="primary-900/50" transition="all duration-300 ease-in-out"
-                    p-3
+                    p-2
                     text-white
                   >
                     <div whitespace-pre-wrap>
