@@ -1,4 +1,4 @@
-import { resolve } from 'node:path'
+import { join, resolve } from 'node:path'
 import Vue from '@vitejs/plugin-vue'
 import UnoCSS from 'unocss/vite'
 import VueMacros from 'unplugin-vue-macros/vite'
@@ -18,7 +18,7 @@ export default defineConfig(async () => ({
   },
   resolve: {
     alias: {
-      '@renderer': resolve('src/renderer/src'),
+      '@renderer': resolve(join('src', 'renderer', 'src')),
     },
   },
   plugins: [
@@ -32,8 +32,9 @@ export default defineConfig(async () => ({
     }),
     // https://github.com/posva/unplugin-vue-router
     VueRouter({
+      routesFolder: resolve(import.meta.dirname, join('src', 'renderer', 'src', 'pages')),
       extensions: ['.vue'],
-      dts: resolve(import.meta.dirname, 'src/typed-router.d.ts'),
+      dts: resolve(import.meta.dirname, join('src', 'renderer', 'src', 'typed-router.d.ts')),
     }),
     DevTools(),
     // https://github.com/JohnCampionJr/vite-plugin-vue-layouts

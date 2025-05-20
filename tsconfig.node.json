@@ -8,6 +8,8 @@
   },
   "include": [
     "vite.config.ts",
-    "uno.config.ts"
+    "uno.config.ts",
+    "eslint.config.ts",
+    "electron.vite.config.ts"
   ]
 }
