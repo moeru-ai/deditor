@@ -15,10 +15,7 @@ onMounted(async () => await load(modelId.value))
 </script>
 
 <template>
-  <div
-    v-if="loadingItems.length > 0 && isLoading"
-    h-5 w-full
-  >
+  <div v-if="loadingItems.length > 0 && isLoading" h-5 w-full>
     <Progress :percentage="Math.min(100, overallProgress)" />
   </div>
 </template>
