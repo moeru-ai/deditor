@@ -41,11 +41,4 @@ export default defineConfig(async () => ({
     Layouts(),
     UnoCSS(),
   ],
-  server: {
-    watch: {
-      ignored: [
-        '**/src-tauri/**',
-      ],
-    },
-  },
 }))
