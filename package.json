@@ -44,6 +44,8 @@
     "@xsai-transformers/shared": "^0.0.6",
     "@xsai/embed": "^0.2.2",
     "@xsai/shared": "^0.2.2",
+    "mysql2": "^3.14.1",
+    "nanoid": "^5.1.5",
     "ofetch": "^1.4.1",
     "splitpanes": "^4.0.3",
     "std-env": "^3.9.0",

@@ -8,7 +8,9 @@ export default defineConfig({
       include: [
         'drizzle-orm',
         'drizzle-orm/postgres-js',
+        'drizzle-orm/mysql2',
         'postgres',
+        'mysql2',
       ],
     })],
   },
@@ -17,7 +19,9 @@ export default defineConfig({
       include: [
         'drizzle-orm',
         'drizzle-orm/postgres-js',
+        'drizzle-orm/mysql2',
         'postgres',
+        'mysql2',
       ],
     })],
   },

@@ -2,19 +2,17 @@ import { dirname, join } from 'node:path'
 import { env } from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
-import { drizzle } from 'drizzle-orm/postgres-js'
-import { app, BrowserWindow, ipcMain, shell } from 'electron'
+import { app, BrowserWindow, shell } from 'electron'
 import { isMacOS } from 'std-env'
 
 import icon from '../../resources/icon.png?asset'
+import { registerDatabaseDialects } from './databases/remote/'
 
 app.dock?.setIcon(icon)
 
-let mainWindow: BrowserWindow | undefined
-
-function createWindow(): void {
+function createWindow(): BrowserWindow {
   // Create the browser window.
-  mainWindow = new BrowserWindow({
+  const mainWindow = new BrowserWindow({
     title: 'Deditor',
     width: 1920,
     height: 1080,
@@ -46,6 +44,8 @@ function createWindow(): void {
   else {
     mainWindow.loadFile(join(dirname(fileURLToPath(import.meta.url)), '../renderer/index.html'))
   }
+
+  return mainWindow
 }
 
 // This method will be called when Electron has finished
@@ -62,22 +62,8 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // IPC test
-  // eslint-disable-next-line no-console
-  ipcMain.on('ping', () => console.log('pong'))
-  ipcMain.on('request:connect-remote-database', (_, databaseDsn: string) => {
-    try {
-      const client = drizzle(databaseDsn)
-      // eslint-disable-next-line no-console
-      client.execute('SELECT 1').then(res => console.log(res))
-      mainWindow?.webContents.send('response:connect-remote-database', true)
-    }
-    catch (err) {
-      mainWindow?.webContents.send('response:error:connect-remote-database', err)
-    }
-  })
-
-  createWindow()
+  const mainWindow = createWindow()
+  registerDatabaseDialects(mainWindow)
 
   app.on('activate', () => {
     // On macOS it's common to re-create a window in the app when the

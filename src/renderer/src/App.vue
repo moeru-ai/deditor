@@ -13,7 +13,11 @@ onMounted(() => {
 
 <template>
   <main h-full font-sans>
-    <div top="0" left="0" w="[100dvw]" bg="[rgba(10,10,10,0.5)]" fixed z-9999 h-9 flex items-center justify-center text-sm backdrop-blur-lg>
+    <div
+      class="titlebar"
+      top="0" left="0" w="[100dvw]" bg="[rgba(10,10,10,0.5)]"
+      fixed z-9999 h-9 flex select-none items-center justify-center text-sm backdrop-blur-lg
+    >
       <h1>Deditor</h1>
     </div>
     <!-- Sidebar Nav -->
@@ -133,5 +137,9 @@ onMounted(() => {
 .fade-enter-to,
 .fade-leave-from {
   opacity: 1;
+}
+
+.titlebar {
+  app-region: drag;
 }
 </style>

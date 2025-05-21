@@ -46,7 +46,9 @@
     "editor.formatOnSave": true
   },
   "cSpell.words": [
+    "airi",
     "Deditor",
+    "duckdb",
     "Splitpanes",
     "vueuse"
   ]
