@@ -1,34 +1,26 @@
-# deditor
+# Deditor.app
 
-An Electron application with Vue and TypeScript
+> It's frustrating to work on numerous amount of ML / AI training datasets and be able to process them, isn't it?
+>
+> Here's the opinionated **D**atasets **Editor** for managing, labelling, processing massive scale of data and be able to visulize them.
 
-## Recommended IDE Setup
-
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar)
-
-## Project Setup
-
-### Install
-
-```bash
-$ pnpm install
-```
+![](./docs/public/screenshots/deditor-screenshot-v0.0.1-1.png)
 
 ### Development
 
 ```bash
-$ pnpm dev
+pnpm dev
 ```
 
 ### Build
 
 ```bash
 # For windows
-$ pnpm build:win
+pnpm build:win
 
 # For macOS
-$ pnpm build:mac
+pnpm build:mac
 
 # For Linux
-$ pnpm build:linux
+pnpm build:linux
 ```

@@ -1,6 +1,5 @@
 {
   "recommendations": [
-    "tauri-apps.tauri-vscode",
     "streetsidesoftware.code-spell-checker",
     "mikestead.dotenv",
     "EditorConfig.EditorConfig",
