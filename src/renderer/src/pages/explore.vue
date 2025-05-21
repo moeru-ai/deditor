@@ -81,9 +81,9 @@ function handleRowClick(_index: number, row: Record<string, unknown>) {
 
 <template>
   <div h-full w-full>
-    <Splitpanes class="flex gap-1">
+    <Splitpanes class="flex gap-0.8 bg-transparent">
       <Pane :min-size="20" :size="60">
-        <Splitpanes horizontal class="flex gap-1">
+        <Splitpanes horizontal class="flex gap-0.8">
           <Pane min-size="20" :size="40">
             <div
               v-motion

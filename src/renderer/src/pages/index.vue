@@ -4,7 +4,7 @@ import { Pane, Splitpanes } from 'splitpanes'
 
 <template>
   <div h-full w-full>
-    <Splitpanes class="flex gap-1">
+    <Splitpanes class="flex gap-0.8">
       <Pane :min-size="20" :size="70">
         <div
           v-motion

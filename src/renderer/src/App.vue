@@ -13,10 +13,13 @@ onMounted(() => {
 
 <template>
   <main h-full font-sans>
+    <div top="0" left="0" w="[100dvw]" bg="[rgba(10,10,10,0.5)]" fixed z-9999 h-9 flex items-center justify-center text-sm backdrop-blur-lg>
+      <h1>Deditor</h1>
+    </div>
     <!-- Sidebar Nav -->
     <div
       class="nav-container"
-      fixed left-0 top-0 z-999 h-full overflow-hidden rounded-r-xl
+      fixed left-0 top-9 z-999 h="[calc(100%-36px)]" overflow-hidden rounded-r-xl
       border="t-1 b-1 r-1 solid neutral-700/50"
       @mouseenter="isNavExpanded = true"
       @mouseleave="isNavExpanded = false"
@@ -110,7 +113,7 @@ onMounted(() => {
         </button>
       </div>
     </div>
-    <div ml-14 h-full p-3>
+    <div h="[calc(100%-36px)]" relative top-9 ml-14 pl-2>
       <RouterView />
     </div>
   </main>

@@ -25,6 +25,8 @@ function createWindow(): void {
       preload: join(dirname(fileURLToPath(import.meta.url)), '../preload/index.mjs'),
       sandbox: false,
     },
+    titleBarStyle: isMacOS ? 'hidden' : undefined,
+    trafficLightPosition: isMacOS ? { x: 10, y: 10 } : undefined,
   })
 
   mainWindow.on('ready-to-show', () => {
