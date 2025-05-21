@@ -24,6 +24,7 @@ export default defineConfig(async () => ({
   },
   plugins: [
     VueMacros({
+      betterDefine: false,
       plugins: {
         vue: Vue({
           include: [/\.vue$/],
