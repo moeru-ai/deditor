@@ -2,18 +2,19 @@ import { dirname, join } from 'node:path'
 import { env } from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
+import { drizzle } from 'drizzle-orm/postgres-js'
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { isMacOS } from 'std-env'
 
 import icon from '../../resources/icon.png?asset'
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
-
 app.dock?.setIcon(icon)
+
+let mainWindow: BrowserWindow | undefined
 
 function createWindow(): void {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     title: 'Deditor',
     width: 1920,
     height: 1080,
@@ -21,13 +22,13 @@ function createWindow(): void {
     autoHideMenuBar: true,
     icon,
     webPreferences: {
-      preload: join(__dirname, '../preload/index.mjs'),
+      preload: join(dirname(fileURLToPath(import.meta.url)), '../preload/index.mjs'),
       sandbox: false,
     },
   })
 
   mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
+    mainWindow!.show()
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -41,7 +42,7 @@ function createWindow(): void {
     mainWindow.loadURL(env.ELECTRON_RENDERER_URL)
   }
   else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+    mainWindow.loadFile(join(dirname(fileURLToPath(import.meta.url)), '../renderer/index.html'))
   }
 }
 
@@ -62,6 +63,17 @@ app.whenReady().then(() => {
   // IPC test
   // eslint-disable-next-line no-console
   ipcMain.on('ping', () => console.log('pong'))
+  ipcMain.on('request:connect-remote-database', (_, databaseDsn: string) => {
+    try {
+      const client = drizzle(databaseDsn)
+      // eslint-disable-next-line no-console
+      client.execute('SELECT 1').then(res => console.log(res))
+      mainWindow?.webContents.send('response:connect-remote-database', true)
+    }
+    catch (err) {
+      mainWindow?.webContents.send('response:error:connect-remote-database', err)
+    }
+  })
 
   createWindow()
 

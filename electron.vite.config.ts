@@ -4,10 +4,22 @@ import viteConfig from './vite.config'
 
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin()],
+    plugins: [externalizeDepsPlugin({
+      include: [
+        'drizzle-orm',
+        'drizzle-orm/postgres-js',
+        'postgres',
+      ],
+    })],
   },
   preload: {
-    plugins: [externalizeDepsPlugin()],
+    plugins: [externalizeDepsPlugin({
+      include: [
+        'drizzle-orm',
+        'drizzle-orm/postgres-js',
+        'postgres',
+      ],
+    })],
   },
   renderer: viteConfig,
 })

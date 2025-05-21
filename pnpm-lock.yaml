@@ -19,10 +19,10 @@ importers:
         version: 3.5.1
       '@proj-airi/drizzle-duckdb-wasm':
         specifier: ^0.4.24
-        version: 0.4.24(drizzle-orm@0.43.1(@electric-sql/pglite@0.3.1))
+        version: 0.4.24(drizzle-orm@0.43.1(@electric-sql/pglite@0.3.1)(postgres@3.4.6))
       '@proj-airi/duckdb-wasm':
         specifier: ^0.4.24
-        version: 0.4.24(drizzle-orm@0.43.1(@electric-sql/pglite@0.3.1))
+        version: 0.4.24(drizzle-orm@0.43.1(@electric-sql/pglite@0.3.1)(postgres@3.4.6))
       '@tanstack/vue-table':
         specifier: ^8.21.3
         version: 8.21.3(vue@3.5.14(typescript@5.8.3))
@@ -53,6 +53,9 @@ importers:
       ofetch:
         specifier: ^1.4.1
         version: 1.4.1
+      postgres:
+        specifier: ^3.4.6
+        version: 3.4.6
       splitpanes:
         specifier: ^4.0.3
         version: 4.0.3(vue@3.5.14(typescript@5.8.3))
@@ -125,7 +128,7 @@ importers:
         version: 2.1.1
       drizzle-orm:
         specifier: ^0.43.1
-        version: 0.43.1(@electric-sql/pglite@0.3.1)
+        version: 0.43.1(@electric-sql/pglite@0.3.1)(postgres@3.4.6)
       electron:
         specifier: ^36.2.1
         version: 36.2.1
@@ -4159,6 +4162,10 @@ packages:
     resolution: {integrity: sha512-dle9A3yYxlBSrt8Fu+IpjGT8SY8hN0mlaA6GY8t0P5PjIOZemULz/E2Bnm/2dcUOena75OTNkHI76uZBNUUq3A==}
     engines: {node: ^10 || ^12 || >=14}
 
+  postgres@3.4.6:
+    resolution: {integrity: sha512-MXrZVqgUfiirfZ0MqQqXqZQa6oM5OWFjfuaHVKl7v2zW25LnOJeLpQk+UUW0ZuP94fcS+fZVqyDYm9v5SIJ11Q==}
+    engines: {node: '>=12'}
+
   prelude-ls@1.2.1:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
@@ -6048,27 +6055,27 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@proj-airi/drizzle-duckdb-wasm@0.4.24(drizzle-orm@0.43.1(@electric-sql/pglite@0.3.1))':
+  '@proj-airi/drizzle-duckdb-wasm@0.4.24(drizzle-orm@0.43.1(@electric-sql/pglite@0.3.1)(postgres@3.4.6))':
     dependencies:
       '@date-fns/tz': 1.2.0
       '@duckdb/duckdb-wasm': 1.29.1-dev68.0
-      '@proj-airi/duckdb-wasm': 0.4.24(drizzle-orm@0.43.1(@electric-sql/pglite@0.3.1))
+      '@proj-airi/duckdb-wasm': 0.4.24(drizzle-orm@0.43.1(@electric-sql/pglite@0.3.1)(postgres@3.4.6))
       apache-arrow: 19.0.1
       date-fns: 4.1.0
       defu: 6.1.4
-      drizzle-orm: 0.43.1(@electric-sql/pglite@0.3.1)
+      drizzle-orm: 0.43.1(@electric-sql/pglite@0.3.1)(postgres@3.4.6)
       es-toolkit: 1.37.2
     transitivePeerDependencies:
       - '@75lb/nature'
 
-  '@proj-airi/duckdb-wasm@0.4.24(drizzle-orm@0.43.1(@electric-sql/pglite@0.3.1))':
+  '@proj-airi/duckdb-wasm@0.4.24(drizzle-orm@0.43.1(@electric-sql/pglite@0.3.1)(postgres@3.4.6))':
     dependencies:
       '@date-fns/tz': 1.2.0
       '@duckdb/duckdb-wasm': 1.29.1-dev68.0
       apache-arrow: 19.0.1
       date-fns: 4.1.0
       defu: 6.1.4
-      drizzle-orm: 0.43.1(@electric-sql/pglite@0.3.1)
+      drizzle-orm: 0.43.1(@electric-sql/pglite@0.3.1)(postgres@3.4.6)
       es-toolkit: 1.37.2
     transitivePeerDependencies:
       - '@75lb/nature'
@@ -7934,9 +7941,10 @@ snapshots:
 
   dotenv@16.5.0: {}
 
-  drizzle-orm@0.43.1(@electric-sql/pglite@0.3.1):
+  drizzle-orm@0.43.1(@electric-sql/pglite@0.3.1)(postgres@3.4.6):
     optionalDependencies:
       '@electric-sql/pglite': 0.3.1
+      postgres: 3.4.6
 
   dunder-proto@1.0.1:
     dependencies:
@@ -9786,6 +9794,8 @@ snapshots:
       nanoid: 3.3.11
       picocolors: 1.1.1
       source-map-js: 1.2.1
+
+  postgres@3.4.6: {}
 
   prelude-ls@1.2.1: {}
 
