@@ -1,6 +1,7 @@
 import type { PresetOrFactoryAwaitable } from 'unocss'
 
 import { colorToString } from '@unocss/preset-mini/utils'
+import { createLocalFontProcessor } from '@unocss/preset-web-fonts/local'
 import { defineConfig, mergeConfigs, presetAttributify, presetIcons, presetTypography, presetWebFonts, presetWind3, transformerDirectives, transformerVariantGroup } from 'unocss'
 import presetAnimations from 'unocss-preset-animations'
 import { presetScrollbar } from 'unocss-preset-scrollbar'
@@ -98,6 +99,15 @@ export function sharedUnoConfig() {
           warning: 5000,
           failure: 10000,
         },
+        // This will download the fonts and serve them locally
+        processors: createLocalFontProcessor({
+        // Directory to cache the fonts
+          cacheDir: 'node_modules/.cache/unocss/fonts',
+          // Directory to save the fonts assets
+          fontAssetsDir: 'public/assets/fonts',
+          // Base URL to serve the fonts from the client
+          fontServeBaseUrl: '/assets/fonts',
+        }),
       }),
       presetIcons({
         scale: 1.2,

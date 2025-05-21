@@ -9,6 +9,7 @@ import Layouts from 'vite-plugin-vue-layouts'
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
+  root: resolve(join('src', 'renderer')),
   optimizeDeps: {
     exclude: [
       '@proj-airi/ui',
