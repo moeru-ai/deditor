@@ -33,13 +33,16 @@ dist-ssr
 **/temp/
 out/*
 
+# UnoCSS fonts
+apps/deditor/public/assets/fonts/*
+
 # Unplugin Vue Router & Unplugin Vue Components
 components.d.ts
 **/typed-router.d.ts
 
 # Cache
 .eslintcache
-**/tsconfig.tsbuildinfo
+**/**/*.tsbuildinfo
 
 # Bianry
 *.pcm

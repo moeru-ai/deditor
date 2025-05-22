@@ -1,9 +1,12 @@
 {
   "compilerOptions": {
-    "composite": true,
     "target": "ESNext",
+    "jsx": "preserve",
     "lib": [
-      "ESNext"
+      "DOM",
+      "ESNext",
+      "DOM.Iterable",
+      "DOM.AsyncIterable"
     ],
     "useDefineForClassFields": true,
     "module": "ESNext",
@@ -12,7 +15,11 @@
     "resolveJsonModule": true,
     "types": [
       "vitest",
-      "vite/client"
+      "vite/client",
+      "vite-plugin-vue-layouts/client",
+      "unplugin-vue-macros/macros-global",
+      "unplugin-vue-router/client",
+      "./src/renderer/electron.d.ts"
     ],
     "allowJs": true,
     /* Linting */
@@ -30,7 +37,9 @@
     "skipLibCheck": true
   },
   "include": [
-    "uno.config.ts",
-    "eslint.config.ts"
+    "src/renderer/**/*.ts",
+    "src/renderer/**/*.d.ts",
+    "src/renderer/**/*.tsx",
+    "src/renderer/**/*.vue"
   ]
 }

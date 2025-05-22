@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "composite": true,
     "target": "ESNext",
     "lib": [
       "ESNext"
@@ -12,7 +11,8 @@
     "resolveJsonModule": true,
     "types": [
       "vitest",
-      "vite/client"
+      "vite/client",
+      "electron-vite/node"
     ],
     "allowJs": true,
     /* Linting */
@@ -30,7 +30,15 @@
     "skipLibCheck": true
   },
   "include": [
-    "uno.config.ts",
-    "eslint.config.ts"
+    "vite.config.ts",
+    "electron.vite.config.ts",
+    "src/main/**/*.ts",
+    "src/main/**/*.d.ts",
+    "src/main/**/*.tsx",
+    "src/main/**/*.vue",
+    "src/preload/**/*.ts",
+    "src/preload/**/*.d.ts",
+    "src/preload/**/*.tsx",
+    "src/preload/**/*.vue"
   ]
 }

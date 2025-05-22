@@ -44,7 +44,7 @@ jobs:
 
       - name: Build
         run: |
-          pnpm run build
+          pnpm run build:unpack
 
   typecheck:
     name: Type Check
@@ -59,6 +59,10 @@ jobs:
 
       - name: Install
         run: pnpm install
+
+      - name: Build
+        run: |
+          pnpm run build
 
       - name: Typecheck
         run: pnpm run typecheck

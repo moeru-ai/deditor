@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: 123456
       POSTGRES_DB: test_deditor_db
     ports:
-      - "7432:5432"
+      - '7432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -26,7 +26,7 @@ services:
   pgvector_rs:
     image: ghcr.io/tensorchord/pgvecto-rs:pg17-v0.4.0
     ports:
-      - "7433:5432"
+      - '7433:5432'
     environment:
       POSTGRES_DATABASE: postgres
       POSTGRES_PASSWORD: '123456'
@@ -45,7 +45,7 @@ services:
   pgvector:
     image: pgvector/pgvector:pg17
     ports:
-      - "7434:5432"
+      - '7434:5432'
     environment:
       POSTGRES_DATABASE: postgres
       POSTGRES_PASSWORD: '123456'
@@ -70,7 +70,7 @@ services:
       MYSQL_USER: deditor
       MYSQL_PASSWORD: 123456
     ports:
-      - "7306:3306"
+      - '7306:3306'
     volumes:
       - mysql_data:/var/lib/mysql
       - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -106,7 +106,7 @@ services:
       - milvus_etcd_data:/volumes/etcd:/etcd
     command: etcd -advertise-client-urls=http://etcd:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
     healthcheck:
-      test: ["CMD", "etcdctl", "endpoint", "health"]
+      test: [CMD, etcdctl, endpoint, health]
       interval: 30s
       timeout: 20s
       retries: 3
@@ -117,39 +117,39 @@ services:
       MINIO_ACCESS_KEY: minioadmin
       MINIO_SECRET_KEY: minioadmin
     ports:
-      - "7001:9001"
-      - "7000:9000"
+      - '7001:9001'
+      - '7000:9000'
     volumes:
       - milvus_minio_data:/volumes/minio:/minio_data
     command: minio server /minio_data --console-address ":9001"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: [CMD, curl, -f, 'http://localhost:9000/minio/health/live']
       interval: 30s
       timeout: 20s
       retries: 3
 
   milvus:
     image: milvusdb/milvus:v2.5.10
-    command: ["milvus", "run", "standalone"]
+    command: [milvus, run, standalone]
     security_opt:
-    - seccomp:unconfined
+      - seccomp:unconfined
     environment:
       ETCD_ENDPOINTS: milvus_etcd:2379
       MINIO_ADDRESS: milvus_minio:9000
     volumes:
       - milvus_data:/volumes/milvus:/var/lib/milvus
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
+      test: [CMD, curl, -f, 'http://localhost:9091/healthz']
       interval: 30s
       start_period: 90s
       timeout: 20s
       retries: 3
     ports:
-      - "17530:19530"
-      - "7091:9091"
+      - '17530:19530'
+      - '7091:9091'
     depends_on:
-      - "milvus_etcd"
-      - "milvus_minio"
+      - milvus_etcd
+      - milvus_minio
 
 volumes:
   postgres_data:
