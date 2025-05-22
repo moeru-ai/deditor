@@ -9,7 +9,7 @@ import { nanoid } from '../../utils/nanoid'
 
 const databaseSessions = new Map<string, MySql2Database>()
 
-export function registerPostgresJsDatabaseDialect(window: BrowserWindow) {
+export function registerMySQL2DatabaseDialect(window: BrowserWindow) {
   defineIPCHandler<MySQL2Methods>(window, 'connectRemoteDatabaseMySQL2')
     .handle(async ({ dsn }) => {
       const dbSession = drizzle(dsn)

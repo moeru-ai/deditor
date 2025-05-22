@@ -6,6 +6,7 @@ export default defineConfig({
   main: {
     plugins: [externalizeDepsPlugin({
       include: [
+        '@stdlib/string',
         'drizzle-orm',
         'drizzle-orm/postgres-js',
         'drizzle-orm/mysql2',
@@ -17,6 +18,7 @@ export default defineConfig({
   preload: {
     plugins: [externalizeDepsPlugin({
       include: [
+        '@stdlib/string',
         'drizzle-orm',
         'drizzle-orm/postgres-js',
         'drizzle-orm/mysql2',

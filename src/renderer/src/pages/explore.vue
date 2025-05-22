@@ -9,6 +9,7 @@ import { onMounted, onUnmounted, ref, watch } from 'vue'
 
 import Button from '../components/basic/Button.vue'
 import Chat from '../components/table/Chat.vue'
+import { useRemotePostgres } from '../composables/databases/remote'
 
 const input = ref(`[${Array.from({ length: 100 }, (_, i) => `{"question": "What is the answer to ${i}?", "answer": "It's ${i}."}`).join(',')}]`)
 
@@ -20,6 +21,8 @@ const pageSize = ref(10)
 const selectedRow = ref<Record<string, unknown>>()
 
 const db = ref<DuckDBWasmDrizzleDatabase>()
+
+const remotePostgres = useRemotePostgres()
 
 async function client() {
   return (await db.value!.$client)
@@ -50,6 +53,9 @@ watch(page, async () => {
 onMounted(async () => {
   db.value = drizzle({ connection: { bundles: getImportUrlBundles(), logger: false } })
   await loadDataset()
+
+  await remotePostgres.connect('postgres://postgres:123456@localhost:5433/postgres')
+  console.log(await remotePostgres.execute(`SELECT 1 AS count`))
 })
 
 onUnmounted(async () => {
