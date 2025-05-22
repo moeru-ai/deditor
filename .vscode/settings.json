@@ -53,6 +53,7 @@
     "healthcheck",
     "initdb",
     "isready",
+    "kebabcase",
     "milvus",
     "minioadmin",
     "mysqladmin",
