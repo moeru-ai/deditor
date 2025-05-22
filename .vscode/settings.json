@@ -49,7 +49,17 @@
     "airi",
     "Deditor",
     "duckdb",
+    "etcdctl",
+    "healthcheck",
+    "initdb",
+    "isready",
+    "milvus",
+    "minioadmin",
+    "mysqladmin",
+    "pgvecto",
+    "pgvector",
     "Splitpanes",
+    "tensorchord",
     "vueuse"
   ]
 }
