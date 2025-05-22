@@ -1,11 +1,15 @@
 {
   "compilerOptions": {
+    "composite": true,
+
+    /* Build */
     "target": "ESNext",
     "lib": [
       "ESNext"
     ],
     "useDefineForClassFields": true,
     "module": "ESNext",
+
     /* Bundler mode */
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
@@ -15,13 +19,13 @@
       "electron-vite/node"
     ],
     "allowJs": true,
+
     /* Linting */
     "strict": true,
     "strictNullChecks": true,
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noEmit": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,

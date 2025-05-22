@@ -1,5 +1,8 @@
 {
   "compilerOptions": {
+    "composite": true,
+
+    /* Build */
     "target": "ESNext",
     "jsx": "preserve",
     "lib": [
@@ -10,6 +13,7 @@
     ],
     "useDefineForClassFields": true,
     "module": "ESNext",
+
     /* Bundler mode */
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
@@ -22,13 +26,13 @@
       "./src/renderer/electron.d.ts"
     ],
     "allowJs": true,
+
     /* Linting */
     "strict": true,
     "strictNullChecks": true,
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noEmit": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
