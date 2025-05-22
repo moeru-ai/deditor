@@ -117,7 +117,7 @@ onMounted(() => {
         </button>
       </div>
     </div>
-    <div h="[calc(100%-36px)]" relative top-9 ml-14 pl-2>
+    <div h="[calc(100%-36px)]" relative top-9 ml-14 mr-2 pl-2>
       <RouterView />
     </div>
   </main>

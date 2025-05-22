@@ -1,20 +1,20 @@
 {
   "compilerOptions": {
-    "composite": true,
     "target": "ESNext",
     "lib": [
       "ESNext"
     ],
     "useDefineForClassFields": true,
     "module": "ESNext",
+
     /* Bundler mode */
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "types": [
-      "vitest",
-      "vite/client"
+      "vitest"
     ],
     "allowJs": true,
+
     /* Linting */
     "strict": true,
     "strictNullChecks": true,
@@ -29,14 +29,8 @@
     "verbatimModuleSyntax": true,
     "skipLibCheck": true
   },
-  "references": [
-    { "path": "./apps/deditor/tsconfig.json" },
-    { "path": "./apps/deditor/tsconfig.node.json" },
-    { "path": "./packages/shared/tsconfig.json" }
-  ],
-  "files": [],
   "include": [
-    "uno.config.ts",
-    "eslint.config.ts"
+    "src/**/*.ts",
+    "src/**/*.d.ts"
   ]
 }
