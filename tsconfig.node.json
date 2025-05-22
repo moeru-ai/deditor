@@ -37,6 +37,7 @@
     "uno.config.ts",
     "eslint.config.ts",
     "electron.vite.config.ts",
+    "src/shared/**/*.ts",
     "src/main/**/*.ts",
     "src/main/**/*.d.ts",
     "src/main/**/*.tsx",

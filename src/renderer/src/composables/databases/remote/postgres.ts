@@ -1,32 +1,27 @@
+import type { PostgresMethods } from '../../../../../shared/ipc/databases/remote'
+
 import { ref } from 'vue'
 
+import { defineClientMethod } from '../../electron/define-client-method'
+
 export function useRemotePostgres() {
+  const methods = <TMethod extends keyof PostgresMethods>(method: TMethod) => defineClientMethod<PostgresMethods, TMethod>(method)
   const databaseSessionId = ref<string>()
 
   return {
-    connect: (dsn: string) => {
-      return new Promise((resolve, reject) => {
-        window.electron.ipcRenderer.send('request:connect-remote-database-postgres', dsn)
-        window.electron.ipcRenderer.on('response:connect-remote-database-postgres', (_, res: { databaseSessionId: string }) => {
-          databaseSessionId.value = res.databaseSessionId
-          resolve(databaseSessionId.value)
-        })
-        window.electron.ipcRenderer.on('response:error:connect-remote-database-postgres', (_, err) => reject(err))
-      })
-    },
-    execute: <R = Record<string, unknown>>(statement: string, ...params: any[]) => {
-      return new Promise<R>((resolve, reject) => {
-        window.electron.ipcRenderer.send('request:query-remote-database-postgres', { databaseSessionId: databaseSessionId.value, statement, parameters: params })
-        window.electron.ipcRenderer.on('response:query-remote-database-postgres', (_, res: { databaseSessionId: string, results: R }) => {
-          if (res.databaseSessionId !== databaseSessionId.value) {
-            reject(new Error('Database session ID mismatch'))
-            return
-          }
+    connect: async (dsn: string) => {
+      const id = await methods('connectRemoteDatabasePostgres').call({ dsn })
+      databaseSessionId.value = id.databaseSessionId
 
-          resolve(res.results)
-        })
-        window.electron.ipcRenderer.on('response:error:query-remote-database-postgres', (_, err) => reject(err))
-      })
+      return id
+    },
+    execute: async <R = Record<string, unknown>>(statement: string, parameters: any[] = []): Promise<R[]> => {
+      if (!databaseSessionId.value) {
+        throw new Error('Database session ID is not set. Please connect to a database first.')
+      }
+
+      const res = await methods('queryRemoteDatabasePostgres').call({ databaseSessionId: databaseSessionId.value!, statement, parameters })
+      return res.results as R[]
     },
   }
 }
