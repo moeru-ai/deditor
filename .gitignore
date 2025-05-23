@@ -34,7 +34,7 @@ dist-ssr
 **/out/*
 
 # UnoCSS fonts
-apps/deditor/public/assets/fonts/*
+apps/deditor/src/renderer/public/assets/fonts/*
 
 # Unplugin Vue Router & Unplugin Vue Components
 components.d.ts
