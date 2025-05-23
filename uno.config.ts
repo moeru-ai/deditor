@@ -101,10 +101,10 @@ export function sharedUnoConfig() {
         },
         // This will download the fonts and serve them locally
         processors: createLocalFontProcessor({
-        // Directory to cache the fonts
+          // Directory to cache the fonts
           cacheDir: 'node_modules/.cache/unocss/fonts',
           // Directory to save the fonts assets
-          fontAssetsDir: 'public/assets/fonts',
+          fontAssetsDir: 'src/renderer/public/assets/fonts',
           // Base URL to serve the fonts from the client
           fontServeBaseUrl: '/assets/fonts',
         }),
