@@ -1,16 +1,17 @@
 import strings from '@stdlib/string'
 
 export function defineClientMethod<TMethods, TMethodName extends keyof TMethods>(method: TMethodName) {
-  type P = TMethods[TMethodName] extends (...args: infer Params) => infer _Returns ? Params : never
-  type R = TMethods[TMethodName] extends (...args: infer _Params) => infer Returns ? Returns : never
+  type MethodType = TMethods[TMethodName]
+  type ParamType = MethodType extends (params: infer P) => any ? P : never
+  type ReturnType = MethodType extends (...args: any[]) => infer R ? R : never
 
-  function call(...params: P): Promise<Awaited<R>> {
-    return new Promise<Awaited<R>>((resolve, reject) => {
+  function call(params?: ParamType): Promise<Awaited<ReturnType>> {
+    return new Promise<Awaited<ReturnType>>((resolve, reject) => {
       window.electron.ipcRenderer.send(`request:${strings.kebabcase(String(method))}`, params)
 
       const onResponseCleanup = window.electron.ipcRenderer.on(
         `response:${strings.kebabcase(String(method))}`,
-        (_, res: Awaited<R>) => {
+        (_, res: Awaited<ReturnType>) => {
           resolve(res)
           onResponseCleanup?.()
         },
@@ -25,8 +26,8 @@ export function defineClientMethod<TMethods, TMethodName extends keyof TMethods>
     })
   }
 
-  function callWithOptions(params: P, options?: { timeout?: number }): Promise<Awaited<R>> {
-    return new Promise<Awaited<R>>((resolve, reject) => {
+  function callWithOptions(params: ParamType, options?: { timeout?: number }): Promise<Awaited<ReturnType>> {
+    return new Promise<Awaited<ReturnType>>((resolve, reject) => {
       let onResponseCleanup: () => void
       let onErrorCleanup: () => void
 
@@ -42,7 +43,7 @@ export function defineClientMethod<TMethods, TMethodName extends keyof TMethods>
 
       onResponseCleanup = window.electron.ipcRenderer.on(
         `response:${strings.kebabcase(String(method))}`,
-        (_, res: Awaited<R>) => {
+        (_, res: Awaited<ReturnType>) => {
           resolve(res)
           onResponseCleanup?.()
         },

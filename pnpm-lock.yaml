@@ -77,6 +77,9 @@ importers:
       '@huggingface/transformers':
         specifier: ^3.5.1
         version: 3.5.1
+      '@moeru/std':
+        specifier: 0.1.0-beta.1
+        version: 0.1.0-beta.1
       '@proj-airi/drizzle-duckdb-wasm':
         specifier: ^0.4.24
         version: 0.4.24(drizzle-orm@0.43.1(@electric-sql/pglite@0.3.2)(mysql2@3.14.1)(postgres@3.4.7))
@@ -947,6 +950,9 @@ packages:
 
   '@mdit-vue/types@2.1.4':
     resolution: {integrity: sha512-QiGNZslz+zXUs2X8D11UQhB4KAMZ0DZghvYxa7+1B+VMLcDtz//XHpWbcuexjzE3kBXSxIUTPH3eSQCa0puZHA==}
+
+  '@moeru/std@0.1.0-beta.1':
+    resolution: {integrity: sha512-ImfoMBchZP+F4aos2nFmlcipcgIhT+ZkUUVWB/bBHEqyB/w/nbI/xgA8a1ibJUtG7RcQnQH+SKom0r4/1xCWqA==}
 
   '@napi-rs/wasm-runtime@0.2.9':
     resolution: {integrity: sha512-OKRBiajrrxB9ATokgEQoG87Z25c67pCpYcCwmXYX8PBftC9pBfN18gnm/fh1wurSLEKIAt+QRFLFCQISrb66Jg==}
@@ -6418,6 +6424,8 @@ snapshots:
       markdown-it: 14.1.0
 
   '@mdit-vue/types@2.1.4': {}
+
+  '@moeru/std@0.1.0-beta.1': {}
 
   '@napi-rs/wasm-runtime@0.2.9':
     dependencies:

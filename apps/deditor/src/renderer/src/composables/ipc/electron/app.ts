@@ -7,7 +7,7 @@ import { defineClientMethod } from '../define-client-method'
 
 const methods = <TMethod extends keyof AppMethods>(method: TMethod) => defineClientMethod<AppMethods, TMethod>(method)
 
-export type AppGetPathParameterName = Parameters<AppMethods['getPath']>[0]
+export type AppGetPathParameterName = Parameters<AppMethods['getPath']>[0]['name']
 
 export function useAppPath(name?: MaybeRefOrGetter<AppGetPathParameterName>) {
   const _name = ref<AppGetPathParameterName | undefined>()
@@ -26,7 +26,7 @@ export function useAppPath(name?: MaybeRefOrGetter<AppGetPathParameterName>) {
 
   async function update(name?: AppGetPathParameterName) {
     if (name)
-      path.value = await methods('getPath').call(name)
+      path.value = await methods('getPath').call({ name })
   }
 
   watch(_name, async name => update(name), { immediate: true })

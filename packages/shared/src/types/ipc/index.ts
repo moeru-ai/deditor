@@ -1,2 +1,2 @@
-export * from './app'
-export * from './databases'
+export type * from './databases'
+export type * from './electron'
