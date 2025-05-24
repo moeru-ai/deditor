@@ -9,6 +9,7 @@ import { onMounted, onUnmounted, ref, watch } from 'vue'
 
 import Button from '../components/basic/Button.vue'
 import Chat from '../components/table/Chat.vue'
+import PaneCard from '../components/ui/pane/PaneCard.vue'
 
 const input = ref(`[${Array.from({ length: 100 }, (_, i) => `{"question": "What is the answer to ${i}?", "answer": "It's ${i}."}`).join(',')}]`)
 
@@ -85,17 +86,7 @@ function handleRowClick(_index: number, row: Record<string, unknown>) {
       <Pane :min-size="20" :size="60">
         <Splitpanes horizontal class="flex gap-0.8">
           <Pane min-size="20" :size="40">
-            <div
-              v-motion
-              :initial="{ opacity: 0, y: 16 }"
-              :enter="{ opacity: 1, y: 0 }"
-              bg="neutral-800/90"
-              h-full w-full flex flex-col gap-2
-              rounded-2xl
-              px-4 py-3
-              backdrop-blur-sm
-              transition="all duration-300 ease-in-out"
-            >
+            <PaneCard flex flex-col gap-2>
               <h2 text="neutral-300/80" mb-1 flex justify-between>
                 <div>
                   Query From
@@ -124,19 +115,12 @@ function handleRowClick(_index: number, row: Record<string, unknown>) {
                   transition="colors duration-300 ease-in-out"
                 />
               </div>
-            </div>
+            </PaneCard>
           </Pane>
           <Pane min-size="20" :size="60">
-            <div
-              v-motion
-              :initial="{ opacity: 0, y: 16 }"
-              :enter="{ opacity: 1, y: 0, transition: { delay: 100 } }"
-              bg="neutral-800/90"
-              h-full w-full flex flex-col gap-2
-              rounded-2xl
-              px-4 py-3
-              backdrop-blur-sm
-              transition="all duration-300 ease-in-out"
+            <PaneCard
+              :enter-delay="100"
+              flex flex-col gap-2
             >
               <h2 text="neutral-300/80" mb-1 flex justify-between>
                 <div>
@@ -152,18 +136,14 @@ function handleRowClick(_index: number, row: Record<string, unknown>) {
                 @page-next="handlePageNext"
                 @row-click="handleRowClick"
               />
-            </div>
+            </PaneCard>
           </Pane>
         </Splitpanes>
       </Pane>
       <Pane :min-size="20" :size="40">
-        <div
-          v-motion
-          :initial="{ opacity: 0, y: 16 }"
-          :enter="{ opacity: 1, y: 0, transition: { delay: 200 } }"
-          bg="neutral-800/90"
-          h-full w-full flex flex-col gap-2 overflow-y-scroll rounded-2xl px-4 py-3 backdrop-blur-sm
-          transition="all duration-300 ease-in-out"
+        <PaneCard
+          :enter-delay="200"
+          flex flex-col gap-2 overflow-y-scroll
         >
           <h2 text="neutral-300/80" mb-1 flex justify-between>
             <div>
@@ -196,7 +176,7 @@ function handleRowClick(_index: number, row: Record<string, unknown>) {
               </template>
             </template>
           </div>
-        </div>
+        </PaneCard>
       </Pane>
     </Splitpanes>
   </div>
