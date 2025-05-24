@@ -4,6 +4,7 @@ import UnoCSS from 'unocss/vite'
 import VueMacros from 'unplugin-vue-macros/vite'
 import VueRouter from 'unplugin-vue-router/vite'
 import { defineConfig } from 'vite'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 // import DevTools from 'vite-plugin-vue-devtools'
 import Layouts from 'vite-plugin-vue-layouts'
 
@@ -42,5 +43,11 @@ export default defineConfig(async () => ({
     // https://github.com/JohnCampionJr/vite-plugin-vue-layouts
     Layouts(),
     UnoCSS(),
+    nodePolyfills({
+      include: ['stream', 'util'], // Minimal for Plotly.js :(
+      globals: {
+        global: true,
+      },
+    }),
   ],
 }))

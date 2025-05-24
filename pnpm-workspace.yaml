@@ -2,17 +2,17 @@ packages:
   - apps/**
   - packages/**
   - '!**/dist/**'
-
 catalog:
   '@proj-airi/drizzle-duckdb-wasm': ^0.4.24
   '@xsai/embed': ^0.3.0-beta.3
   '@xsai/shared': ^0.3.0-beta.3
   '@xsai/shared-chat': ^0.3.0-beta.3
   '@xsai/utils-chat': ^0.3.0-beta.3
-
 onlyBuiltDependencies:
+  - '@parcel/watcher'
   - electron
   - electron-winstaller
+  - es5-ext
   - esbuild
   - onnxruntime-node
   - protobufjs

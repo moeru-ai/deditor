@@ -163,5 +163,6 @@ export function useXsAITransformers(workerURL: string | URL, _type: 'embed') {
     overallTotal,
     load,
     process,
+    embedProvider: embedProvider as ReturnType<typeof createEmbedProvider>,
   }
 }
