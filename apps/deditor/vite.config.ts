@@ -1,5 +1,5 @@
-import { join, resolve } from 'node:path'
 import Vue from '@vitejs/plugin-vue'
+import { join, resolve } from 'node:path'
 import UnoCSS from 'unocss/vite'
 import VueMacros from 'unplugin-vue-macros/vite'
 import VueRouter from 'unplugin-vue-router/vite'

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Pane, Splitpanes } from 'splitpanes'
 
-import PaneCard from '../components/ui/pane/PaneCard.vue'
+import PaneCard from '../components/container/PaneCard.vue'
 </script>
 
 <template>

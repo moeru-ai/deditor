@@ -9,15 +9,17 @@ export default await antfu(
       'build/**',
     ],
     rules: {
-      'import/order': [
+      'import/order': 'off',
+      'perfectionist/sort-imports': [
         'error',
         {
-          'groups': [
+          groups: [
             ['type'],
             ['builtin', 'external'],
-            ['parent', 'sibling', 'index'],
+            ['internal', 'parent', 'sibling', 'index'],
+            ['style'],
           ],
-          'newlines-between': 'always',
+          newlinesBetween: 'always',
         },
       ],
     },
