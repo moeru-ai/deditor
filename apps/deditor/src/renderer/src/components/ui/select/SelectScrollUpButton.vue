@@ -6,7 +6,7 @@ import { ChevronUpIcon } from '@radix-icons/vue'
 import { reactiveOmit } from '@vueuse/core'
 import { SelectScrollUpButton, useForwardProps } from 'reka-ui'
 
-import { cn } from '~/lib/utils'
+import { cn } from '@/libs/shadcn/utils'
 
 const props = defineProps<SelectScrollUpButtonProps & { class?: HTMLAttributes['class'] }>()
 

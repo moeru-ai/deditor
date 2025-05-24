@@ -19,7 +19,7 @@ export default defineConfig(async () => ({
   },
   resolve: {
     alias: {
-      '@renderer': resolve(join('src', 'renderer', 'src')),
+      '@': resolve(join('src', 'renderer', 'src')),
     },
   },
   plugins: [

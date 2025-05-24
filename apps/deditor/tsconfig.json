@@ -2,9 +2,9 @@
   "compilerOptions": {
     "composite": true,
 
+    "baseUrl": "./src/renderer",
     "paths": {
-      "~/*": ["./src/renderer/src/*"],
-      "~/lib/utils": ["./src/renderer/src/libs/shadcn/utils.ts"] // Workaround for shadcn-vue. Discussion: https://github.com/unovue/shadcn-vue/issues/1102
+      "@/*": ["./src/*"]
     },
 
     /* Build */
