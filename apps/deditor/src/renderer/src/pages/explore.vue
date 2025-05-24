@@ -8,7 +8,7 @@ import { Pane, Splitpanes } from 'splitpanes'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 
 import Button from '../components/basic/Button.vue'
-import PaneCard from '../components/container/PaneCard.vue'
+import PaneArea from '../components/container/PaneArea.vue'
 import Chat from '../components/table/Chat.vue'
 
 const input = ref(`[${Array.from({ length: 100 }, (_, i) => `{"question": "What is the answer to ${i}?", "answer": "It's ${i}."}`).join(',')}]`)
@@ -86,7 +86,7 @@ function handleRowClick(_index: number, row: Record<string, unknown>) {
       <Pane :min-size="20" :size="60">
         <Splitpanes horizontal class="flex gap-0.8">
           <Pane min-size="20" :size="40">
-            <PaneCard flex flex-col gap-2>
+            <PaneArea flex flex-col gap-2>
               <h2 text="neutral-300/80" mb-1 flex justify-between>
                 <div>
                   Query From
@@ -115,10 +115,10 @@ function handleRowClick(_index: number, row: Record<string, unknown>) {
                   transition="colors duration-300 ease-in-out"
                 />
               </div>
-            </PaneCard>
+            </PaneArea>
           </Pane>
           <Pane min-size="20" :size="60">
-            <PaneCard
+            <PaneArea
               :enter-delay="100"
               flex flex-col gap-2
             >
@@ -136,12 +136,12 @@ function handleRowClick(_index: number, row: Record<string, unknown>) {
                 @page-next="handlePageNext"
                 @row-click="handleRowClick"
               />
-            </PaneCard>
+            </PaneArea>
           </Pane>
         </Splitpanes>
       </Pane>
       <Pane :min-size="20" :size="40">
-        <PaneCard
+        <PaneArea
           :enter-delay="200"
           flex flex-col gap-2 overflow-y-scroll
         >
@@ -176,7 +176,7 @@ function handleRowClick(_index: number, row: Record<string, unknown>) {
               </template>
             </template>
           </div>
-        </PaneCard>
+        </PaneArea>
       </Pane>
     </Splitpanes>
   </div>
