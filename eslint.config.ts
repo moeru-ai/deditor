@@ -22,4 +22,10 @@ export default await antfu(
       ],
     },
   },
+  {
+    files: ['**/tsconfig.json'],
+    rules: {
+      'jsonc/sort-keys': 'off',
+    },
+  },
 )

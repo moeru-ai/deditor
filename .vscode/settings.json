@@ -59,6 +59,7 @@
     "mysqladmin",
     "pgvecto",
     "pgvector",
+    "shadcn",
     "Splitpanes",
     "tensorchord",
     "unplugin",
