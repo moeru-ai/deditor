@@ -4,8 +4,8 @@ import type { BrowserWindow } from 'electron'
 
 import { drizzle } from 'drizzle-orm/mysql2'
 
-import { defineIPCHandler } from '../../electron/define-ipc-handler'
-import { nanoid } from '../../utils/nanoid'
+import { nanoid } from '../../../utils/nanoid'
+import { defineIPCHandler } from '../../define-ipc-handler'
 
 const databaseSessions = new Map<string, MySql2Database>()
 

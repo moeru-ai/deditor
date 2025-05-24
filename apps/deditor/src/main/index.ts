@@ -6,7 +6,8 @@ import { fileURLToPath } from 'node:url'
 import { isMacOS } from 'std-env'
 
 import icon from '../../resources/icon.png?asset'
-import { registerDatabaseDialects } from './databases/remote/'
+import { registerApp } from './ipc/app'
+import { registerDatabaseDialects } from './ipc/databases/remote/'
 
 app.dock?.setIcon(icon)
 
@@ -63,6 +64,8 @@ app.whenReady().then(() => {
   })
 
   const mainWindow = createWindow()
+
+  registerApp(mainWindow, app)
   registerDatabaseDialects(mainWindow)
 
   app.on('activate', () => {

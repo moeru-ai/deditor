@@ -1,16 +1,16 @@
-import type { MySQL2Methods } from '@deditor-app/shared'
+import type { PostgresMethods } from '@deditor-app/shared'
 
 import { ref } from 'vue'
 
-import { defineClientMethod } from '../../electron/define-client-method'
+import { defineClientMethod } from '../../define-client-method'
 
-export function useRemoteMySQL() {
-  const methods = <TMethod extends keyof MySQL2Methods>(method: TMethod) => defineClientMethod<MySQL2Methods, TMethod>(method)
+export function useRemotePostgres() {
+  const methods = <TMethod extends keyof PostgresMethods>(method: TMethod) => defineClientMethod<PostgresMethods, TMethod>(method)
   const databaseSessionId = ref<string>()
 
   return {
     connect: async (dsn: string) => {
-      const id = await methods('connectRemoteDatabaseMySQL2').call({ dsn })
+      const id = await methods('connectRemoteDatabasePostgres').call({ dsn })
       databaseSessionId.value = id.databaseSessionId
 
       return id
@@ -20,7 +20,7 @@ export function useRemoteMySQL() {
         throw new Error('Database session ID is not set. Please connect to a database first.')
       }
 
-      const res = await methods('queryRemoteDatabaseMySQL2').call({
+      const res = await methods('queryRemoteDatabasePostgres').call({
         databaseSessionId: databaseSessionId.value!,
         statement,
         parameters,
