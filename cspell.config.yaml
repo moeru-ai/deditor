@@ -1,0 +1,33 @@
+version: '0.2'
+ignorePaths: []
+dictionaryDefinitions: []
+dictionaries: []
+words:
+  - airi
+  - Deditor
+  - duckdb
+  - etcdctl
+  - healthcheck
+  - huggingface
+  - iconify
+  - initdb
+  - isready
+  - kebabcase
+  - milvus
+  - minioadmin
+  - Moeru
+  - mysqladmin
+  - ofetch
+  - pglite
+  - pgvecto
+  - pgvector
+  - reka
+  - shadcn
+  - Splitpanes
+  - tensorchord
+  - unocss
+  - unplugin
+  - vueuse
+  - xsai
+ignoreWords: []
+import: []
