@@ -2,7 +2,7 @@
 import type { DuckDBWasmDrizzleDatabase } from '@proj-airi/drizzle-duckdb-wasm'
 
 import { drizzle } from '@proj-airi/drizzle-duckdb-wasm'
-import { getImportUrlBundles } from '@proj-airi/duckdb-wasm/bundles/import-url-browser'
+import { getImportUrlBundles } from '@proj-airi/drizzle-duckdb-wasm/bundles/import-url-browser'
 import { BasicTextarea } from '@proj-airi/ui'
 import { Pane, Splitpanes } from 'splitpanes'
 import { onMounted, onUnmounted, ref, watch } from 'vue'

@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "private": true,
   "packageManager": "pnpm@10.11.0",
-  "description": "Opinionated Datasets Editor for managing, labelling, processing massive scale of data and be able to visulize them.",
+  "description": "Opinionated Datasets Editor for managing, labelling, processing massive scale of data and be able to visualize them.",
   "author": {
     "name": "Moeru AI - Project AIRI Team",
     "email": "airi@moeru.ai",

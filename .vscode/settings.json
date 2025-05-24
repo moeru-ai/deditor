@@ -51,18 +51,26 @@
     "duckdb",
     "etcdctl",
     "healthcheck",
+    "huggingface",
+    "iconify",
     "initdb",
     "isready",
     "kebabcase",
     "milvus",
     "minioadmin",
+    "Moeru",
     "mysqladmin",
+    "ofetch",
+    "pglite",
     "pgvecto",
     "pgvector",
+    "reka",
     "shadcn",
     "Splitpanes",
     "tensorchord",
+    "unocss",
     "unplugin",
-    "vueuse"
+    "vueuse",
+    "xsai"
   ]
 }

@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.0.1",
   "private": true,
-  "description": "Opinionated Datasets Editor for managing, labelling, processing massive scale of data and be able to visulize them.",
+  "description": "Opinionated Datasets Editor for managing, labelling, processing massive scale of data and be able to visualize them.",
   "author": {
     "name": "Moeru AI - Project AIRI Team",
     "email": "airi@moeru.ai",
@@ -30,7 +30,7 @@
     "@electron-toolkit/utils": "^4.0.0",
     "@huggingface/transformers": "^3.5.1",
     "@proj-airi/drizzle-duckdb-wasm": "^0.4.24",
-    "@proj-airi/duckdb-wasm": "^0.4.24",
+    "@proj-airi/ui": "^0.5.0",
     "@stdlib/string": "^0.3.3",
     "@tanstack/vue-table": "^8.21.3",
     "@tanstack/vue-virtual": "^3.13.8",
@@ -52,7 +52,6 @@
   "devDependencies": {
     "@deditor-app/shared": "workspace:^",
     "@iconify-json/ph": "^1.2.2",
-    "@proj-airi/ui": "^0.5.0",
     "@radix-icons/vue": "^1.0.0",
     "@types/splitpanes": "^2.2.6",
     "@unocss/reset": "^66.1.2",

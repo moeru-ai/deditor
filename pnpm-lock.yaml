@@ -80,9 +80,9 @@ importers:
       '@proj-airi/drizzle-duckdb-wasm':
         specifier: ^0.4.24
         version: 0.4.24(drizzle-orm@0.43.1(@electric-sql/pglite@0.3.2)(mysql2@3.14.1)(postgres@3.4.7))
-      '@proj-airi/duckdb-wasm':
-        specifier: ^0.4.24
-        version: 0.4.24(drizzle-orm@0.43.1(@electric-sql/pglite@0.3.2)(mysql2@3.14.1)(postgres@3.4.7))
+      '@proj-airi/ui':
+        specifier: ^0.5.0
+        version: 0.5.0(@nuxt/kit@3.17.4)(typescript@5.8.3)
       '@stdlib/string':
         specifier: ^0.3.3
         version: 0.3.3
@@ -141,9 +141,6 @@ importers:
       '@iconify-json/ph':
         specifier: ^1.2.2
         version: 1.2.2
-      '@proj-airi/ui':
-        specifier: ^0.5.0
-        version: 0.5.0(@nuxt/kit@3.17.4)(typescript@5.8.3)
       '@radix-icons/vue':
         specifier: ^1.0.0
         version: 1.0.0(vue@3.5.14(typescript@5.8.3))

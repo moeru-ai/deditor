@@ -2,7 +2,7 @@ import type { ConnectOptions, DuckDBWasmDrizzleDatabase } from '@proj-airi/drizz
 import type { MaybeRefOrGetter } from 'vue'
 
 import { drizzle } from '@proj-airi/drizzle-duckdb-wasm'
-import { getImportUrlBundles } from '@proj-airi/duckdb-wasm/bundles/import-url-browser'
+import { getImportUrlBundles } from '@proj-airi/drizzle-duckdb-wasm/bundles/import-url-browser'
 import { onMounted, onUnmounted, ref, toValue, watch } from 'vue'
 
 export function useDuckDB(options?: ConnectOptions & { autoConnect?: boolean }) {
