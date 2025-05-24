@@ -8,8 +8,8 @@ import { Pane, Splitpanes } from 'splitpanes'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 
 import Button from '../components/basic/Button.vue'
+import PaneCard from '../components/container/PaneCard.vue'
 import Chat from '../components/table/Chat.vue'
-import PaneCard from '../components/ui/pane/PaneCard.vue'
 
 const input = ref(`[${Array.from({ length: 100 }, (_, i) => `{"question": "What is the answer to ${i}?", "answer": "It's ${i}."}`).join(',')}]`)
 

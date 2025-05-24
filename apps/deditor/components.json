@@ -10,10 +10,10 @@
     "prefix": ""
   },
   "aliases": {
-    "components": "~renderer/components",
-    "composables": "~renderer/composables",
-    "utils": "~renderer/libs/shadcn",
-    "ui": "~renderer/components/ui",
-    "lib": "~renderer/libs"
+    "components": "~/components",
+    "composables": "~/composables",
+    "utils": "~/libs/shadcn/utils",
+    "ui": "~/components/ui",
+    "lib": "~/libs"
   }
 }
