@@ -2,6 +2,10 @@
   "compilerOptions": {
     "composite": true,
 
+    "paths": {
+      "~renderer/*": ["./src/renderer/src/*"],
+    },
+
     /* Build */
     "target": "ESNext",
     "jsx": "preserve",
