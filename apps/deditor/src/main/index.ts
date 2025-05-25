@@ -1,5 +1,5 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
-import { app, BrowserWindow, shell } from 'electron'
+import { app, BrowserWindow, screen, shell } from 'electron'
 import { dirname, join } from 'node:path'
 import { env } from 'node:process'
 import { fileURLToPath } from 'node:url'
@@ -12,11 +12,18 @@ import { registerApp, registerFs, registerPath, registerSafeStorage } from './ip
 app.dock?.setIcon(icon)
 
 function createWindow(): BrowserWindow {
+  // Fit screen
+  //
+  // Read more on:
+  // https://www.electronjs.org/docs/latest/api/screen
+  const primaryDisplay = screen.getPrimaryDisplay()
+  const { width, height } = primaryDisplay.workAreaSize
+
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     title: 'Deditor',
-    width: 1920,
-    height: 1080,
+    width,
+    height,
     show: false,
     icon,
     // Preload
