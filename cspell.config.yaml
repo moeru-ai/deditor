@@ -1,9 +1,10 @@
-version: '0.2'
+version: "0.2"
 ignorePaths: []
 dictionaryDefinitions: []
 dictionaries: []
 words:
   - airi
+  - Attributify
   - Deditor
   - duckdb
   - etcdctl
@@ -18,6 +19,7 @@ words:
   - Moeru
   - mysqladmin
   - ofetch
+  - oklch
   - pglite
   - pgvecto
   - pgvector

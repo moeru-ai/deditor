@@ -52,6 +52,7 @@
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
+    "@deditor-app/drizzle-orm-icons": "workspace:^",
     "@deditor-app/shared": "workspace:^",
     "@iconify-json/ph": "^1.2.2",
     "@radix-icons/vue": "^1.0.0",
