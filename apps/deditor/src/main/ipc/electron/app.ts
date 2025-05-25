@@ -6,6 +6,7 @@ import { defineIPCHandler } from '../define-ipc-handler'
 export function registerApp(window: BrowserWindow, app: App) {
   defineIPCHandler<AppMethods>(window, 'getPath')
     .handle(async (_, { name }) => {
+      console.log('getPath', name)
       return app.getPath(name)
     })
 }

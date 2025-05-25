@@ -5,7 +5,7 @@ import { isRef, onMounted, ref, toValue, watch } from 'vue'
 
 import { defineClientMethod } from '../define-client-method'
 
-const methods = <TMethod extends keyof AppMethods>(method: TMethod) => defineClientMethod<AppMethods, TMethod>(method)
+export const app = <TMethod extends keyof AppMethods>(method: TMethod) => defineClientMethod<AppMethods, TMethod>(method)
 
 export type AppGetPathParameterName = Parameters<AppMethods['getPath']>[0]['name']
 
@@ -26,7 +26,7 @@ export function useAppPath(name?: MaybeRefOrGetter<AppGetPathParameterName>) {
 
   async function update(name?: AppGetPathParameterName) {
     if (name)
-      path.value = await methods('getPath').call({ name })
+      path.value = await app('getPath').call({ name })
   }
 
   watch(_name, async name => update(name), { immediate: true })

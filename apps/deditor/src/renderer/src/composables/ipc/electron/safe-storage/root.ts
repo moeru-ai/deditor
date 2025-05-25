@@ -3,16 +3,13 @@ import type { SafeStorageMethods } from '@deditor-app/shared'
 import { decodeBase64, encodeBase64 } from '@moeru/std/base64'
 import { computedAsync } from '@vueuse/core'
 
+import { typedArrayToBuffer } from '../../../utils'
 import { defineClientMethod } from '../../define-client-method'
 
-const methods = <TMethod extends keyof SafeStorageMethods>(method: TMethod) => defineClientMethod<SafeStorageMethods, TMethod>(method)
-
-function typedArrayToBuffer(array: Uint8Array): ArrayBuffer {
-  return array.buffer.slice(array.byteOffset, array.byteLength + array.byteOffset) as ArrayBuffer
-}
+export const safeStorage = <TMethod extends keyof SafeStorageMethods>(method: TMethod) => defineClientMethod<SafeStorageMethods, TMethod>(method)
 
 export function useSafeStorage() {
-  const isAvailable = computedAsync(async () => methods('isEncryptionAvailable').call())
+  const isAvailable = computedAsync(async () => safeStorage('isEncryptionAvailable').call())
 
   return {
     isAvailable,
@@ -20,13 +17,13 @@ export function useSafeStorage() {
       if (!isAvailable.value)
         throw new Error('Safe storage encryption is not available on this platform.')
 
-      return methods('encryptString').call({ plainText })
+      return safeStorage('encryptString').call({ plainText })
     },
     encryptBase64: async (plainText: string) => {
       if (!isAvailable.value)
         throw new Error('Safe storage encryption is not available on this platform.')
 
-      const res = await methods('encryptString').call({ plainText })
+      const res = await safeStorage('encryptString').call({ plainText })
       return encodeBase64(res)
     },
     decrypt: (encryptedData: ArrayBuffer) => {
@@ -35,7 +32,7 @@ export function useSafeStorage() {
 
       // eslint-disable-next-line no-console
       console.log('Decrypting:', encryptedData)
-      return methods('decryptString').call({ encryptedData })
+      return safeStorage('decryptString').call({ encryptedData })
     },
     decryptBase64: (encryptedBase64: string) => {
       const decryptedBuffer = decodeBase64(encryptedBase64)
@@ -47,7 +44,7 @@ export function useSafeStorage() {
       const buffer = typedArrayToBuffer(decryptedBuffer)
       // eslint-disable-next-line no-console
       console.log('Decrypting Base64:', decryptedBuffer)
-      return methods('decryptString').call({ encryptedData: buffer })
+      return safeStorage('decryptString').call({ encryptedData: buffer })
     },
   }
 }

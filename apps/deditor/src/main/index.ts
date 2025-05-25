@@ -7,7 +7,7 @@ import { isMacOS } from 'std-env'
 
 import icon from '../../resources/icon.png?asset'
 import { registerDatabaseDialects } from './ipc/databases/remote/'
-import { registerApp, registerSafeStorage } from './ipc/electron'
+import { registerApp, registerFs, registerPath, registerSafeStorage } from './ipc/electron'
 
 app.dock?.setIcon(icon)
 
@@ -18,12 +18,13 @@ function createWindow(): BrowserWindow {
     width: 1920,
     height: 1080,
     show: false,
-    autoHideMenuBar: true,
     icon,
+    // Preload
     webPreferences: {
       preload: join(dirname(fileURLToPath(import.meta.url)), '../preload/index.mjs'),
       sandbox: false,
     },
+    // Title bar style
     titleBarStyle: isMacOS ? 'hidden' : undefined,
     trafficLightPosition: isMacOS ? { x: 10, y: 10 } : undefined,
   })
@@ -36,6 +37,19 @@ function createWindow(): BrowserWindow {
     shell.openExternal(details.url)
     return { action: 'deny' }
   })
+
+  // When developing, do not automatically focus and show the window immediately
+  // after launch.
+  //
+  // Thanks to
+  //
+  // Question: is there a way to disable auto focus of electron app after "npm run dev"
+  // https://github.com/SimulatedGREG/electron-vue/issues/269#issuecomment-308320467
+  if (import.meta.env.DEV) {
+    // eslint-disable-next-line no-console
+    console.debug('Running in development mode, window will not be focused automatically.')
+    mainWindow.showInactive()
+  }
 
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
@@ -65,8 +79,16 @@ app.whenReady().then(() => {
 
   const mainWindow = createWindow()
 
+  // Node.js APIs
+  // similar to Node Integration, but with a more secure context
+  registerFs(mainWindow, app)
+  registerPath(mainWindow, app)
+
+  // Electron specific IPC handlers
   registerApp(mainWindow, app)
   registerSafeStorage(mainWindow, app)
+
+  // Deditor specific IPC handlers
   registerDatabaseDialects(mainWindow)
 
   app.on('activate', () => {
