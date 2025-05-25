@@ -11,7 +11,7 @@ defineProps<{
     :enter="{ opacity: 1, y: 0, transition: { delay: enterDelay } }"
     bg="neutral-800/90" h-full w-full rounded-2xl
     px-4 py-3
-    backdrop-blur-sm
+    backdrop-blur-lg
     transition="all duration-300 ease-in-out"
   >
     <slot />
