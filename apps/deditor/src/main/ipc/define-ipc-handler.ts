@@ -22,13 +22,16 @@ export function defineIPCHandler<
         try {
           handler({ event }, request.params)
             .then((result) => {
+              console.log(`IPC response for ${methodName}:`, result)
               window.webContents.send(`response:${methodName}`, { _eventId: request._eventId, returns: result })
             })
             .catch(err => {
+              console.error(`IPC error for ${methodName}:`, err)
               window.webContents.send(`response:error:${methodName}`, { _eventId: request._eventId, error: err })
             })
         }
         catch (err) {
+          console.error(`IPC handler error for ${methodName}:`, err)
           window.webContents.send(`response:error:${methodName}`, { _eventId: request._eventId, error: err as Error })
         }
       }

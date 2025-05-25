@@ -18,9 +18,11 @@ export function defineClientMethod<TMethods, TMethodName extends keyof TMethods>
   }) {
     const responseEventKey = `response:${strings.kebabcase(String(method))}`
     const responseErrorEventKey = `response:error:${strings.kebabcase(String(method))}`
+    debugger
 
     if (!eventListeners.has(responseEventKey)) {
       const listener: IpcRendererListener = (_, res: Awaited<{ _eventId: string, returns: MethodReturnType }>) => {
+        debugger
         if (hooks?.onResponse) {
           hooks.onResponse(res.returns)
         }
@@ -35,6 +37,7 @@ export function defineClientMethod<TMethods, TMethodName extends keyof TMethods>
     }
     if (!eventListeners.has(responseErrorEventKey)) {
       const listener: IpcRendererListener = (_, err: { _eventId: string, error: Error }) => {
+        debugger
         if (hooks?.onError) {
           hooks.onError(err.error)
         }
@@ -74,7 +77,7 @@ export function defineClientMethod<TMethods, TMethodName extends keyof TMethods>
         },
       })
 
-      requestPromiseResolvers.set(nanoid(), resolve)
+      requestPromiseResolvers.set(eventId, resolve)
       requestPromiseRejectors.set(eventId, reject)
 
       const requestEventKey = `request:${strings.kebabcase(String(method))}`
@@ -98,7 +101,7 @@ export function defineClientMethod<TMethods, TMethodName extends keyof TMethods>
   }
 
   function call(params?: MethodParamType): Promise<Awaited<MethodReturnType>> {
-    return _call(params, { timeout: 5000 })
+    return _call(params, { timeout: 60000 })
   }
 
   function callWithOptions(params: MethodParamType, options?: { timeout?: number }): Promise<Awaited<MethodReturnType>> {
