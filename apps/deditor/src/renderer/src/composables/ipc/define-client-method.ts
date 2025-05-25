@@ -18,11 +18,9 @@ export function defineClientMethod<TMethods, TMethodName extends keyof TMethods>
   }) {
     const responseEventKey = `response:${strings.kebabcase(String(method))}`
     const responseErrorEventKey = `response:error:${strings.kebabcase(String(method))}`
-    debugger
 
     if (!eventListeners.has(responseEventKey)) {
       const listener: IpcRendererListener = (_, res: Awaited<{ _eventId: string, returns: MethodReturnType }>) => {
-        debugger
         if (hooks?.onResponse) {
           hooks.onResponse(res.returns)
         }
@@ -37,7 +35,6 @@ export function defineClientMethod<TMethods, TMethodName extends keyof TMethods>
     }
     if (!eventListeners.has(responseErrorEventKey)) {
       const listener: IpcRendererListener = (_, err: { _eventId: string, error: Error }) => {
-        debugger
         if (hooks?.onError) {
           hooks.onError(err.error)
         }

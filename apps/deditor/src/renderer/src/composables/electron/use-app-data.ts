@@ -15,7 +15,6 @@ export function useAppDataStorage<T extends(string | number | boolean | object |
 ) {
   return useStorageAsync<T>(key, initialValue, {
     getItem: async (key) => {
-      debugger
       const appDataPath = await app('getPath').call({ name: 'appData' })
       const fileDirPath = await path('join').call([appDataPath, ...dirname(filename).split(sep)])
       const fileDirPathExists = await fs('exists').call({ path: fileDirPath })
