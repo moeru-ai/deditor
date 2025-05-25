@@ -7,6 +7,8 @@ export default await antfu(
     toml: false,
     ignores: [
       'build/**',
+      'cspell.config.yaml',
+      'cspell.config.yml',
     ],
     rules: {
       'import/order': 'off',
