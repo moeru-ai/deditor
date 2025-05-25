@@ -38,5 +38,8 @@
     "stub": "unbuild --stub",
     "build": "unbuild",
     "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "nanoid": "^5.1.5"
   }
 }

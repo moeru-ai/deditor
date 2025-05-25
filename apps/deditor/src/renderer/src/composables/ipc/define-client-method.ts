@@ -1,61 +1,112 @@
+import type { IpcRendererListener } from '@electron-toolkit/preload'
+
+import { nanoid } from '@deditor-app/shared'
 import strings from '@stdlib/string'
+
+const eventListeners = new Map<string, { on: IpcRendererListener, off: () => void }>()
+const requestPromiseResolvers = new Map<string, (value: any) => void>()
+const requestPromiseRejectors = new Map<string, (reason?: any) => void>()
 
 export function defineClientMethod<TMethods, TMethodName extends keyof TMethods>(method: TMethodName) {
   type MethodType = TMethods[TMethodName]
-  type ParamType = MethodType extends (params: infer P) => any ? P : never
-  type ReturnType = MethodType extends (...args: any[]) => infer R ? R : never
+  type MethodParamType = MethodType extends (params: infer P) => any ? P : never
+  type MethodReturnType = MethodType extends (...args: any[]) => infer R ? R : never
 
-  function call(params?: ParamType): Promise<Awaited<ReturnType>> {
-    return new Promise<Awaited<ReturnType>>((resolve, reject) => {
-      window.electron.ipcRenderer.send(`request:${strings.kebabcase(String(method))}`, params)
+  function setupEventListenersForMethod(method: TMethodName, hooks?: {
+    onResponse?: (response: MethodReturnType) => void
+    onError?: (error: Error) => void
+  }) {
+    const responseEventKey = `response:${strings.kebabcase(String(method))}`
+    const responseErrorEventKey = `response:error:${strings.kebabcase(String(method))}`
 
-      const onResponseCleanup = window.electron.ipcRenderer.on(
-        `response:${strings.kebabcase(String(method))}`,
-        (_, res: Awaited<ReturnType>) => {
-          resolve(res)
-          onResponseCleanup?.()
-        },
-      )
-      const onErrorCleanup = window.electron.ipcRenderer.on(
-        `response:error:${strings.kebabcase(String(method))}`,
-        (_, err: Error) => {
-          reject(err)
-          onErrorCleanup?.()
-        },
-      )
-    })
+    if (!eventListeners.has(responseEventKey)) {
+      const listener: IpcRendererListener = (_, res: Awaited<{ _eventId: string, returns: MethodReturnType }>) => {
+        if (hooks?.onResponse) {
+          hooks.onResponse(res.returns)
+        }
+        if (res._eventId && requestPromiseResolvers.has(res._eventId)) {
+          requestPromiseResolvers.get(res._eventId)!(res.returns)
+          requestPromiseResolvers.delete(res._eventId)
+          requestPromiseRejectors.delete(res._eventId)
+        }
+      }
+
+      eventListeners.set(responseEventKey, { on: listener, off: window.electron.ipcRenderer.on(responseEventKey, listener) })
+    }
+    if (!eventListeners.has(responseErrorEventKey)) {
+      const listener: IpcRendererListener = (_, err: { _eventId: string, error: Error }) => {
+        if (hooks?.onError) {
+          hooks.onError(err.error)
+        }
+        if (err._eventId && requestPromiseRejectors.has(err._eventId)) {
+          requestPromiseRejectors.get(err._eventId)!(err.error)
+          requestPromiseRejectors.delete(err._eventId)
+          requestPromiseResolvers.delete(err._eventId)
+        }
+      }
+
+      eventListeners.set(responseErrorEventKey, { on: listener, off: window.electron.ipcRenderer.on(responseErrorEventKey, listener) })
+    }
+
+    if (globalThis.window != null) {
+      globalThis.window.addEventListener('beforeunload', () => {
+        eventListeners.get(responseEventKey)?.off()
+        eventListeners.get(responseErrorEventKey)?.off()
+      })
+    }
   }
 
-  function callWithOptions(params: ParamType, options?: { timeout?: number }): Promise<Awaited<ReturnType>> {
-    return new Promise<Awaited<ReturnType>>((resolve, reject) => {
-      let onResponseCleanup: () => void
-      let onErrorCleanup: () => void
+  function _call(params?: MethodParamType, options?: { timeout?: number }): Promise<Awaited<MethodReturnType>> {
+    return new Promise<Awaited<MethodReturnType>>((resolve, reject) => {
+      const eventId = nanoid()
+      let setTimeoutId: ReturnType<typeof setTimeout> | undefined
 
-      window.electron.ipcRenderer.send(`request:${strings.kebabcase(String(method))}`, params)
+      setupEventListenersForMethod(method, {
+        onResponse: () => {
+          if (setTimeoutId != null) {
+            clearTimeout(setTimeoutId)
+          }
+        },
+        onError: () => {
+          if (setTimeoutId != null) {
+            clearTimeout(setTimeoutId)
+          }
+        },
+      })
 
-      if (options?.timeout != null && Number.isFinite(options.timeout) && options.timeout > 0) {
-        setTimeout(() => {
-          onResponseCleanup?.()
-          onErrorCleanup?.()
+      requestPromiseResolvers.set(nanoid(), resolve)
+      requestPromiseRejectors.set(eventId, reject)
+
+      const requestEventKey = `request:${strings.kebabcase(String(method))}`
+
+      window.electron.ipcRenderer.send(requestEventKey, { _eventId: eventId, params })
+
+      if (options?.timeout != null) {
+        setTimeoutId = setTimeout(() => {
+          if (!requestPromiseResolvers.has(eventId)) {
+            return
+          }
+
+          requestPromiseResolvers.delete(eventId)
+          requestPromiseRejectors.delete(eventId)
+
+          console.error(`Timeout after ${options.timeout}ms for method: ${String(method)}`)
           reject(new Error(`Timeout after ${options.timeout}ms`))
         }, options.timeout)
       }
-
-      onResponseCleanup = window.electron.ipcRenderer.on(
-        `response:${strings.kebabcase(String(method))}`,
-        (_, res: Awaited<ReturnType>) => {
-          resolve(res)
-          onResponseCleanup?.()
-        },
-      )
-      onErrorCleanup = window.electron.ipcRenderer.on(
-        `response:error:${strings.kebabcase(String(method))}`,
-        (_, err: Error) => {
-          reject(err)
-          onErrorCleanup?.()
-        },
-      )
     })
+  }
+
+  function call(params?: MethodParamType): Promise<Awaited<MethodReturnType>> {
+    return _call(params, { timeout: 5000 })
+  }
+
+  function callWithOptions(params: MethodParamType, options?: { timeout?: number }): Promise<Awaited<MethodReturnType>> {
+    if (options?.timeout && (!Number.isFinite(options.timeout) || options.timeout < 0)) {
+      return Promise.reject(new Error(`Timeout ${options.timeout} is not a valid number`))
+    }
+
+    return _call(params, options)
   }
 
   return { call, callWithOptions }

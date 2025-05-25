@@ -2,9 +2,9 @@ import type { PostgresMethods } from '@deditor-app/shared'
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import type { BrowserWindow } from 'electron'
 
+import { nanoid } from '@deditor-app/shared'
 import { drizzle } from 'drizzle-orm/postgres-js'
 
-import { nanoid } from '../../../utils/nanoid'
 import { defineIPCHandler } from '../../define-ipc-handler'
 
 const databaseSessions = new Map<string, PostgresJsDatabase>()

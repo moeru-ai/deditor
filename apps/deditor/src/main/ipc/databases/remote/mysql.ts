@@ -2,9 +2,9 @@ import type { MySQL2Methods } from '@deditor-app/shared'
 import type { MySql2Database } from 'drizzle-orm/mysql2'
 import type { BrowserWindow } from 'electron'
 
+import { nanoid } from '@deditor-app/shared'
 import { drizzle } from 'drizzle-orm/mysql2'
 
-import { nanoid } from '../../../utils/nanoid'
 import { defineIPCHandler } from '../../define-ipc-handler'
 
 const databaseSessions = new Map<string, MySql2Database>()

@@ -125,6 +125,9 @@ importers:
       ofetch:
         specifier: ^1.4.1
         version: 1.4.1
+      pathe:
+        specifier: ^2.0.3
+        version: 2.0.3
       splitpanes:
         specifier: ^4.0.3
         version: 4.0.3(vue@3.5.14(typescript@5.8.3))
@@ -205,7 +208,11 @@ importers:
         specifier: ^2.2.10
         version: 2.2.10(typescript@5.8.3)
 
-  packages/shared: {}
+  packages/shared:
+    dependencies:
+      nanoid:
+        specifier: ^5.1.5
+        version: 5.1.5
 
 packages:
 
