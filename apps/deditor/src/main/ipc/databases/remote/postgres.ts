@@ -17,7 +17,7 @@ export function registerPostgresJsDatabaseDialect(window: BrowserWindow) {
       databaseSessions.set(dbSessionId, dbSession)
 
       // eslint-disable-next-line no-console
-      dbSession.execute('SELECT 1').then(res => console.log(res))
+      await dbSession.execute('SELECT 1')
       return { databaseSessionId: dbSessionId, dialect: 'postgres' }
     })
 

@@ -30,8 +30,6 @@ export function useSafeStorage() {
       if (!isAvailable.value)
         throw new Error('Safe storage decryption is not available on this platform.')
 
-      // eslint-disable-next-line no-console
-      console.log('Decrypting:', encryptedData)
       return safeStorage('decryptString').call({ encryptedData })
     },
     decryptBase64: (encryptedBase64: string) => {
@@ -42,8 +40,6 @@ export function useSafeStorage() {
         throw new Error('Safe storage decryption is not available on this platform.')
 
       const buffer = typedArrayToBuffer(decryptedBuffer)
-      // eslint-disable-next-line no-console
-      console.log('Decrypting Base64:', decryptedBuffer)
       return safeStorage('decryptString').call({ encryptedData: buffer })
     },
   }

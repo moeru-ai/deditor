@@ -19,7 +19,6 @@ export function defineIPCHandler<
       const methodName = strings.kebabcase(String(method))
 
       const wrappedHandler = (event: IpcMainEvent, request: { _eventId: string, params: ParamType }) => {
-        console.log(`Handling IPC request for method: ${methodName}`, request.params)
         try {
           handler({ event }, request.params)
             .then((result) => {
