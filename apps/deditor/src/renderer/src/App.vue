@@ -114,7 +114,6 @@ onMounted(() => {
             transition="all duration-300 ease-in-out"
           >
             <div h-full max-h-8 max-w-8 min-h-8 min-w-8 w-full flex items-center justify-center>
-              <div i-ph:plugs-fill text-lg />
               <div i-ph:chart-scatter-bold text-lg />
             </div>
             <div
@@ -135,7 +134,6 @@ onMounted(() => {
           >
             <div h-full max-h-8 max-w-8 min-h-8 min-w-8 w-full flex items-center justify-center>
               <div i-ph:plugs-fill text-lg />
-              <div i-ph:chart-scatter-bold text-lg />
             </div>
             <div
               v-if="isNavExpanded"
