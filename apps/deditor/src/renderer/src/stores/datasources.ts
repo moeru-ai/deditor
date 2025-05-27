@@ -1,15 +1,34 @@
 import { defineStore } from 'pinia'
-import { reactive } from 'vue'
+import { ref } from 'vue'
 
-export interface Datasource {
+export type Driver =
+  | 'postgres'
+  | 'mysql'
+  | 'sqlite'
+  | 'pglite'
+  | 'duckdb-wasm'
+
+export type Datasource =
+  | DatasourceThroughConnectionString
+  | DatasourceThroughConnectionParameters
+
+export interface DatasourceBase {
   id: string
-  driver: 'postgres' | 'mysql' | 'sqlite' | 'pglite' | 'duckdb-wasm'
+  driver: Driver
   name: string
-  connectionString: string
+}
+
+export type DatasourceThroughConnectionString = DatasourceBase & { connectionString: string }
+export type DatasourceThroughConnectionParameters = DatasourceBase & {
+  host: string
+  port: number
+  user: string
+  password: string
+  database: string
 }
 
 export const useDatasourcesStore = defineStore('datasources', () => {
-  const datasources = reactive<Datasource[]>([])
+  const datasources = ref<Datasource[]>([])
 
   return {
     datasources,
