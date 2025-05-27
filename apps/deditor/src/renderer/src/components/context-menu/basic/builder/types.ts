@@ -11,7 +11,7 @@ export interface BaseMenuItem {
 
 export interface MenuItem extends BaseMenuItem {
   type: 'item'
-  onClick?: () => void
+  onClick?: <T>(context: { data?: T }) => void
 }
 
 export interface MenuSubItem extends BaseMenuItem {

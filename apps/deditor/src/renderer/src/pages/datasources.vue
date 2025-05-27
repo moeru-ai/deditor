@@ -1,149 +1,55 @@
 <script setup lang="ts">
 import type { MenuItemConfig } from '../components/context-menu/basic/builder/types'
+import type { Datasource } from '../stores/datasources'
 
 import { Pane, Splitpanes } from 'splitpanes'
-import { computed, ref } from 'vue'
-import { RouterView, useRoute } from 'vue-router'
+import { computed } from 'vue'
+import { RouterView, useRoute, useRouter } from 'vue-router'
 
 import PaneArea from '../components/container/PaneArea.vue'
 import DatasourcesContextMenu from '../components/context-menu/datasources/index.vue'
 import { useDatasourcesStore } from '../stores/datasources'
 
 const route = useRoute()
+const router = useRouter()
 const datasourcesStore = useDatasourcesStore()
+
+const id = computed(() => (route.params as any).id as string)
 
 const editing = computed(() => route.path.match(/\/datasources\/([^/]+)\/edit/))
 
-// Define checkbox and radio states
-const showBookmarks = ref(false)
-const showFullUrls = ref(false)
-const selectedPerson = ref('pedro')
+function handleDelete(datasource?: Datasource) {
+  if (!datasource)
+    return
+
+  if (id.value === datasource.id) {
+    // If the current datasource is being deleted, redirect to the datasources list
+    router.replace('/datasources')
+  }
+
+  const index = datasourcesStore.datasources.findIndex(ds => ds.id === datasource.id)
+  if (index !== -1) {
+    datasourcesStore.datasources.splice(index, 1)
+  }
+}
+
+function handleClick(datasource: Datasource) {
+  if (editing.value && id.value === datasource.id) {
+    // If already editing the same datasource, do nothing
+    return
+  }
+
+  router.push(`/datasources/${datasource.driver}/edit/${datasource.id}`)
+}
 
 // Define the menu configuration
 const menuConfig = computed<MenuItemConfig[]>(() => ([
   {
     type: 'item',
-    value: 'new-tab',
-    label: 'New Tab',
-    shortcut: '⌘+T',
-    onClick: () => console.log('New Tab clicked'),
-  },
-  {
-    type: 'sub',
-    value: 'more-tools',
-    label: 'More Tools',
-    children: [
-      {
-        type: 'item',
-        label: 'Save Page As…',
-        shortcut: '⌘+S',
-        onClick: () => console.log('Save Page clicked'),
-      },
-      {
-        type: 'item',
-        label: 'Create Shortcut…',
-        onClick: () => console.log('Create Shortcut clicked'),
-      },
-      {
-        type: 'item',
-        label: 'Name Window…',
-        onClick: () => console.log('Name Window clicked'),
-      },
-      { type: 'separator' },
-      {
-        type: 'item',
-        label: 'Developer Tools',
-        onClick: () => console.log('Developer Tools clicked'),
-      },
-    ],
-  },
-  {
-    type: 'item',
-    value: 'new-window',
-    label: 'New Window',
-    shortcut: '⌘+N',
-    onClick: () => console.log('New Window clicked'),
-  },
-  {
-    type: 'item',
-    value: 'new-private-window',
-    label: 'New Private Window',
-    shortcut: '⇧+⌘+N',
-    onClick: () => console.log('New Private Window clicked'),
-  },
-  { type: 'separator' },
-  {
-    type: 'checkbox',
-    value: 'show-bookmarks',
-    label: 'Show Bookmarks',
-    shortcut: '⌘+B',
-    modelValue: showBookmarks.value,
-    onUpdate: (val) => {
-      showBookmarks.value = val
-      console.log('Show Bookmarks:', val)
-    },
-  },
-  {
-    type: 'checkbox',
-    value: 'show-full-urls',
-    label: 'Show Full URLs',
-    modelValue: showFullUrls.value,
-    onUpdate: (val) => {
-      showFullUrls.value = val
-      console.log('Show Full URLs:', val)
-    },
-  },
-  { type: 'separator' },
-  {
-    type: 'label',
-    label: 'People',
-  },
-  {
-    type: 'radio',
-    value: 'selected-person',
-    modelValue: selectedPerson.value,
-    options: [
-      { value: 'pedro', label: 'Pedro Duarte' },
-      { value: 'colm', label: 'Colm Tuite' },
-    ],
-    onUpdate: (val) => {
-      selectedPerson.value = val
-      console.log('Selected Person:', val)
-    },
-  },
-  { type: 'separator' },
-  {
-    type: 'sub',
-    label: 'First Level Submenu',
-    children: [
-      {
-        type: 'item',
-        label: 'Submenu Item 1',
-        onClick: () => console.log('Submenu Item 1 clicked'),
-      },
-      {
-        type: 'sub',
-        label: 'Second Level Submenu',
-        children: [
-          {
-            type: 'item',
-            label: 'Nested Item 1',
-            onClick: () => console.log('Nested Item 1 clicked'),
-          },
-          {
-            type: 'sub',
-            label: 'Third Level Submenu',
-            children: [
-              {
-                type: 'item',
-                label: 'Deeply Nested Item',
-                onClick: () => console.log('Deeply Nested Item clicked'),
-              },
-            ],
-          },
-        ],
-      },
-    ],
+    value: 'delete',
+    label: 'Delete',
+    shortcut: '⌘ + Del',
+    onClick: ({ data }) => handleDelete(data as Datasource),
   },
 ]))
 </script>
@@ -172,21 +78,24 @@ const menuConfig = computed<MenuItemConfig[]>(() => ([
                 </div>
               </div>
               <div flex flex-col gap="0.5">
-                <DatasourcesContextMenu :config="menuConfig">
-                  <RouterLink
-                    v-for="(datasource, index) in datasourcesStore.datasources"
-                    :key="index"
-                    :to="`/datasources/${datasource.driver}/edit/${datasource.id}`"
-                    bg="hover:neutral-700/80"
-                    active-class="bg-neutral-700/50"
-                    flex items-center gap-2 rounded-md px-2 py-1 text-sm
-                    transition="all duration-100 ease-in-out"
-                  >
-                    <template v-if="datasource.driver === 'postgres'">
+                <DatasourcesContextMenu
+                  v-for="(datasource, index) in datasourcesStore.datasources"
+                  :key="index"
+                  :config="menuConfig"
+                  :data="datasource"
+                  @click="() => handleClick(datasource)"
+                >
+                  <template v-if="datasource.driver === 'postgres'">
+                    <div
+                      bg="hover:neutral-700/80"
+                      active-class="bg-neutral-700/50"
+                      transition="all duration-100 ease-in-out"
+                      flex cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1 text-sm
+                    >
                       <div i-drizzle-orm-icons:postgresql />
                       <div>{{ datasource.name }}</div>
-                    </template>
-                  </RouterLink>
+                    </div>
+                  </template>
                 </DatasourcesContextMenu>
               </div>
               <button

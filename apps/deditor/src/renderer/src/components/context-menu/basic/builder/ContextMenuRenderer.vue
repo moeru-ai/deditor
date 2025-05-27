@@ -20,6 +20,7 @@ import { contextMenuStates } from './constants'
 
 const props = defineProps<{
   item: MenuItemConfig
+  data?: Record<string, any>
 }>()
 
 // Inject the menu state from parent
@@ -44,7 +45,7 @@ const commonClasses = 'group text-grass11 data-[disabled]:text-mauve8 relative h
 
 <template>
   <!-- Regular menu item -->
-  <ContextMenuItem v-if="item.type === 'item'" :value="item.value" :disabled="item.disabled" @click="item.onClick && item.onClick()">
+  <ContextMenuItem v-if="item.type === 'item'" :value="item.value" :disabled="item.disabled" @click="item.onClick && item.onClick({ data: props.data })">
     {{ item.label }}
     <div v-if="item.shortcut" class="text-mauve11 group-data-[disabled]:text-mauve8 ml-auto pl-[20px] group-data-[highlighted]:text-white">
       {{ item.shortcut }}

@@ -1,4 +1,135 @@
 <script setup lang="ts">
+/**
+ * @example
+ *
+ * const menuConfig = computed<MenuItemConfig[]>(() => ([
+ *   {
+ *     type: 'item',
+ *     value: 'new-tab',
+ *     label: 'New Tab',
+ *     shortcut: '⌘+T',
+ *     onClick: () => console.log('New Tab clicked'),
+ *   },
+ *   {
+ *     type: 'sub',
+ *     value: 'more-tools',
+ *     label: 'More Tools',
+ *     children: [
+ *       {
+ *         type: 'item',
+ *         label: 'Save Page As…',
+ *         shortcut: '⌘+S',
+ *         onClick: () => console.log('Save Page clicked'),
+ *       },
+ *       {
+ *         type: 'item',
+ *         label: 'Create Shortcut…',
+ *         onClick: () => console.log('Create Shortcut clicked'),
+ *       },
+ *       {
+ *         type: 'item',
+ *         label: 'Name Window…',
+ *         onClick: () => console.log('Name Window clicked'),
+ *       },
+ *       { type: 'separator' },
+ *       {
+ *         type: 'item',
+ *         label: 'Developer Tools',
+ *         onClick: () => console.log('Developer Tools clicked'),
+ *       },
+ *     ],
+ *   },
+ *   {
+ *     type: 'item',
+ *     value: 'new-window',
+ *     label: 'New Window',
+ *     shortcut: '⌘+N',
+ *     onClick: () => console.log('New Window clicked'),
+ *   },
+ *   {
+ *     type: 'item',
+ *     value: 'new-private-window',
+ *     label: 'New Private Window',
+ *     shortcut: '⇧+⌘+N',
+ *     onClick: () => console.log('New Private Window clicked'),
+ *   },
+ *   { type: 'separator' },
+ *   {
+ *     type: 'checkbox',
+ *     value: 'show-bookmarks',
+ *     label: 'Show Bookmarks',
+ *     shortcut: '⌘+B',
+ *     modelValue: showBookmarks.value,
+ *     onUpdate: (val) => {
+ *       showBookmarks.value = val
+ *       console.log('Show Bookmarks:', val)
+ *     },
+ *   },
+ *   {
+ *     type: 'checkbox',
+ *     value: 'show-full-urls',
+ *     label: 'Show Full URLs',
+ *     modelValue: showFullUrls.value,
+ *     onUpdate: (val) => {
+ *       showFullUrls.value = val
+ *       console.log('Show Full URLs:', val)
+ *     },
+ *   },
+ *   { type: 'separator' },
+ *   {
+ *     type: 'label',
+ *     label: 'People',
+ *   },
+ *   {
+ *     type: 'radio',
+ *     value: 'selected-person',
+ *     modelValue: selectedPerson.value,
+ *     options: [
+ *       { value: 'pedro', label: 'Pedro Duarte' },
+ *       { value: 'colm', label: 'Colm Tuite' },
+ *     ],
+ *    onUpdate: (val) => {
+ *        selectedPerson.value = val
+ *        console.log('Selected Person:', val)
+ *      },
+ *    },
+ *    { type: 'separator' },
+ *    {
+ *      type: 'sub',
+ *      label: 'First Level Submenu',
+ *      children: [
+ *        {
+ *          type: 'item',
+ *          label: 'Submenu Item 1',
+ *          onClick: () => console.log('Submenu Item 1 clicked'),
+ *        },
+ *        {
+ *          type: 'sub',
+ *          label: 'Second Level Submenu',
+ *          children: [
+ *            {
+ *              type: 'item',
+ *              label: 'Nested Item 1',
+ *              onClick: () => console.log('Nested Item 1 clicked'),
+ *            },
+ *            {
+ *              type: 'sub',
+ *              label: 'Third Level Submenu',
+ *              children: [
+ *                {
+ *                  type: 'item',
+ *                  label: 'Deeply Nested Item',
+ *                  onClick: () => console.log('Deeply Nested Item clicked'),
+ *                },
+ *              ],
+ *            },
+ *          ],
+ *        },
+ *      ],
+ *    },
+ *  ]))
+ */
+
 import type { MenuItemConfig } from './types'
 
 import {
@@ -16,6 +147,11 @@ const props = defineProps<{
   menuConfig: MenuItemConfig[]
   sideOffset?: number
   portalTo?: string
+  data?: Record<string, any>
+}>()
+
+const emits = defineEmits<{
+  (e: 'click', event: MouseEvent): void
 }>()
 
 // Create a reactive object to track menu states
@@ -75,13 +211,13 @@ provide(contextMenuStates, {
 
 <template>
   <ContextMenuRoot>
-    <ContextMenuTrigger as-child>
+    <ContextMenuTrigger as-child @click="emits('click', $event)">
       <slot />
     </ContextMenuTrigger>
     <ContextMenuPortal :to="portalTo || '#app'">
       <ContextMenuContent :side-offset="sideOffset || 5">
         <template v-for="(item, _index) in menuConfig" :key="_index">
-          <ContextMenuRenderer :item="item" />
+          <ContextMenuRenderer :item="item" :data="data" />
         </template>
       </ContextMenuContent>
     </ContextMenuPortal>
