@@ -1,15 +1,151 @@
 <script setup lang="ts">
+import type { MenuItemConfig } from '../components/context-menu/basic/builder/types'
+
 import { Pane, Splitpanes } from 'splitpanes'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { RouterView, useRoute } from 'vue-router'
 
 import PaneArea from '../components/container/PaneArea.vue'
+import DatasourcesContextMenu from '../components/context-menu/datasources/index.vue'
 import { useDatasourcesStore } from '../stores/datasources'
 
 const route = useRoute()
 const datasourcesStore = useDatasourcesStore()
 
 const editing = computed(() => route.path.match(/\/datasources\/([^/]+)\/edit/))
+
+// Define checkbox and radio states
+const showBookmarks = ref(false)
+const showFullUrls = ref(false)
+const selectedPerson = ref('pedro')
+
+// Define the menu configuration
+const menuConfig = computed<MenuItemConfig[]>(() => ([
+  {
+    type: 'item',
+    value: 'new-tab',
+    label: 'New Tab',
+    shortcut: '⌘+T',
+    onClick: () => console.log('New Tab clicked'),
+  },
+  {
+    type: 'sub',
+    value: 'more-tools',
+    label: 'More Tools',
+    children: [
+      {
+        type: 'item',
+        label: 'Save Page As…',
+        shortcut: '⌘+S',
+        onClick: () => console.log('Save Page clicked'),
+      },
+      {
+        type: 'item',
+        label: 'Create Shortcut…',
+        onClick: () => console.log('Create Shortcut clicked'),
+      },
+      {
+        type: 'item',
+        label: 'Name Window…',
+        onClick: () => console.log('Name Window clicked'),
+      },
+      { type: 'separator' },
+      {
+        type: 'item',
+        label: 'Developer Tools',
+        onClick: () => console.log('Developer Tools clicked'),
+      },
+    ],
+  },
+  {
+    type: 'item',
+    value: 'new-window',
+    label: 'New Window',
+    shortcut: '⌘+N',
+    onClick: () => console.log('New Window clicked'),
+  },
+  {
+    type: 'item',
+    value: 'new-private-window',
+    label: 'New Private Window',
+    shortcut: '⇧+⌘+N',
+    onClick: () => console.log('New Private Window clicked'),
+  },
+  { type: 'separator' },
+  {
+    type: 'checkbox',
+    value: 'show-bookmarks',
+    label: 'Show Bookmarks',
+    shortcut: '⌘+B',
+    modelValue: showBookmarks.value,
+    onUpdate: (val) => {
+      showBookmarks.value = val
+      console.log('Show Bookmarks:', val)
+    },
+  },
+  {
+    type: 'checkbox',
+    value: 'show-full-urls',
+    label: 'Show Full URLs',
+    modelValue: showFullUrls.value,
+    onUpdate: (val) => {
+      showFullUrls.value = val
+      console.log('Show Full URLs:', val)
+    },
+  },
+  { type: 'separator' },
+  {
+    type: 'label',
+    label: 'People',
+  },
+  {
+    type: 'radio',
+    value: 'selected-person',
+    modelValue: selectedPerson.value,
+    options: [
+      { value: 'pedro', label: 'Pedro Duarte' },
+      { value: 'colm', label: 'Colm Tuite' },
+    ],
+    onUpdate: (val) => {
+      selectedPerson.value = val
+      console.log('Selected Person:', val)
+    },
+  },
+  { type: 'separator' },
+  {
+    type: 'sub',
+    label: 'First Level Submenu',
+    children: [
+      {
+        type: 'item',
+        label: 'Submenu Item 1',
+        onClick: () => console.log('Submenu Item 1 clicked'),
+      },
+      {
+        type: 'sub',
+        label: 'Second Level Submenu',
+        children: [
+          {
+            type: 'item',
+            label: 'Nested Item 1',
+            onClick: () => console.log('Nested Item 1 clicked'),
+          },
+          {
+            type: 'sub',
+            label: 'Third Level Submenu',
+            children: [
+              {
+                type: 'item',
+                label: 'Deeply Nested Item',
+                onClick: () => console.log('Deeply Nested Item clicked'),
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+]))
 </script>
 
 <template>
@@ -36,20 +172,22 @@ const editing = computed(() => route.path.match(/\/datasources\/([^/]+)\/edit/))
                 </div>
               </div>
               <div flex flex-col gap="0.5">
-                <RouterLink
-                  v-for="(datasource, index) in datasourcesStore.datasources"
-                  :key="index"
-                  :to="`/datasources/${datasource.driver}/edit/${datasource.id}`"
-                  bg="hover:neutral-700/80"
-                  active-class="bg-neutral-700/50"
-                  flex items-center gap-2 rounded-md px-2 py-1 text-sm
-                  transition="all duration-100 ease-in-out"
-                >
-                  <template v-if="datasource.driver === 'postgres'">
-                    <div i-drizzle-orm-icons:postgresql />
-                    <div>{{ datasource.name }}</div>
-                  </template>
-                </RouterLink>
+                <DatasourcesContextMenu :config="menuConfig">
+                  <RouterLink
+                    v-for="(datasource, index) in datasourcesStore.datasources"
+                    :key="index"
+                    :to="`/datasources/${datasource.driver}/edit/${datasource.id}`"
+                    bg="hover:neutral-700/80"
+                    active-class="bg-neutral-700/50"
+                    flex items-center gap-2 rounded-md px-2 py-1 text-sm
+                    transition="all duration-100 ease-in-out"
+                  >
+                    <template v-if="datasource.driver === 'postgres'">
+                      <div i-drizzle-orm-icons:postgresql />
+                      <div>{{ datasource.name }}</div>
+                    </template>
+                  </RouterLink>
+                </DatasourcesContextMenu>
               </div>
               <button
                 bg="neutral-900/70 hover:neutral-900"
