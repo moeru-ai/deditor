@@ -14,10 +14,12 @@ words:
   - initdb
   - isready
   - kebabcase
+  - matchall
   - milvus
   - minioadmin
   - Moeru
   - mysqladmin
+  - nolyfill
   - ofetch
   - oklch
   - pglite
@@ -26,6 +28,7 @@ words:
   - reka
   - shadcn
   - Splitpanes
+  - taze
   - tensorchord
   - unocss
   - unplugin
