@@ -18,7 +18,7 @@ import {
   getSortedRowModel,
   useVueTable,
 } from '@tanstack/vue-table'
-import { computed, h, ref } from 'vue'
+import { computed, h, ref, toRaw } from 'vue'
 
 import { valueUpdater } from '../../libs/shadcn/utils'
 import Button from '../basic/Button.vue'
@@ -72,7 +72,14 @@ const columns = computed<ColumnDef<Record<string, unknown>>[]>(() => {
     return {
       accessorKey: key,
       header: key,
-      cell: (cellProps: CellContext<Record<string, unknown>, unknown>) => h('span', {}, cellProps.row.getValue(key)),
+      cell: (cellProps: CellContext<Record<string, unknown>, unknown>) => {
+        const value = cellProps.row.getValue(key) as string | number | boolean
+        if (Array.isArray(value)) {
+          return h('span', {}, JSON.stringify(toRaw(value)))
+        }
+
+        return h('span', {}, value)
+      },
       size: DEFAULT_COLUMN_WIDTH,
       minSize: 60,
       maxSize: 800,
