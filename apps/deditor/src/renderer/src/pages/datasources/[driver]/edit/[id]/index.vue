@@ -8,6 +8,7 @@ import { RouterLink, useRoute } from 'vue-router'
 
 import Editable from '../../../../../components/basic/Editable.vue'
 import { Input } from '../../../../../components/ui/input'
+import { useRemotePostgres } from '../../../../../composables/ipc/databases/remote'
 import { useDatasourcesStore } from '../../../../../stores/datasources'
 
 const route = useRoute()
@@ -15,12 +16,17 @@ const route = useRoute()
 const id = computed(() => (route.params as any).id as string)
 const driver = computed<Driver>(() => (route.params as any).driver)
 
+const testConnectionConnecting = ref(false)
+const testConnectionSucceeded = ref(false)
+const testConnectionErrored = ref(false)
+const testConnectionErrorMessage = ref('')
+
 const datasourcesStore = useDatasourcesStore()
 
 function datasourceFromId() {
   const datasource = datasourcesStore.datasources.find(ds => ds.id === id.value)
   if (typeof datasource === 'undefined') {
-    const newDatasource = { id: nanoid(), name: 'New Datasource', driver: driver.value, connectionString: '' } satisfies Datasource
+    const newDatasource = { id: nanoid(), name: 'New Datasource', driver: driver.value, connectionString: '', database: 'postgres', sslMode: '' } satisfies Datasource
     datasourcesStore.datasources.push(newDatasource)
 
     return newDatasource
@@ -64,19 +70,70 @@ watch(datasource, () => {
 }, {
   deep: true,
 })
+
+async function handleTestConnection() {
+  const { connect, execute } = useRemotePostgres()
+  if ('connectionString' in datasource.value && !!datasource.value.connectionString) {
+    try {
+      testConnectionSucceeded.value = false
+      testConnectionConnecting.value = true
+      await connect(datasource.value.connectionString)
+      // eslint-disable-next-line no-console
+      console.debug(await execute('SELECT 1'))
+      testConnectionSucceeded.value = true
+    }
+    catch (err) {
+      testConnectionErrored.value = true
+      testConnectionErrorMessage.value = (err as Error).message || 'Unknown error occurred while testing connection.'
+      console.error('Error testing connection:', testConnectionErrorMessage.value)
+      return
+    }
+    finally {
+      testConnectionConnecting.value = false
+    }
+  }
+  else {
+    const params = datasource.value as DatasourceThroughConnectionParameters
+    try {
+      testConnectionSucceeded.value = false
+      testConnectionConnecting.value = true
+      const search = new URLSearchParams()
+      if (params.sslMode != null) {
+        search.set('sslmode', params.sslMode)
+      }
+
+      await connect(`http://${params.user}:${params.password}@${params.host}:${params.port}/${params.database}${`?${search.toString()}`}`)
+      // eslint-disable-next-line no-console
+      console.debug(await execute('SELECT 1'))
+      testConnectionSucceeded.value = true
+    }
+    catch (err) {
+      testConnectionErrored.value = true
+      testConnectionErrorMessage.value = (err as Error).message || 'Unknown error occurred while testing connection.'
+      console.error('Error testing connection:', testConnectionErrorMessage.value)
+      return
+    }
+    finally {
+      testConnectionConnecting.value = false
+    }
+  }
+}
 </script>
 
 <template>
-  <div>
+  <div h-full max-w-screen-sm flex flex-col>
     <div flex>
-      <Editable v-model="datasourceName" text="neutral-300/80" mb-1 flex flex-1 @blur="handleBlur">
-        {{ driver }}
-      </Editable>
+      <h2 text="neutral-300/80" mb-1 flex flex-1>
+        Edit Datasource
+      </h2>
       <RouterLink to="/datasources">
         <div i-ph:x-bold text="neutral-300/80" />
       </RouterLink>
     </div>
-    <div mt-10 flex flex-col gap-2>
+    <div mt-3 flex flex-1 flex-col gap-2>
+      <Editable v-model="datasourceName" mb-3 font-bold @blur="handleBlur">
+        {{ driver }}
+      </Editable>
       <div grid="~ cols-[1fr_2px_1fr] rows-[1fr_1fr]" items-center gap-2>
         <div>
           <div class="flex items-center gap-1 text-sm font-medium">
@@ -94,7 +151,7 @@ watch(datasource, () => {
             <span class="text-red-500">*</span>
           </div>
           <div class="text-xs text-neutral-500 dark:text-neutral-400" text-nowrap>
-            Port number of the database server. Default is usually 5432 for PostgreSQL, 3306 for MySQL, etc.
+            Port number of the database server.
           </div>
         </div>
         <Input v-model="(datasource as DatasourceThroughConnectionParameters).host" />
@@ -127,9 +184,46 @@ watch(datasource, () => {
               Password for the database user. Ensure this is kept secure and not hard-coded in your application.
             </div>
           </div>
-          <Input v-model="(datasource as DatasourceThroughConnectionParameters).password" />
+          <Input v-model="(datasource as DatasourceThroughConnectionParameters).password" type="password" />
         </label>
       </div>
+      <div>
+        <label flex="~ col gap-2">
+          <div>
+            <div class="flex items-center gap-1 text-sm font-medium">
+              Database
+            </div>
+            <div class="text-xs text-neutral-500 dark:text-neutral-400" text-nowrap>
+              Name of the database to connect to. If not specified, the default database for the user will be used.
+            </div>
+          </div>
+          <Input v-model="(datasource as DatasourceThroughConnectionParameters).database" />
+        </label>
+      </div>
+      <div>
+        <label flex="~ col gap-2">
+          <div>
+            <div class="flex items-center gap-1 text-sm font-medium">
+              SSL Mode
+            </div>
+            <div class="text-xs text-neutral-500 dark:text-neutral-400" text-nowrap>
+              SSL mode for the connection.
+            </div>
+          </div>
+          <Input v-model="(datasource as DatasourceThroughConnectionParameters).sslMode" />
+        </label>
+      </div>
+    </div>
+    <div flex flex-col gap-3>
+      <div v-if="testConnectionErrored" class="mt-2 text-sm text-red-500" border="2 solid red-800/50" bg="red-900/50" flex items-center gap-1 rounded-lg px-3 py-2 text-lg>
+        <div i-ph:warning-circle-bold mr-1 inline-block />
+        {{ testConnectionErrorMessage }}
+      </div>
+      <button bg="green-800/50" flex items-center justify-center gap-2 rounded-lg px-3 py-2 @click="handleTestConnection">
+        Test
+        <div v-if="testConnectionConnecting" i-svg-spinners:270-ring />
+        <div v-else-if="testConnectionSucceeded" i-ph:check-bold />
+      </button>
     </div>
   </div>
 </template>

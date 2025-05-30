@@ -12,12 +12,18 @@ const databaseSessions = new Map<string, PostgresJsDatabase>()
 export function registerPostgresJsDatabaseDialect(window: BrowserWindow) {
   defineIPCHandler<PostgresMethods>(window, 'connectRemoteDatabasePostgres')
     .handle(async (_, { dsn }) => {
-      const dbSession = drizzle(dsn)
-      const dbSessionId = nanoid()
-      databaseSessions.set(dbSessionId, dbSession)
+      try {
+        const dbSession = drizzle(dsn)
+        const dbSessionId = nanoid()
+        databaseSessions.set(dbSessionId, dbSession)
 
-      await dbSession.execute('SELECT 1')
-      return { databaseSessionId: dbSessionId, dialect: 'postgres' }
+        await dbSession.execute('SELECT 1')
+        return { databaseSessionId: dbSessionId, dialect: 'postgres' }
+      }
+      catch (err) {
+        console.error('failed to connect to remote Postgres database:', err)
+        throw err
+      }
     })
 
   defineIPCHandler<PostgresMethods>(window, 'queryRemoteDatabasePostgres')
@@ -26,8 +32,14 @@ export function registerPostgresJsDatabaseDialect(window: BrowserWindow) {
         throw new Error('Database session ID not found in session map, please connect to the database first.')
       }
 
-      const dbSession = databaseSessions.get(databaseSessionId)!
-      const res = await dbSession.execute(statement)
-      return { databaseSessionId, results: res }
+      try {
+        const dbSession = databaseSessions.get(databaseSessionId)!
+        const res = await dbSession.execute(statement)
+        return { databaseSessionId, results: res }
+      }
+      catch (err) {
+        console.error('failed to query remote Postgres database:', err)
+        throw err
+      }
     })
 }
