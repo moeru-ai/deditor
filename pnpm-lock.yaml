@@ -87,8 +87,8 @@ importers:
         specifier: 0.1.0-beta.1
         version: 0.1.0-beta.1
       '@proj-airi/drizzle-duckdb-wasm':
-        specifier: ^0.4.24
-        version: 0.4.24(drizzle-orm@0.44.0(@electric-sql/pglite@0.3.2)(mysql2@3.14.1)(postgres@3.4.7))
+        specifier: ^0.4.26
+        version: 0.4.26(drizzle-orm@0.44.0(@electric-sql/pglite@0.3.2)(mysql2@3.14.1)(postgres@3.4.7))
       '@proj-airi/ui':
         specifier: ^0.5.0
         version: 0.5.0(@nuxt/kit@3.17.4)(typescript@5.8.3)
@@ -1086,8 +1086,8 @@ packages:
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
 
-  '@proj-airi/drizzle-duckdb-wasm@0.4.24':
-    resolution: {integrity: sha512-LPil7T45sNk4rWsbAmcq+wJmQWgv1WWWgkXEM9/Mpt9lZ46Oq0fTKGHFwhTNIxfRKMxEdwsD7IYfQeV3sj6KtQ==}
+  '@proj-airi/drizzle-duckdb-wasm@0.4.26':
+    resolution: {integrity: sha512-4+BIzmMHBTRcVLzbfaZtH2cucaaXUg9IOarDMdLLGctLNyog31SFbBW2ET8106u94fP7MrWCHptqHPDQWP2gcA==}
     peerDependencies:
       drizzle-orm: '>=0.40.0'
       web-worker: ^1.5.0
@@ -1095,8 +1095,8 @@ packages:
       web-worker:
         optional: true
 
-  '@proj-airi/duckdb-wasm@0.4.24':
-    resolution: {integrity: sha512-Md2HWJoJggn9vMLWvD7s6XFIYEPvXu8AurRBMXk4S5r2z/38FzQvn1vK91uOq3oWvrJJvl7mLteVYCKsAtPjYA==}
+  '@proj-airi/duckdb-wasm@0.4.26':
+    resolution: {integrity: sha512-St18QDxgABt1goCH7QATNbfpFXEAwvVpHOjRDSN5BpdXKp+laGcLu5FL4y4Fihi4j7M7BWVjRv8VokaQvyRMtQ==}
     peerDependencies:
       drizzle-orm: '>=0.40.0'
       web-worker: ^1.5.0
@@ -2283,8 +2283,8 @@ packages:
     resolution: {integrity: sha512-X0p7auzdnGuhYMVKYINdQssS4EcKec9TCXyez/qtJt32DrIMGbzqiaMiQ0X6fQlQpw8Fl0Qygcv4dfRAr5Gu9Q==}
     hasBin: true
 
-  apache-arrow@19.0.1:
-    resolution: {integrity: sha512-APmMLzS4qbTivLrPdQXexGM4JRr+0g62QDaobzEvip/FdQIrv2qLy0mD5Qdmw4buydtVJgbFeKR8f59I6PPGDg==}
+  apache-arrow@20.0.0:
+    resolution: {integrity: sha512-JUeK0jFRUd7rbmrhhzR3O2KXjLaZ4YYYFOptyUfxOsMIoZCPi6bZR58gVi/xi3HTBMPseXm9PXyQ2V916930pA==}
     hasBin: true
 
   app-builder-bin@5.0.0-alpha.12:
@@ -6694,24 +6694,25 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@proj-airi/drizzle-duckdb-wasm@0.4.24(drizzle-orm@0.44.0(@electric-sql/pglite@0.3.2)(mysql2@3.14.1)(postgres@3.4.7))':
+  '@proj-airi/drizzle-duckdb-wasm@0.4.26(drizzle-orm@0.44.0(@electric-sql/pglite@0.3.2)(mysql2@3.14.1)(postgres@3.4.7))':
     dependencies:
       '@date-fns/tz': 1.2.0
       '@duckdb/duckdb-wasm': 1.29.1-dev68.0
-      '@proj-airi/duckdb-wasm': 0.4.24(drizzle-orm@0.44.0(@electric-sql/pglite@0.3.2)(mysql2@3.14.1)(postgres@3.4.7))
-      apache-arrow: 19.0.1
+      '@moeru/std': 0.1.0-beta.1
+      '@proj-airi/duckdb-wasm': 0.4.26(drizzle-orm@0.44.0(@electric-sql/pglite@0.3.2)(mysql2@3.14.1)(postgres@3.4.7))
+      apache-arrow: 20.0.0
       date-fns: 4.1.0
-      defu: 6.1.4
       drizzle-orm: 0.44.0(@electric-sql/pglite@0.3.2)(mysql2@3.14.1)(postgres@3.4.7)
       es-toolkit: 1.38.0
     transitivePeerDependencies:
       - '@75lb/nature'
 
-  '@proj-airi/duckdb-wasm@0.4.24(drizzle-orm@0.44.0(@electric-sql/pglite@0.3.2)(mysql2@3.14.1)(postgres@3.4.7))':
+  '@proj-airi/duckdb-wasm@0.4.26(drizzle-orm@0.44.0(@electric-sql/pglite@0.3.2)(mysql2@3.14.1)(postgres@3.4.7))':
     dependencies:
       '@date-fns/tz': 1.2.0
       '@duckdb/duckdb-wasm': 1.29.1-dev68.0
-      apache-arrow: 19.0.1
+      '@moeru/std': 0.1.0-beta.1
+      apache-arrow: 20.0.0
       date-fns: 4.1.0
       defu: 6.1.4
       drizzle-orm: 0.44.0(@electric-sql/pglite@0.3.2)(mysql2@3.14.1)(postgres@3.4.7)
@@ -8394,7 +8395,7 @@ snapshots:
       json-bignum: 0.0.3
       tslib: 2.8.1
 
-  apache-arrow@19.0.1:
+  apache-arrow@20.0.0:
     dependencies:
       '@swc/helpers': 0.5.17
       '@types/command-line-args': 5.2.3
@@ -8402,7 +8403,7 @@ snapshots:
       '@types/node': 20.17.50
       command-line-args: 6.0.1
       command-line-usage: 7.0.3
-      flatbuffers: 24.12.23
+      flatbuffers: 25.2.10
       json-bignum: 0.0.3
       tslib: 2.8.1
     transitivePeerDependencies:
