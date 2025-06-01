@@ -1,48 +1,100 @@
 <script setup lang="ts">
 import type { EmbedResult } from '@xsai/embed'
 
-import type { ProjectionConfig } from '@/components/plot/ScatterEmbeddings3d.vue'
+import type { ProvidedVisualizerState, VisualizerState } from '@/types/visualizer'
 
-import { BasicTextarea } from '@proj-airi/ui'
 import { embed } from '@xsai/embed'
 import { Pane, Splitpanes } from 'splitpanes'
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, provide, reactive, ref } from 'vue'
 
-import Button from '@/components/basic/Button.vue'
-import PaneCard from '@/components/pane/PaneCard.vue'
-import ScatterEmbeddings3d from '@/components/plot/ScatterEmbeddings3d.vue'
-import ProjectionControls from '@/components/visualizer-controls/ProjectionControls.vue'
+import PaneArea from '@/components/container/PaneArea.vue'
+import DataNavigator from '@/components/visualizer/DataNavigator.vue'
+import PointVisualizer from '@/components/visualizer/PointVisualizer.vue'
+// import ScatterEmbeddings3d from '@/components/plot/ScatterEmbeddings3d.vue'
+import ProjectionControls from '@/components/visualizer/ProjectionControls.vue'
+// import { useDuckDB } from '@/composables/use-duckdb'
 import { useXsAITransformers } from '@/composables/use-xsai-transformers'
+import { ProvidedVisualizerStateKey } from '@/constants'
+import baseTexts from '@/fixtures/vis-base-texts.json'
+import testTexts from '@/fixtures/vis-test-texts.json'
+// import Migration0000 from '~/drizzle-migrations/0000_redundant_lady_deathstrike.sql?raw'
+// import * as VisualizerSchemas from '~/drizzle/schemas/visualizer'
 
 import embedWorkerURL from '../workers/embed?worker&url'
 
-const wildContext = ref([
-  '"nya" means "cat" in Makitoish.',
-  '"appi" means "happy" in Makitoish.',
-  '"ko" means "little" in Makitoish.',
-  '"hwahwa" means "rainy" in Makitoish.',
-  '"Makitoish" is a coffee-based language spoken by the Makito.',
-  '"English" is a language spoken by many people around the world.',
-  '"Japanese" is a language written in kanji, hiragana, and katakana.',
-])
-const wildContextEmbeddings = ref<EmbedResult[]>([])
+const state = reactive<VisualizerState>({
+  texts: [],
+  vectors: [],
+  points: [],
+  styles: [],
+  styleDefinitions: {},
+})
 
-const query = ref('What is "nyanyaappi"?')
-const queryEmbeddings = ref<EmbedResult>()
+provide<ProvidedVisualizerState>(ProvidedVisualizerStateKey, state)
 
-const projectionConfig = ref<ProjectionConfig>()
+const baseEmbeddings = ref<EmbedResult[]>([])
+const testEmbeddings = ref<EmbedResult[]>([])
 
-const modelId = ref('Xenova/bge-large-zh')
+// const { db } = useDuckDB({ autoConnect: true }, { schema: VisualizerSchemas })
+
+const modelId = ref('mixedbread-ai/mxbai-embed-large-v1')
 const { load, embedProvider } = useXsAITransformers(embedWorkerURL, 'embed')
 
 onMounted(async () => {
-  await load(modelId.value)
+  state.texts = [
+    ...baseTexts,
+    ...testTexts,
+  ]
+
+  state.styles = [
+    ...Array.from({ length: baseTexts.length }).fill('base'),
+    ...Array.from({ length: testTexts.length }).fill('test'),
+  ]
+
+  // await db.value?.execute(Migration0000)
+  // console.log(await db.value?.select().from(VisualizerSchemas.embeddings))
+
+  state.styleDefinitions = {
+    base: {
+      color: 'rgb(255, 255, 255)',
+    },
+    test: {
+      color: 'rgb(146, 101, 237)',
+    },
+  }
+
+  await load(modelId.value).then(async () => {
+    baseEmbeddings.value = await embedMany(baseTexts)
+    testEmbeddings.value = await embedMany(testTexts)
+
+    baseEmbeddings.value.reduce<
+      [VisualizerState['vectors'], VisualizerState['styles'], VisualizerState['texts']]
+    >(([vectors, styles, texts], result) => {
+      vectors.push(result.embedding)
+      styles.push('base')
+      texts.push(result.input)
+      return [vectors, styles, texts]
+    }, [state.vectors, state.styles, state.texts])
+
+    testEmbeddings.value.reduce<
+      [VisualizerState['vectors'], VisualizerState['styles'], VisualizerState['texts']]
+    >(([vectors, styles, texts], result) => {
+      vectors.push(result.embedding)
+      styles.push('test')
+      texts.push(result.input)
+      return [vectors, styles, texts]
+    }, [state.vectors, state.styles, state.texts])
+  })
+
+  // console.log('Base Embeddings:', baseEmbeddings.value)
+  // console.log('Test Embeddings:', testEmbeddings.value)
 })
 
-// TODO: We should a real `embedMany`
+// TODO: We should have a real `embedMany`
 async function embedMany(messages: string[]) {
   const results: EmbedResult[] = []
   for (const message of messages) {
+    console.debug('[embed]', message)
     results.push(await embed({
       ...embedProvider.embed(modelId.value),
       input: message,
@@ -50,48 +102,31 @@ async function embedMany(messages: string[]) {
   }
   return results
 }
-
-async function updateQueryEmbeddings() {
-  queryEmbeddings.value = await embed({
-    ...embedProvider.embed(modelId.value),
-    input: query.value,
-  })
-}
-
-watch(wildContext, async (messages) => {
-  wildContextEmbeddings.value = await embedMany(messages)
-}, { immediate: true })
 </script>
 
 <template>
   <div h-full w-full>
     <Splitpanes class="h-full w-full flex gap-0.8 bg-transparent">
       <Pane :min-size="20" :size="70">
-        <ScatterEmbeddings3d
-          v-if="projectionConfig"
-          :embeddings="wildContextEmbeddings"
-          :projection="projectionConfig"
-          :query-embeddings="queryEmbeddings"
-        />
+        <Splitpanes horizontal class="h-full w-full gap-0.8 bg-transparent">
+          <Pane :min-size="20" :size="60">
+            <PaneArea no-padding no-scroll>
+              <PointVisualizer />
+            </PaneArea>
+          </Pane>
+
+          <Pane :min-size="20" :size="40">
+            <PaneArea flex="~ col gap-4">
+              <DataNavigator />
+            </PaneArea>
+          </Pane>
+        </Splitpanes>
       </Pane>
 
       <Pane :min-size="20" :size="30">
-        <PaneCard flex flex-col gap-6>
-          <div flex flex-col items-start gap-4>
-            <h2>Query</h2>
-            <BasicTextarea
-              v-model="query"
-              bg="neutral-900/80 hover:neutral-900" border="2 solid neutral-700/20 hover:primary-700/50"
-              min-h-30 w-full rounded-lg border-none px-3 py-2 text-sm font-mono outline-none
-              transition="colors duration-300 ease-in-out"
-            />
-            <Button self-end @click="updateQueryEmbeddings">
-              Update Query Embeddings
-            </Button>
-          </div>
-
-          <ProjectionControls @update="projectionConfig = $event" />
-        </PaneCard>
+        <PaneArea flex flex-col gap-6>
+          <ProjectionControls />
+        </PaneArea>
       </Pane>
     </Splitpanes>
   </div>

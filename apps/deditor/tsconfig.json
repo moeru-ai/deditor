@@ -2,9 +2,11 @@
   "compilerOptions": {
     "composite": true,
 
-    "baseUrl": "./src/renderer",
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/renderer/src/*"],
+      "~/drizzle/*": ["./src/drizzle/*"],
+      "~/drizzle-migrations/*": ["./drizzle/*"]
     },
 
     /* Build */
@@ -46,6 +48,7 @@
     "skipLibCheck": true
   },
   "include": [
+    "src/drizzle/**/*.ts",
     "src/renderer/**/*.ts",
     "src/renderer/**/*.d.ts",
     "src/renderer/**/*.tsx",

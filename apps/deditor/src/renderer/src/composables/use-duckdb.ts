@@ -1,13 +1,17 @@
 import type { ArrowField, ConnectOptions, DuckDBWasmDrizzleDatabase, ResultColumns } from '@proj-airi/drizzle-duckdb-wasm'
+import type { DrizzleConfig } from 'drizzle-orm'
 import type { MaybeRefOrGetter, Ref } from 'vue'
 
 import { drizzle } from '@proj-airi/drizzle-duckdb-wasm'
 import { getImportUrlBundles } from '@proj-airi/drizzle-duckdb-wasm/bundles/import-url-browser'
 import { onMounted, onUnmounted, ref, toValue, watch } from 'vue'
 
-export function useDuckDB(options?: ConnectOptions & { autoConnect?: boolean }) {
+export function useDuckDB<TSchema extends Record<string, unknown> = Record<string, never>>(
+  options?: ConnectOptions & { autoConnect?: boolean },
+  drizzleConfig?: DrizzleConfig<TSchema>,
+) {
   const connecting = ref(false)
-  const db = ref<DuckDBWasmDrizzleDatabase>()
+  const db = ref<DuckDBWasmDrizzleDatabase<TSchema>>()
   const closeFunc = ref<() => Promise<void>>(async () => { })
   const errored = ref<boolean>(false)
   const error = ref<unknown>()
@@ -16,7 +20,10 @@ export function useDuckDB(options?: ConnectOptions & { autoConnect?: boolean }) 
     connecting.value = true
 
     try {
-      const drizzleClient = await drizzle({ connection: { ...options, bundles: getImportUrlBundles() } })
+      const drizzleClient = drizzleConfig
+      ? drizzle<TSchema>({ connection: { ...options, bundles: getImportUrlBundles() } }, drizzleConfig)
+      : drizzle<TSchema>({ connection: { ...options, bundles: getImportUrlBundles() } })
+
       db.value = drizzleClient
 
       closeFunc.value = async () => {

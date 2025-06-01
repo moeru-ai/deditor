@@ -32,6 +32,8 @@ words:
   - tanstack
   - taze
   - tensorchord
+  - TSNE
+  - UMAP
   - unocss
   - unplugin
   - vueuse
