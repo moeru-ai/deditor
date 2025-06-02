@@ -3,7 +3,7 @@ import type { Datasource, DatasourceThroughConnectionParameters, Driver } from '
 
 import { nanoid } from '@deditor-app/shared'
 import { useRefHistory } from '@vueuse/core'
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 
 import Editable from '../../../../../components/basic/Editable.vue'
@@ -23,6 +23,32 @@ const testConnectionErrorMessage = ref('')
 
 const datasourcesStore = useDatasourcesStore()
 
+function generateDSN(params: DatasourceThroughConnectionParameters) {
+  const search = new URLSearchParams()
+  if (params.sslMode != null) {
+    search.set('sslmode', params.sslMode)
+  }
+
+  for (const [key, value] of Object.entries(params.extraOptions || {})) {
+    if (Array.isArray(value)) {
+      value.forEach(v => search.set(key, v))
+    }
+    else {
+      search.set(key, value)
+    }
+  }
+
+  const dsn = new URL('/test', 'https://127.0.0.1')
+  dsn.username = params.user || ''
+  dsn.password = params.password || ''
+  dsn.host = params.host || '127.0.0.1'
+  dsn.port = String(params.port || 5432)
+  dsn.pathname = params.database || 'postgres'
+  dsn.search = search.toString()
+
+  return dsn.toString().replace('https', params.driver)
+}
+
 function datasourceFromId() {
   const datasource = datasourcesStore.datasources.find(ds => ds.id === id.value)
   if (typeof datasource === 'undefined') {
@@ -38,6 +64,47 @@ function datasourceFromId() {
 const datasource = ref(datasourceFromId())
 const datasourceName = ref(datasource.value.name || 'New Datasource')
 const { undo, clear } = useRefHistory(datasourceName)
+const DSN = computed({
+  get: () => {
+    return generateDSN(datasource.value as DatasourceThroughConnectionParameters)
+  },
+  set: (value) => {
+    if (!datasource.value)
+      return
+
+    const params = datasource.value as DatasourceThroughConnectionParameters
+
+    // Cleanup the datasource
+    params.host = '127.0.0.1'
+    params.port = 5432
+    params.user = ''
+    params.password = ''
+    params.database = 'postgres'
+    params.sslMode = ''
+
+    try {
+      const url = new URL(value)
+      params.host = url.hostname || '127.0.0.1'
+      params.port = Number(url.port) || 5432
+      params.user = url.username || ''
+      params.password = url.password || ''
+      params.database = url?.pathname?.slice(1) || 'postgres' // Remove leading slash
+
+      // Parse SSL mode from query params if present
+      const sslMode = url.searchParams.get('sslmode')
+      if (sslMode)
+        params.sslMode = sslMode
+    }
+    catch (err) {
+      console.warn('Invalid connection string format:', err)
+    }
+  },
+})
+
+// TODO: ?
+onMounted(() => {
+  DSN.value = generateDSN(datasource.value as DatasourceThroughConnectionParameters)
+})
 
 watch([id, driver], () => {
   clear()
@@ -97,14 +164,11 @@ async function handleTestConnection() {
     try {
       testConnectionSucceeded.value = false
       testConnectionConnecting.value = true
-      const search = new URLSearchParams()
-      if (params.sslMode != null) {
-        search.set('sslmode', params.sslMode)
-      }
 
-      await connect(`http://${params.user}:${params.password}@${params.host}:${params.port}/${params.database}${`?${search.toString()}`}`)
+      await connect(generateDSN(params))
       // eslint-disable-next-line no-console
       console.debug(await execute('SELECT 1'))
+
       testConnectionSucceeded.value = true
     }
     catch (err) {
@@ -134,6 +198,19 @@ async function handleTestConnection() {
       <Editable v-model="datasourceName" mb-3 font-bold @blur="handleBlur">
         {{ driver }}
       </Editable>
+      <div>
+        <label flex="~ col gap-2">
+          <div>
+            <div class="flex items-center gap-1 text-sm font-medium">
+              DSN
+            </div>
+            <div class="text-xs text-neutral-500 dark:text-neutral-400" text-nowrap>
+              Data Source Name for the database connection.
+            </div>
+          </div>
+          <Input v-model="DSN" />
+        </label>
+      </div>
       <div grid="~ cols-[1fr_2px_1fr] rows-[1fr_1fr]" items-center gap-2>
         <div>
           <div class="flex items-center gap-1 text-sm font-medium">
