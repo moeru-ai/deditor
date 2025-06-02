@@ -26,6 +26,7 @@ export type DatasourceThroughConnectionParameters = DatasourceBase & {
   password: string
   database?: string
   sslMode?: string
+  extraOptions?: Record<string, string | string[]>
 }
 
 export const useDatasourcesStore = defineStore('datasources', () => {
