@@ -1,0 +1,125 @@
+export interface DSNExtraOptions extends Record<string, string | string[]> {
+  sslmode: string
+}
+
+export interface DSNConnectionParameters {
+  host: string
+  port: number
+  user: string
+  password: string
+  database?: string
+  extraOptions?: DSNExtraOptions
+}
+
+export interface DSNDefaultParams {
+  params?: DSNConnectionParameters
+  applyParamsURLSearchParams?: (search: URLSearchParams) => void
+  applyURL?: (url: URL) => void
+}
+
+export function defaultParamsFromDriver(driver: string): DSNDefaultParams {
+  switch (driver) {
+    case 'postgres':
+      return postgresDefaultParams()
+    case 'mysql':
+      return mysqlDefaultParams()
+    default:
+      throw new Error(`Unsupported driver: ${driver}`)
+  }
+}
+
+export function postgresDefaultParams(): DSNDefaultParams {
+  return {
+    params: {
+      host: '127.0.0.1',
+      password: '',
+      port: 5432,
+      user: 'postgres',
+      database: 'postgres',
+    },
+    applyParamsURLSearchParams: (search: URLSearchParams) => {
+      search.set('sslmode', 'disabled')
+    },
+  }
+}
+
+export function mysqlDefaultParams(): DSNDefaultParams {
+  return {
+    params: {
+      host: '127.0.0.1',
+      password: '',
+      port: 3306,
+      user: 'root',
+    },
+  }
+}
+
+export function toDSN(
+  driver: string,
+  params: DSNConnectionParameters,
+  defaultParams?: DSNDefaultParams,
+) {
+  const {
+    applyParamsURLSearchParams = () => {},
+    applyURL = () => {},
+  } = defaultParams || {
+    applyParamsURLSearchParams: () => {},
+    applyURL: () => {},
+  }
+
+  const search = new URLSearchParams()
+  if (applyParamsURLSearchParams != null && typeof applyParamsURLSearchParams === 'function') {
+    applyParamsURLSearchParams(search)
+  }
+
+  for (const [key, value] of Object.entries(params.extraOptions || {})) {
+    if (Array.isArray(value)) {
+      value.forEach(v => search.set(key, v))
+    }
+    else {
+      search.set(key, value)
+    }
+  }
+
+  const dsn = new URL('/test', 'https://127.0.0.1')
+  dsn.username = params.user || ''
+  dsn.password = params.password || ''
+  dsn.host = params.host || defaultParams?.params?.host || '127.0.0.1'
+  dsn.port = String(params.port || defaultParams?.params?.port || 5432)
+  dsn.pathname = params.database || defaultParams?.params?.database || ''
+  dsn.search = search.toString()
+
+  if (applyURL != null && typeof applyURL === 'function') {
+    applyURL(dsn)
+  }
+
+  return dsn.toString().replace('https', driver)
+}
+
+export function fromDSN(dsn: string, defaultParams: DSNDefaultParams): DSNConnectionParameters {
+  const params: DSNConnectionParameters = {
+    ...defaultParams.params!,
+  }
+
+  try {
+    const url = new URL(dsn)
+    params.host = url.hostname || '127.0.0.1'
+    params.port = Number(url.port) || 5432
+    params.user = url.username || ''
+    params.password = url.password || ''
+    params.database = url?.pathname?.slice(1) || 'postgres' // Remove leading slash
+
+    if (!params.extraOptions)
+      params.extraOptions = { sslmode: 'disabled' }
+
+    // Parse SSL mode from query params if present
+    const sslMode = url.searchParams.get('sslmode')
+    if (sslMode)
+      params.extraOptions!.sslmode = sslMode
+  }
+  catch (err) {
+    console.warn('Invalid connection string format:', err)
+  }
+
+  return params
+}

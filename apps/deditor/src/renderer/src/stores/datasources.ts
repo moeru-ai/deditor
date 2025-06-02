@@ -1,3 +1,5 @@
+import type { DSNExtraOptions } from '../libs/dsn'
+
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
@@ -25,8 +27,8 @@ export type DatasourceThroughConnectionParameters = DatasourceBase & {
   user: string
   password: string
   database?: string
-  sslMode?: string
-  extraOptions?: Record<string, string | string[]>
+  sslmode: string
+  extraOptions?: DSNExtraOptions
 }
 
 export const useDatasourcesStore = defineStore('datasources', () => {

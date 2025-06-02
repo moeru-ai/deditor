@@ -9,6 +9,7 @@ import { RouterLink, useRoute } from 'vue-router'
 import Editable from '../../../../../components/basic/Editable.vue'
 import { Input } from '../../../../../components/ui/input'
 import { useRemotePostgres } from '../../../../../composables/ipc/databases/remote'
+import { defaultParamsFromDriver, fromDSN, toDSN } from '../../../../../libs/dsn'
 import { useDatasourcesStore } from '../../../../../stores/datasources'
 
 const route = useRoute('/datasources/[driver]/edit/[id]/')
@@ -23,36 +24,10 @@ const testConnectionErrorMessage = ref('')
 
 const datasourcesStore = useDatasourcesStore()
 
-function generateDSN(params: DatasourceThroughConnectionParameters) {
-  const search = new URLSearchParams()
-  if (params.sslMode != null) {
-    search.set('sslmode', params.sslMode)
-  }
-
-  for (const [key, value] of Object.entries(params.extraOptions || {})) {
-    if (Array.isArray(value)) {
-      value.forEach(v => search.set(key, v))
-    }
-    else {
-      search.set(key, value)
-    }
-  }
-
-  const dsn = new URL('/test', 'https://127.0.0.1')
-  dsn.username = params.user || ''
-  dsn.password = params.password || ''
-  dsn.host = params.host || '127.0.0.1'
-  dsn.port = String(params.port || 5432)
-  dsn.pathname = params.database || 'postgres'
-  dsn.search = search.toString()
-
-  return dsn.toString().replace('https', params.driver)
-}
-
 function datasourceFromId() {
   const datasource = datasourcesStore.datasources.find(ds => ds.id === id.value)
   if (typeof datasource === 'undefined') {
-    const newDatasource = { id: nanoid(), name: 'New Datasource', driver: driver.value, connectionString: '', database: 'postgres', sslMode: '' } satisfies Datasource
+    const newDatasource = { id: nanoid(), name: 'New Datasource', driver: driver.value, connectionString: '', database: 'postgres', sslmode: '' } satisfies Datasource
     datasourcesStore.datasources.push(newDatasource)
 
     return newDatasource
@@ -66,44 +41,27 @@ const datasourceName = ref(datasource.value.name || 'New Datasource')
 const { undo, clear } = useRefHistory(datasourceName)
 const DSN = computed({
   get: () => {
-    return generateDSN(datasource.value as DatasourceThroughConnectionParameters)
+    return toDSN(driver.value, datasource.value as DatasourceThroughConnectionParameters, defaultParamsFromDriver(driver.value))
   },
   set: (value) => {
     if (!datasource.value)
       return
 
     const params = datasource.value as DatasourceThroughConnectionParameters
+    const paramsFromDSN = fromDSN(value, defaultParamsFromDriver(driver.value))
 
-    // Cleanup the datasource
-    params.host = '127.0.0.1'
-    params.port = 5432
-    params.user = ''
-    params.password = ''
-    params.database = 'postgres'
-    params.sslMode = ''
-
-    try {
-      const url = new URL(value)
-      params.host = url.hostname || '127.0.0.1'
-      params.port = Number(url.port) || 5432
-      params.user = url.username || ''
-      params.password = url.password || ''
-      params.database = url?.pathname?.slice(1) || 'postgres' // Remove leading slash
-
-      // Parse SSL mode from query params if present
-      const sslMode = url.searchParams.get('sslmode')
-      if (sslMode)
-        params.sslMode = sslMode
-    }
-    catch (err) {
-      console.warn('Invalid connection string format:', err)
-    }
+    params.host = paramsFromDSN.host
+    params.port = paramsFromDSN.port
+    params.user = paramsFromDSN.user
+    params.password = paramsFromDSN.password
+    params.database = paramsFromDSN.database
+    params.extraOptions = paramsFromDSN.extraOptions || { sslmode: '' }
   },
 })
 
 // TODO: ?
 onMounted(() => {
-  DSN.value = generateDSN(datasource.value as DatasourceThroughConnectionParameters)
+  DSN.value = toDSN(driver.value, datasource.value as DatasourceThroughConnectionParameters, defaultParamsFromDriver(driver.value))
 })
 
 watch([id, driver], () => {
@@ -165,7 +123,7 @@ async function handleTestConnection() {
       testConnectionSucceeded.value = false
       testConnectionConnecting.value = true
 
-      await connect(generateDSN(params))
+      await connect(toDSN(driver.value, params, defaultParamsFromDriver(driver.value)))
       // eslint-disable-next-line no-console
       console.debug(await execute('SELECT 1'))
 
@@ -287,7 +245,7 @@ async function handleTestConnection() {
               SSL mode for the connection.
             </div>
           </div>
-          <Input v-model="(datasource as DatasourceThroughConnectionParameters).sslMode" />
+          <Input v-model="(datasource as DatasourceThroughConnectionParameters).sslmode" />
         </label>
       </div>
     </div>
