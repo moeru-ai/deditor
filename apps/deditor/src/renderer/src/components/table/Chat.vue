@@ -313,11 +313,6 @@ function handleRowClick(index: number) {
 </template>
 
 <style scoped>
-.table {
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
 .resizer {
   position: absolute;
   right: 0;
@@ -355,11 +350,5 @@ function handleRowClick(index: number) {
 :deep([data-column-id="spacer"]) {
   width: 100% !important;
   min-width: 10px;
-}
-
-/* Ensure table rows have consistent styling */
-:deep(tr) {
-  background-color: rgba(23, 23, 23, 0.2);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 </style>

@@ -9,7 +9,7 @@ const props = defineProps<{
 </script>
 
 <template>
-  <thead :class="cn('[&_tr]:border-b', props.class)">
+  <thead :class="cn('sticky top-0 z-10 backdrop-blur-md bg-neutral-800/80 [&_th]:border-b [&_th]:border-white/10', props.class)">
     <slot />
   </thead>
 </template>
