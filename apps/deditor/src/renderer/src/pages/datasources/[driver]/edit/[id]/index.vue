@@ -11,10 +11,10 @@ import { Input } from '../../../../../components/ui/input'
 import { useRemotePostgres } from '../../../../../composables/ipc/databases/remote'
 import { useDatasourcesStore } from '../../../../../stores/datasources'
 
-const route = useRoute()
+const route = useRoute('/datasources/[driver]/edit/[id]/')
 
-const id = computed(() => (route.params as any).id as string)
-const driver = computed<Driver>(() => (route.params as any).driver)
+const id = computed(() => route.params.id)
+const driver = computed<Driver>(() => route.params.driver as Driver)
 
 const testConnectionConnecting = ref(false)
 const testConnectionSucceeded = ref(false)
