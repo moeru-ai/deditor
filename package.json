@@ -15,6 +15,7 @@
     "dev": "pnpm -F @deditor-app/deditor dev",
     "dev:web": "pnpm -F @deditor-app/deditor web:dev",
     "build": "pnpm -r -F=\"./packages/*\" -F=\"./apps/*\" run build",
+    "build:packages": "pnpm -F=\"./packages/*\" run build",
     "build:web": "pnpm -F @deditor-app/deditor web:build",
     "build:unpack": "pnpm run build && pnpm -F @deditor-app/deditor build:unpack",
     "build:win": "pnpm run build && pnpm -F @deditor-app/deditor build:win",
