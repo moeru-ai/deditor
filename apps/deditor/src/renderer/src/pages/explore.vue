@@ -1,41 +1,52 @@
 <script setup lang="ts">
 import type { DuckDBWasmDrizzleDatabase } from '@proj-airi/drizzle-duckdb-wasm'
 
+import type { DatasourceThroughConnectionParameters } from '../stores/datasources'
+
 import { drizzle } from '@proj-airi/drizzle-duckdb-wasm'
 import { getImportUrlBundles } from '@proj-airi/drizzle-duckdb-wasm/bundles/import-url-browser'
 import { BasicTextarea } from '@proj-airi/ui'
+import { storeToRefs } from 'pinia'
 import { Pane, Splitpanes } from 'splitpanes'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 
 import Button from '../components/basic/Button.vue'
 import PaneArea from '../components/container/PaneArea.vue'
 import Chat from '../components/table/Chat.vue'
+import { useRemotePostgres } from '../composables/ipc/databases/remote'
+import { defaultParamsFromDriver, toDSN } from '../libs/dsn'
+import { useDatasourcesStore } from '../stores/datasources'
 
 const input = ref(`[${Array.from({ length: 100 }, (_, i) => `{"question": "What is the answer to ${i}?", "answer": "It's ${i}."}`).join(',')}]`)
 
 const results = ref<Record<string, unknown>[]>([])
 const total = ref(0)
 const page = ref(1)
-const pageSize = ref(10)
-
+const pageSize = ref(20)
 const selectedRow = ref<Record<string, unknown>>()
 
-const db = ref<DuckDBWasmDrizzleDatabase>()
+const queryFrom = ref<'one-time' | 'files' | 'datasets' | 'datasources'>('one-time')
 
-async function client() {
-  return (await db.value!.$client)
+const queryFromDatasourceId = ref<string>()
+const _queryFromDatasources = storeToRefs(useDatasourcesStore())
+
+const inMemoryDB = ref<DuckDBWasmDrizzleDatabase>()
+const remotePostgresDB = useRemotePostgres()
+
+async function inMemoryDBClient() {
+  return (await inMemoryDB.value!.$client)
 }
 
-async function loadDataset() {
-  if (!db.value)
+async function loadFromSelectedOneTime() {
+  if (!inMemoryDB.value)
     return
 
-  const c = await client()
+  const c = await inMemoryDBClient()
   await c.db.registerFileText('qa.jsonl', input.value)
-  const [{ count }] = await db.value.execute<{ count: number }>(`SELECT COUNT(*) AS count FROM read_json('qa.jsonl')`)
+  const [{ count }] = await inMemoryDB.value.execute<{ count: number }>(`SELECT COUNT(*) AS count FROM read_json('qa.jsonl')`)
   total.value = count
 
-  const res = await db.value.execute<Record<string, unknown>>(`
+  const res = await inMemoryDB.value.execute<Record<string, unknown>>(`
 SELECT *
 FROM read_json('qa.jsonl')
 LIMIT ${pageSize.value} OFFSET ${(page.value - 1) * pageSize.value}
@@ -44,17 +55,57 @@ LIMIT ${pageSize.value} OFFSET ${(page.value - 1) * pageSize.value}
   results.value = res
 }
 
-watch(page, async () => {
-  await loadDataset()
+async function loadFromSelectedDatasource() {
+  if (!queryFromDatasourceId.value) {
+    return
+  }
+
+  const queryFromDatasource = _queryFromDatasources.datasources.value.find(ds => ds.id === queryFromDatasourceId.value)
+  if (!queryFromDatasource) {
+    return
+  }
+
+  if (queryFromDatasource.driver === 'postgres') {
+    console.log('connect', toDSN(queryFromDatasource.driver, queryFromDatasource as DatasourceThroughConnectionParameters, defaultParamsFromDriver(queryFromDatasource.driver)))
+    await remotePostgresDB.connect(toDSN(queryFromDatasource.driver, queryFromDatasource as DatasourceThroughConnectionParameters, defaultParamsFromDriver(queryFromDatasource.driver)))
+    results.value = await remotePostgresDB.execute('SELECT * FROM generate_series(1, 10);')
+  }
+}
+
+watch(queryFrom, async () => {
+  results.value = []
+
+  switch (queryFrom.value) {
+    case 'one-time':
+      await loadFromSelectedOneTime()
+      break
+    case 'datasources':
+      await loadFromSelectedDatasource()
+      break
+  }
+})
+
+watch(queryFromDatasourceId, async () => {
+  results.value = []
+
+  await loadFromSelectedDatasource()
 })
 
 onMounted(async () => {
-  db.value = drizzle({ connection: { bundles: getImportUrlBundles(), logger: false } })
-  await loadDataset()
+  inMemoryDB.value = drizzle({ connection: { bundles: getImportUrlBundles(), logger: false } })
+
+  switch (queryFrom.value) {
+    case 'one-time':
+      await loadFromSelectedOneTime()
+      break
+    case 'datasources':
+      await loadFromSelectedDatasource()
+      break
+  }
 })
 
 onUnmounted(async () => {
-  (await db.value?.$client)?.close()
+  (await inMemoryDB.value?.$client)?.close()
 })
 
 function canPagePrevious() {
@@ -93,20 +144,24 @@ function handleRowClick(_index: number, row: Record<string, unknown>) {
                 </div>
               </h2>
               <div w-full flex gap-2 text-sm>
-                <Button w-full>
+                <Button w-full @click="queryFrom = 'one-time'">
                   <div i-ph:folder-dotted-fill />
                   <div>One-Time</div>
                 </Button>
-                <Button w-full>
+                <!-- <Button w-full @click="queryFrom = 'files'">
                   <div i-ph:folder-notch-plus-fill />
                   <div>Files</div>
                 </Button>
-                <Button w-full>
+                <Button w-full @click="queryFrom = 'datasets'">
                   <div i-ph:database-fill />
                   <div>Datasets</div>
+                </Button> -->
+                <Button w-full @click="queryFrom = 'datasources'">
+                  <div i-ph:hard-drives-fill />
+                  <div>Datasources</div>
                 </Button>
               </div>
-              <div h-full max-h-full flex flex-col gap-2 overflow-y-scroll rounded-lg>
+              <div v-if="queryFrom === 'one-time'" h-full max-h-full flex flex-col gap-2 overflow-y-scroll rounded-lg>
                 <BasicTextarea
                   v-model="input"
                   placeholder="请输入"
@@ -114,6 +169,13 @@ function handleRowClick(_index: number, row: Record<string, unknown>) {
                   min-h-30 rounded-lg border-none px-3 py-2 text-sm font-mono outline-none
                   transition="colors duration-300 ease-in-out"
                 />
+              </div>
+              <div v-if="queryFrom === 'datasources'" h-full max-h-full flex flex-col gap-2 overflow-y-scroll rounded-lg>
+                <select v-model="queryFromDatasourceId">
+                  <option v-for="datasource in _queryFromDatasources.datasources.value" :key="datasource.id" :value="datasource.id">
+                    {{ datasource.name }}
+                  </option>
+                </select>
               </div>
             </PaneArea>
           </Pane>

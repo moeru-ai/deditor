@@ -1,7 +1,8 @@
 import type { DSNExtraOptions } from '../libs/dsn'
 
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+
+import { useAppDataStorage } from '../composables/electron/use-app-data'
 
 export type Driver =
   | 'postgres'
@@ -32,7 +33,7 @@ export type DatasourceThroughConnectionParameters = DatasourceBase & {
 }
 
 export const useDatasourcesStore = defineStore('datasources', () => {
-  const datasources = ref<Datasource[]>([])
+  const datasources = useAppDataStorage<Datasource[]>('ai.moeru.deditor/config.json', 'datasources', [])
 
   return {
     datasources,

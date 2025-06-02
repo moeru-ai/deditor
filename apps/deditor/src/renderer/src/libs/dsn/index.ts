@@ -1,5 +1,5 @@
-export interface DSNExtraOptions extends Record<string, string | string[]> {
-  sslmode: string
+export interface DSNExtraOptions extends Record<string, string | string[] | number | boolean> {
+  sslmode: boolean | "require" | "allow" | "prefer" | "verify-full"
 }
 
 export interface DSNConnectionParameters {
@@ -38,7 +38,7 @@ export function postgresDefaultParams(): DSNDefaultParams {
       database: 'postgres',
     },
     applyParamsURLSearchParams: (search: URLSearchParams) => {
-      search.set('sslmode', 'disabled')
+      search.set('sslmode', 'false')
     },
   }
 }
@@ -77,7 +77,7 @@ export function toDSN(
       value.forEach(v => search.set(key, v))
     }
     else {
-      search.set(key, value)
+      search.set(key, String(value))
     }
   }
 
@@ -110,12 +110,19 @@ export function fromDSN(dsn: string, defaultParams: DSNDefaultParams): DSNConnec
     params.database = url?.pathname?.slice(1) || 'postgres' // Remove leading slash
 
     if (!params.extraOptions)
-      params.extraOptions = { sslmode: 'disabled' }
+      params.extraOptions = { sslmode: false }
 
     // Parse SSL mode from query params if present
     const sslMode = url.searchParams.get('sslmode')
-    if (sslMode)
-      params.extraOptions!.sslmode = sslMode
+    if (sslMode) {
+      if (sslMode === "true") {
+        params.extraOptions!.sslmode = true
+      } else if (sslMode === "false") {
+        params.extraOptions!.sslmode = false
+      } else {
+        params.extraOptions!.sslmode = sslMode as "require" | "allow" | "prefer" | "verify-full"
+      }
+    }
   }
   catch (err) {
     console.warn('Invalid connection string format:', err)

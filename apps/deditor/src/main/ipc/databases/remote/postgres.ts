@@ -13,6 +13,7 @@ export function registerPostgresJsDatabaseDialect(window: BrowserWindow) {
   defineIPCHandler<PostgresMethods>(window, 'connectRemoteDatabasePostgres')
     .handle(async (_, { dsn }) => {
       try {
+        console.log('connect', dsn)
         const dbSession = drizzle(dsn)
         const dbSessionId = nanoid()
         databaseSessions.set(dbSessionId, dbSession)
@@ -28,6 +29,7 @@ export function registerPostgresJsDatabaseDialect(window: BrowserWindow) {
 
   defineIPCHandler<PostgresMethods>(window, 'queryRemoteDatabasePostgres')
     .handle(async (_, { databaseSessionId, statement }) => {
+      console.log('query', databaseSessionId, statement)
       if (!databaseSessions.has(databaseSessionId)) {
         throw new Error('Database session ID not found in session map, please connect to the database first.')
       }
