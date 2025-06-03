@@ -47,18 +47,24 @@ const datasource = computed({
     }
   },
 })
-const datasourceName = ref(datasource.value.name || 'New Datasource')
-const { undo, clear } = useRefHistory(datasourceName)
+
 const DSN = computed({
   get: () => {
-    return toDSN(driver.value, datasource.value as DatasourceThroughConnectionParameters, defaultParamsFromDriver(driver.value))
+    return toDSN(
+      driver.value,
+      datasource.value as DatasourceThroughConnectionParameters,
+      defaultParamsFromDriver(driver.value),
+    )
   },
   set: (value) => {
     if (!datasource.value)
       return
 
     const params = datasource.value as DatasourceThroughConnectionParameters
-    const paramsFromDSN = fromDSN(value, defaultParamsFromDriver(driver.value))
+    const paramsFromDSN = fromDSN(
+      value,
+      defaultParamsFromDriver(driver.value),
+    )
 
     params.host = paramsFromDSN.host
     params.port = paramsFromDSN.port
@@ -69,15 +75,27 @@ const DSN = computed({
   },
 })
 
+const datasourceName = computed({
+  get: () => datasource.value.name || 'New Datasource',
+  set: (value) => {
+    datasource.value.name = value
+  },
+})
+
+const { undo, clear } = useRefHistory(datasourceName)
+
 // TODO: ?
 onMounted(() => {
-  DSN.value = toDSN(driver.value, datasource.value as DatasourceThroughConnectionParameters, defaultParamsFromDriver(driver.value))
+  DSN.value = toDSN(
+    driver.value,
+    datasource.value as DatasourceThroughConnectionParameters,
+    defaultParamsFromDriver(driver.value),
+  )
 })
 
 watch([id, driver], () => {
   clear()
   datasource.value = datasourceFromId()
-  datasourceName.value = datasource.value.name || 'New Datasource'
 })
 
 function handleBlur() {
@@ -85,14 +103,6 @@ function handleBlur() {
     undo()
   }
 }
-
-watch(datasourceName, (newName) => {
-  if (datasource.value) {
-    datasource.value.name = newName
-  }
-}, {
-  immediate: true,
-})
 
 async function handleTestConnection() {
   const { connect, execute } = useRemotePostgres()
