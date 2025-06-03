@@ -102,6 +102,17 @@ const menuConfig = computed<MenuItemConfig[]>(() => ([
                       <div>{{ datasource.name }}</div>
                     </div>
                   </template>
+                  <template v-else>
+                    <div
+                      bg="hover:neutral-700/80"
+                      active-class="bg-neutral-700/50"
+                      transition="all duration-100 ease-in-out"
+                      flex cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1 text-sm
+                    >
+                      <div i-ph:question />
+                      <div>{{ datasource.name }}</div>
+                    </div>
+                  </template>
                 </DatasourcesContextMenu>
               </div>
               <button
