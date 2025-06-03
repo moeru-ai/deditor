@@ -18,7 +18,8 @@ import {
   getSortedRowModel,
   useVueTable,
 } from '@tanstack/vue-table'
-import { computed, h, ref, toRaw } from 'vue'
+import { useEventListener } from '@vueuse/core'
+import { computed, h, nextTick, ref, toRaw } from 'vue'
 
 import { valueUpdater } from '../../libs/shadcn/utils'
 import Button from '../basic/Button.vue'
@@ -54,33 +55,78 @@ const emits = defineEmits<{
   (e: 'pagePrevious'): void
   (e: 'pageNext'): void
   (e: 'rowClick', index: number, row: Record<string, unknown>): void
+  (e: 'updateData', rowIndex: number, columnId: string, value: unknown): void
 }>()
-
-// Define default column sizes
-const DEFAULT_COLUMN_WIDTH = 150
-const SELECT_COLUMN_WIDTH = 50
 
 // Add column resizing state
 const columnSizing = ref<ColumnSizingState>({})
 const columnResizeMode = ref<ColumnResizeMode>('onChange')
 
+// Create a ref to track editing state
+const editingCell = ref<{ rowIndex: number, columnId: string } | null>(null)
+const editValue = ref<string>('')
+// Add focused cell tracking
+const focusedCell = ref<{ rowIndex: number, columnId: string } | null>(null)
+
 const columns = computed<ColumnDef<Record<string, unknown>>[]>(() => {
   if (!props.data || !props.data.length || !props.data[0])
     return []
 
-  const fields = Object.keys(props.data[0]).map((key) => {
+  const fields: ColumnDef<Record<string, unknown>>[] = Object.keys(props.data[0]).map((key) => {
     return {
       accessorKey: key,
       header: key,
       cell: (cellProps: CellContext<Record<string, unknown>, unknown>) => {
         const value = cellProps.row.getValue(key) as string | number | boolean
-        if (Array.isArray(value)) {
-          return h('span', {}, JSON.stringify(toRaw(value)))
+        const rowIndex = cellProps.row.index
+
+        // Check if this cell is being edited
+        if (editingCell.value?.rowIndex === rowIndex && editingCell.value?.columnId === key) {
+          return h('input', {
+            value: editValue.value,
+            class: 'editing-cell-input bg-neutral-900 w-full border-2 border-primary-800 rounded-md px-1.5 py-1 outline-none inline-flex',
+            onInput: (e: Event) => {
+              editValue.value = (e.target as HTMLInputElement).value
+            },
+            onBlur: () => finishEditing(),
+            onKeyup: (e: KeyboardEvent) => {
+              if (e.key === 'Enter')
+                finishEditing()
+              if (e.key === 'Escape') {
+                clearCellStates()
+              }
+            },
+            onClick: (e: Event) => {
+              // Prevent click from bubbling to parent span
+              e.stopPropagation()
+            },
+            autofocus: true,
+          })
         }
 
-        return h('span', {}, value)
+        // Check if this cell is focused
+        const isFocused = focusedCell.value?.rowIndex === rowIndex && focusedCell.value?.columnId === key
+        const cellClass = [
+          'cursor-text px-1.5 py-1 inline-flex w-full overflow-hidden',
+          isFocused ? 'border-2 border-primary-800/50 rounded-md bg-neutral-900/50' : 'border-2 border-transparent',
+        ].join(' ')
+
+        // Regular cell display with double click to edit
+        if (Array.isArray(value)) {
+          return h('span', {
+            onDblclick: () => startEditing(rowIndex, key, JSON.stringify(toRaw(value))),
+            onClick: () => handleCellFocus(rowIndex, key),
+            class: cellClass,
+          }, JSON.stringify(toRaw(value)))
+        }
+
+        return h('span', {
+          onDblclick: () => startEditing(rowIndex, key, value),
+          onClick: () => handleCellFocus(rowIndex, key),
+          class: cellClass,
+        }, value)
       },
-      size: DEFAULT_COLUMN_WIDTH,
+      size: 150,
       minSize: 60,
       maxSize: 800,
       enableResizing: true,
@@ -92,20 +138,22 @@ const columns = computed<ColumnDef<Record<string, unknown>>[]>(() => {
       id: 'select',
       header: ({ table }) => h(Checkbox, {
         'modelValue': table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate'),
-        'onUpdate:modelValue': value => table.toggleAllPageRowsSelected(!!value),
+        'onUpdate:modelValue': (value: boolean | 'indeterminate') => table.toggleAllPageRowsSelected(!!value),
         'ariaLabel': 'Select all',
+        'class': 'ml-1 mt-0.5 inline-block',
       }),
       cell: ({ row }) => h(Checkbox, {
         'modelValue': row.getIsSelected(),
-        'onUpdate:modelValue': value => row.toggleSelected(!!value),
+        'onUpdate:modelValue': (value: boolean | 'indeterminate') => row.toggleSelected(!!value),
         'ariaLabel': 'Select row',
+        'class': 'ml-2 inline-block',
       }),
       enableSorting: false,
       enableHiding: false,
-      size: SELECT_COLUMN_WIDTH,
-      minSize: SELECT_COLUMN_WIDTH,
-      maxSize: SELECT_COLUMN_WIDTH,
-      enableResizing: false,
+      size: 40,
+      minSize: 40,
+      maxSize: 800,
+      enableResizing: true,
     },
     ...fields,
     // Add a spacer column that will expand to fill available space
@@ -190,6 +238,60 @@ const columnSizeVars = computed(() => {
 function handleRowClick(index: number) {
   emits('rowClick', index, table.getRowModel().rows[index].original)
 }
+
+// Function to handle cell updates
+function updateData(rowIndex: number, columnId: string, value: unknown) {
+  emits('updateData', rowIndex, columnId, value)
+}
+
+// Function to handle edit mode
+function startEditing(rowIndex: number, columnId: string, initialValue: unknown) {
+  // If we're already editing a different cell, save its value first
+  if (editingCell.value && (editingCell.value.rowIndex !== rowIndex || editingCell.value.columnId !== columnId)) {
+    finishEditing()
+  }
+
+  editingCell.value = { rowIndex, columnId }
+  editValue.value = String(initialValue)
+  // Wait for the input to be rendered
+  nextTick(() => {
+    const input = document.querySelector('.editing-cell-input input') as HTMLInputElement
+    if (input) {
+      input.focus()
+      input.select() // Select all text when entering edit mode
+    }
+  })
+}
+
+// Function to handle edit completion
+function finishEditing() {
+  if (editingCell.value) {
+    const { rowIndex, columnId } = editingCell.value
+    updateData(rowIndex, columnId, editValue.value)
+    editingCell.value = null
+  }
+}
+
+// Function to handle cell focus
+function handleCellFocus(rowIndex: number, columnId: string) {
+  focusedCell.value = { rowIndex, columnId }
+  emits('rowClick', rowIndex, table.getRowModel().rows[rowIndex].original)
+}
+
+// Function to clear all cell states
+function clearCellStates() {
+  editingCell.value = null
+  focusedCell.value = null
+}
+
+// Add global keyup handler
+function handleGlobalKeyup(e: KeyboardEvent) {
+  if (e.key === 'Escape') {
+    clearCellStates()
+  }
+}
+
+useEventListener('keyup', handleGlobalKeyup)
 </script>
 
 <template>

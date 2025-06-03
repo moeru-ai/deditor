@@ -128,6 +128,14 @@ function handlePageNext() {
 function handleRowClick(_index: number, row: Record<string, unknown>) {
   selectedRow.value = row
 }
+
+function handleUpdateData(rowIndex: number, columnId: string, value: unknown) {
+  // Update your data here
+  // Example:
+  const newData = [...results.value]
+  newData[rowIndex][columnId] = value
+  results.value = newData
+}
 </script>
 
 <template>
@@ -196,6 +204,7 @@ function handleRowClick(_index: number, row: Record<string, unknown>) {
                 @page-previous="handlePagePrevious"
                 @page-next="handlePageNext"
                 @row-click="handleRowClick"
+                @update-data="handleUpdateData"
               />
             </PaneArea>
           </Pane>
