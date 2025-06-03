@@ -10,12 +10,11 @@ import PaneArea from '../components/container/PaneArea.vue'
 import DatasourcesContextMenu from '../components/context-menu/datasources/index.vue'
 import { useDatasourcesStore } from '../stores/datasources'
 
-const route = useRoute()
+const route = useRoute('/datasources/[driver]/edit/[id]/') // nested view
 const router = useRouter()
 const datasourcesStore = useDatasourcesStore()
 
-const id = computed(() => (route.params as any).id as string)
-
+const id = computed(() => route.params.id)
 const editing = computed(() => route.path.match(/\/datasources\/([^/]+)\/edit/))
 
 function handleDelete(datasource?: Datasource) {
