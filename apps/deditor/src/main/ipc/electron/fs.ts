@@ -3,7 +3,8 @@ import type { App, BrowserWindow } from 'electron'
 import type { PathLike } from 'node:fs'
 
 import { Buffer } from 'node:buffer'
-import { mkdir, readFile, stat, writeFile } from 'node:fs/promises'
+import { writeFileSync } from 'node:fs'
+import { mkdir, readFile, stat } from 'node:fs/promises'
 
 import { defineIPCHandler } from '../define-ipc-handler'
 
@@ -33,7 +34,12 @@ export function isENOENTError(error: unknown): boolean {
 
 export function registerFs(window: BrowserWindow, _app: App) {
   defineIPCHandler<FsMethods>(window, 'exists').handle(async (_, params) => await exists(params.path))
-  defineIPCHandler<FsMethods>(window, 'readFile').handle(async (_, params) => (await readFile(params.path, params.options)).buffer)
-  defineIPCHandler<FsMethods>(window, 'writeFile').handle(async (_, params) => await writeFile(params.path, Buffer.from(params.data), params.options))
+  defineIPCHandler<FsMethods>(window, 'readFile').handle(async (_, params) => {
+    const buffer = await readFile(params.path, params.options)
+    if (typeof buffer === 'string')
+      return Buffer.from(buffer).buffer
+    return buffer.buffer
+  })
+  defineIPCHandler<FsMethods>(window, 'writeFile').handle(async (_, params) => writeFileSync(params.path, Buffer.from(params.data), params.options))
   defineIPCHandler<FsMethods>(window, 'mkdir').handle(async (_, params) => await mkdir(params.path, params.options))
 }

@@ -10,7 +10,6 @@ export function useRemotePostgres() {
 
   return {
     connect: async (dsn: string) => {
-      console.log('connect', dsn)
       const id = await methods('connectRemoteDatabasePostgres').call({ dsn })
       databaseSessionId.value = id.databaseSessionId
 

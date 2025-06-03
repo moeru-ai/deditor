@@ -80,6 +80,9 @@ importers:
       '@electron-toolkit/utils':
         specifier: ^4.0.0
         version: 4.0.0(electron@36.3.2)
+      '@guiiai/logg':
+        specifier: ^1.0.10
+        version: 1.0.10
       '@huggingface/transformers':
         specifier: ^3.5.1
         version: 3.5.1
@@ -783,6 +786,9 @@ packages:
 
   '@gar/promisify@1.1.3':
     resolution: {integrity: sha512-k2Ty1JcVojjJFwrg/ThKi2ujJ7XNLYaFGNB/bWT9wGR+oSMJHMa5w+CUq6p/pVrKeNNgA7pCqEcjSnHVoqJQFw==}
+
+  '@guiiai/logg@1.0.10':
+    resolution: {integrity: sha512-r94RV+/Uqs5xB6DMqnzUSsXG+vLTP058jwNgqyxwPCD6fk/YvUtma7Z7Pu6YDS0LWJttLk4VtdkDbo/GSUVCGw==}
 
   '@huggingface/jinja@0.4.1':
     resolution: {integrity: sha512-3WXbMFaPkk03LRCM0z0sylmn8ddDm4ubjU7X+Hg4M2GOuMklwoGAFXp9V2keq7vltoB/c7McE5aHUVVddAewsw==}
@@ -6392,6 +6398,8 @@ snapshots:
       - vue
 
   '@gar/promisify@1.1.3': {}
+
+  '@guiiai/logg@1.0.10': {}
 
   '@huggingface/jinja@0.4.1': {}
 

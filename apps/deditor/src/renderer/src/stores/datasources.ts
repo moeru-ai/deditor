@@ -1,5 +1,6 @@
 import type { DSNExtraOptions } from '../libs/dsn'
 
+import { nanoid } from '@deditor-app/shared'
 import { defineStore } from 'pinia'
 
 import { useVersionedAppDataStorage } from '../composables/electron/use-app-data'
@@ -35,7 +36,12 @@ export type DatasourceThroughConnectionParameters = DatasourceBase & {
 export const useDatasourcesStore = defineStore('datasources', () => {
   const datasources = useVersionedAppDataStorage<Datasource[]>('ai.moeru.deditor/config.json', 'datasources', [], { defaultVersion: '0.0.1' })
 
+  function createDatasource(driver: Driver) {
+    return { id: nanoid(), name: 'New Datasource', driver, connectionString: '', sslmode: '' } satisfies Datasource
+  }
+
   return {
     datasources,
+    createDatasource,
   }
 })

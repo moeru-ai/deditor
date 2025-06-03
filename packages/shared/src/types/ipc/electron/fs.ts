@@ -1,9 +1,9 @@
-import type { Mode, OpenMode, PathLike } from 'node:fs'
+import type { Mode, OpenMode, PathLike, WriteFileOptions } from 'node:fs'
 
 export interface FsMethods {
   exists: (params: { path: PathLike }) => boolean
   readFile: (params: { path: PathLike, options?: ({ encoding?: null | undefined, flag?: OpenMode | undefined }) }) => ArrayBufferLike
-  writeFile: (params: { path: PathLike, data: ArrayBufferLike, options?: ({ encoding?: null | undefined, mode?: number | undefined, flag?: OpenMode | undefined }) }) => void
+  writeFile: (params: { path: PathLike, data: ArrayBufferLike, options?: WriteFileOptions }) => void
   mkdir: (params: {
     path: PathLike
     /**

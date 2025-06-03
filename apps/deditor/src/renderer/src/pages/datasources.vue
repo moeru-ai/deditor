@@ -42,6 +42,12 @@ function handleClick(datasource: Datasource) {
   router.push(`/datasources/${datasource.driver}/edit/${datasource.id}`)
 }
 
+function handleAdd() {
+  const newDatasource = datasourcesStore.createDatasource('postgres')
+  datasourcesStore.datasources.push(newDatasource)
+  router.push(`/datasources/${newDatasource.driver}/edit/${newDatasource.id}`)
+}
+
 // Define the menu configuration
 const menuConfig = computed<MenuItemConfig[]>(() => ([
   {
@@ -71,7 +77,7 @@ const menuConfig = computed<MenuItemConfig[]>(() => ([
                   <button
                     bg="neutral-900/70 hover:neutral-900"
                     ml-1 inline-block flex items-center gap-1 rounded-lg py-1 pl-1 pr-2 text-sm outline-none
-                    @click="datasourcesStore.datasources.push({ driver: 'postgres', name: `Datasource ${datasourcesStore.datasources.length + 1}`, connectionString: '', id: String(datasourcesStore.datasources.length + 1) })"
+                    @click="handleAdd"
                   >
                     <div i-ph:plus-light /> Add
                   </button>
@@ -103,7 +109,7 @@ const menuConfig = computed<MenuItemConfig[]>(() => ([
                 w="[calc(100%-1rem)]"
                 fixed bottom-2 left-2 flex items-center gap-1 rounded-xl px-3 py-2 text-sm outline-none
                 transition="all duration-300 ease-in-out"
-                @click="datasourcesStore.datasources.push({ driver: 'postgres', name: `Datasource ${datasourcesStore.datasources.length + 1}`, connectionString: '', id: String(datasourcesStore.datasources.length + 1) })"
+                @click="handleAdd"
               >
                 <div i-ph:plus-light />
                 <div>

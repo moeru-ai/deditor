@@ -66,7 +66,6 @@ async function loadFromSelectedDatasource() {
   }
 
   if (queryFromDatasource.driver === 'postgres') {
-    console.log('connect', toDSN(queryFromDatasource.driver, queryFromDatasource as DatasourceThroughConnectionParameters, defaultParamsFromDriver(queryFromDatasource.driver)))
     await remotePostgresDB.connect(toDSN(queryFromDatasource.driver, queryFromDatasource as DatasourceThroughConnectionParameters, defaultParamsFromDriver(queryFromDatasource.driver)))
     results.value = await remotePostgresDB.execute('SELECT * FROM generate_series(1, 10);')
   }

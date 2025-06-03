@@ -101,9 +101,7 @@ function useAppDataStorage<T extends(string | number | boolean | object | null)>
 
       await fs('writeFile').call({ path: filePath, data: typedArrayToBuffer(writeContent) })
     },
-  }, {
-    ...options,
-  })
+  }, options)
 }
 
 interface Versioned<T> { version?: string, data?: T }

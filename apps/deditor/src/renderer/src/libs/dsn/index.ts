@@ -1,5 +1,5 @@
 export interface DSNExtraOptions extends Record<string, string | string[] | number | boolean> {
-  sslmode: boolean | "require" | "allow" | "prefer" | "verify-full"
+  sslmode: boolean | 'require' | 'allow' | 'prefer' | 'verify-full'
 }
 
 export interface DSNConnectionParameters {
@@ -115,12 +115,14 @@ export function fromDSN(dsn: string, defaultParams: DSNDefaultParams): DSNConnec
     // Parse SSL mode from query params if present
     const sslMode = url.searchParams.get('sslmode')
     if (sslMode) {
-      if (sslMode === "true") {
+      if (sslMode === 'true') {
         params.extraOptions!.sslmode = true
-      } else if (sslMode === "false") {
+      }
+      else if (sslMode === 'false') {
         params.extraOptions!.sslmode = false
-      } else {
-        params.extraOptions!.sslmode = sslMode as "require" | "allow" | "prefer" | "verify-full"
+      }
+      else {
+        params.extraOptions!.sslmode = sslMode as 'require' | 'allow' | 'prefer' | 'verify-full'
       }
     }
   }

@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import type { Datasource, DatasourceThroughConnectionParameters, Driver } from '../../../../../stores/datasources'
+import type { DatasourceThroughConnectionParameters, Driver } from '../../../../../stores/datasources'
 
-import { nanoid } from '@deditor-app/shared'
 import { useClipboard, useRefHistory } from '@vueuse/core'
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
@@ -28,16 +27,26 @@ const datasourcesStore = useDatasourcesStore()
 function datasourceFromId() {
   const datasource = datasourcesStore.datasources.find(ds => ds.id === id.value)
   if (typeof datasource === 'undefined') {
-    const newDatasource = { id: nanoid(), name: 'New Datasource', driver: driver.value, connectionString: '', database: 'postgres', sslmode: '' } satisfies Datasource
+    const newDatasource = datasourcesStore.createDatasource(driver.value)
     datasourcesStore.datasources.push(newDatasource)
-
     return newDatasource
   }
 
   return datasource
 }
 
-const datasource = ref(datasourceFromId())
+const datasource = computed({
+  get: () => datasourceFromId(),
+  set: (value) => {
+    const datasourceIndex = datasourcesStore.datasources.findIndex(ds => ds.id === id.value)
+    if (datasourceIndex !== -1) {
+      datasourcesStore.datasources[datasourceIndex] = value
+    }
+    else {
+      console.error(`Datasource with id ${id.value} not found in store.`)
+    }
+  },
+})
 const datasourceName = ref(datasource.value.name || 'New Datasource')
 const { undo, clear } = useRefHistory(datasourceName)
 const DSN = computed({
@@ -83,18 +92,6 @@ watch(datasourceName, (newName) => {
   }
 }, {
   immediate: true,
-})
-
-watch(datasource, () => {
-  const datasourceIndex = datasourcesStore.datasources.findIndex(ds => ds.id === id.value)
-  if (datasourceIndex !== -1) {
-    datasourcesStore.datasources[datasourceIndex] = datasource.value
-  }
-  else {
-    console.error(`Datasource with id ${id.value} not found in store.`)
-  }
-}, {
-  deep: true,
 })
 
 async function handleTestConnection() {
