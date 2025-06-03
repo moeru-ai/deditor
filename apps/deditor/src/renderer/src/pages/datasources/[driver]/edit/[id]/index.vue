@@ -2,10 +2,11 @@
 import type { Datasource, DatasourceThroughConnectionParameters, Driver } from '../../../../../stores/datasources'
 
 import { nanoid } from '@deditor-app/shared'
-import { useRefHistory } from '@vueuse/core'
+import { useClipboard, useRefHistory } from '@vueuse/core'
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 
+import Button from '../../../../../components/basic/Button.vue'
 import Editable from '../../../../../components/basic/Editable.vue'
 import { Input } from '../../../../../components/ui/input'
 import { useRemotePostgres } from '../../../../../composables/ipc/databases/remote'
@@ -55,7 +56,7 @@ const DSN = computed({
     params.user = paramsFromDSN.user
     params.password = paramsFromDSN.password
     params.database = paramsFromDSN.database
-    params.extraOptions = paramsFromDSN.extraOptions || { sslmode: '' }
+    params.extraOptions = paramsFromDSN.extraOptions || { sslmode: false }
   },
 })
 
@@ -140,6 +141,11 @@ async function handleTestConnection() {
     }
   }
 }
+
+async function handlePasteDSN() {
+  const { text } = useClipboard()
+  DSN.value = text.value || ''
+}
 </script>
 
 <template>
@@ -166,7 +172,12 @@ async function handleTestConnection() {
               Data Source Name for the database connection.
             </div>
           </div>
-          <Input v-model="DSN" />
+          <div flex items-center gap-2>
+            <Input v-model="DSN" flex-1 />
+            <Button @click="handlePasteDSN">
+              Paste
+            </Button>
+          </div>
         </label>
       </div>
       <div grid="~ cols-[1fr_2px_1fr] rows-[1fr_1fr]" items-center gap-2>
