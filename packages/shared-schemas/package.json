@@ -1,5 +1,5 @@
 {
-  "name": "@deditor-app/shared",
+  "name": "@deditor-app/shared-schemas",
   "type": "module",
   "private": true,
   "author": {
@@ -11,23 +11,18 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/moeru-ai/deditor.git",
-    "directory": "packages/shared"
+    "directory": "packages/shared-schemas"
   },
   "exports": {
-    "./types": {
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/types/index.mjs",
-      "require": "./dist/types/index.cjs"
-    },
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     }
   },
-  "main": "./dist/types/index.cjs",
-  "module": "./dist/types/index.mjs",
-  "types": "./dist/types/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "files": [
     "README.md",
     "dist",
@@ -41,9 +36,5 @@
   },
   "peerDependencies": {
     "drizzle-orm": ">=0.44.0"
-  },
-  "dependencies": {
-    "@deditor-app/shared-schemas": "workspace:^",
-    "nanoid": "^5.1.5"
   }
 }

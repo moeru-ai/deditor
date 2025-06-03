@@ -344,7 +344,7 @@ useEventListener('keyup', handleGlobalKeyup)
               }"
               :colspan="header.colSpan"
               :data-column-id="header.column.id"
-              class="relative select-none bg-neutral-900/50"
+              class="relative select-none bg-neutral-900/50 font-mono"
             >
               <div class="flex items-center justify-between gap-2">
                 <div v-if="!header.isPlaceholder" class="truncate">

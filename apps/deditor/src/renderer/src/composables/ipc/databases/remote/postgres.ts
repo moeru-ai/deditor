@@ -28,5 +28,21 @@ export function useRemotePostgres() {
 
       return res.results as R[]
     },
+    listTables: async () => {
+      if (!databaseSessionId.value) {
+        throw new Error('Database session ID is not set. Please connect to a database first.')
+      }
+
+      const res = await methods('listTables').call({ databaseSessionId: databaseSessionId.value! })
+      return res.results
+    },
+    listColumns: async (tableName: string, schema: string = 'public') => {
+      if (!databaseSessionId.value) {
+        throw new Error('Database session ID is not set. Please connect to a database first.')
+      }
+
+      const res = await methods('listColumns').call({ databaseSessionId: databaseSessionId.value!, tableName, schema })
+      return res.results
+    },
   }
 }

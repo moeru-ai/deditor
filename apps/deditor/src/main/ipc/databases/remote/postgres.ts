@@ -3,21 +3,26 @@ import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import type { BrowserWindow } from 'electron'
 
 import { nanoid } from '@deditor-app/shared'
+import * as schema from '@deditor-app/shared-schemas'
+import { postgresInformationSchemaColumns } from '@deditor-app/shared-schemas'
+import { and, eq } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/postgres-js'
+import postgres from 'postgres'
 
 import { defineIPCHandler } from '../../define-ipc-handler'
 
-const databaseSessions = new Map<string, PostgresJsDatabase>()
+const databaseSessions = new Map<string, { drizzle: PostgresJsDatabase<typeof schema>, client: postgres.Sql }>()
 
 export function registerPostgresJsDatabaseDialect(window: BrowserWindow) {
   defineIPCHandler<PostgresMethods>(window, 'connectRemoteDatabasePostgres')
     .handle(async (_, { dsn }) => {
       try {
-        const dbSession = drizzle(dsn)
+        const pgClient = postgres(dsn)
+        const pgDrizzle = drizzle(pgClient, { schema })
         const dbSessionId = nanoid()
-        databaseSessions.set(dbSessionId, dbSession)
+        databaseSessions.set(dbSessionId, { drizzle: pgDrizzle, client: pgClient })
 
-        await dbSession.execute('SELECT 1')
+        await pgDrizzle.execute('SELECT 1')
         return { databaseSessionId: dbSessionId, dialect: 'postgres' }
       }
       catch (err) {
@@ -27,18 +32,62 @@ export function registerPostgresJsDatabaseDialect(window: BrowserWindow) {
     })
 
   defineIPCHandler<PostgresMethods>(window, 'queryRemoteDatabasePostgres')
-    .handle(async (_, { databaseSessionId, statement }) => {
+    .handle(async (_, { databaseSessionId, statement, parameters }) => {
       if (!databaseSessions.has(databaseSessionId)) {
         throw new Error('Database session ID not found in session map, please connect to the database first.')
       }
 
       try {
         const dbSession = databaseSessions.get(databaseSessionId)!
-        const res = await dbSession.execute(statement)
+        const res = await dbSession.client.unsafe(statement, parameters)
         return { databaseSessionId, results: res }
       }
       catch (err) {
         console.error('failed to query remote Postgres database:', err)
+        throw err
+      }
+    })
+
+  defineIPCHandler<PostgresMethods>(window, 'listTables')
+    .handle(async (_, { databaseSessionId }) => {
+      if (!databaseSessions.has(databaseSessionId)) {
+        throw new Error('Database session ID not found in session map, please connect to the database first.')
+      }
+
+      try {
+        const dbSession = databaseSessions.get(databaseSessionId)!
+        const res = await dbSession.drizzle.query.postgresInformationSchemaTables.findMany()
+        return { databaseSessionId, results: res }
+      }
+      catch (err) {
+        console.error('failed to query remote Postgres database to list tables:', err)
+        throw err
+      }
+    })
+
+  defineIPCHandler<PostgresMethods>(window, 'listColumns')
+    .handle(async (_, { databaseSessionId, tableName, schema }) => {
+      if (!databaseSessions.has(databaseSessionId)) {
+        throw new Error('Database session ID not found in session map, please connect to the database first.')
+      }
+
+      try {
+        const dbSession = databaseSessions.get(databaseSessionId)!
+        const res = await dbSession.drizzle.select().from(postgresInformationSchemaColumns).where(
+          and(
+            eq(postgresInformationSchemaColumns.table_name, tableName),
+            eq(postgresInformationSchemaColumns.table_schema, schema ?? 'public'),
+          ),
+        )
+        return {
+          databaseSessionId,
+          tableName,
+          schema,
+          results: res,
+        }
+      }
+      catch (err) {
+        console.error('failed to query remote Postgres database to list columns:', err)
         throw err
       }
     })

@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import type { DuckDBWasmDrizzleDatabase } from '@proj-airi/drizzle-duckdb-wasm'
+import type { SQL } from 'drizzle-orm'
 
-import type { DatasourceThroughConnectionParameters } from '../stores/datasources'
+import type { DatasourceDriverMap, DatasourceThroughConnectionParameters } from '../stores/datasources'
 
 import { drizzle } from '@proj-airi/drizzle-duckdb-wasm'
 import { getImportUrlBundles } from '@proj-airi/drizzle-duckdb-wasm/bundles/import-url-browser'
 import { BasicTextarea } from '@proj-airi/ui'
+import { sql } from 'drizzle-orm'
 import { storeToRefs } from 'pinia'
 import { Pane, Splitpanes } from 'splitpanes'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
@@ -13,9 +15,7 @@ import { onMounted, onUnmounted, ref, watch } from 'vue'
 import Button from '../components/basic/Button.vue'
 import PaneArea from '../components/container/PaneArea.vue'
 import Chat from '../components/table/Chat.vue'
-import { useRemotePostgres } from '../composables/ipc/databases/remote'
-import { defaultParamsFromDriver, toDSN } from '../libs/dsn'
-import { useDatasourcesStore } from '../stores/datasources'
+import { useDatasourceSessionsStore, useDatasourcesStore } from '../stores/datasources'
 
 const input = ref(`[${Array.from({ length: 100 }, (_, i) => `{"question": "What is the answer to ${i}?", "answer": "It's ${i}."}`).join(',')}]`)
 
@@ -29,9 +29,12 @@ const queryFrom = ref<'one-time' | 'files' | 'datasets' | 'datasources'>('one-ti
 
 const queryFromDatasourceId = ref<string>()
 const _queryFromDatasources = storeToRefs(useDatasourcesStore())
+const datasourceSessions = useDatasourceSessionsStore()
+
+const queryFromDatasourceTables = ref<{ schema?: string | null, table?: string | null }[]>([])
+const queryFromDatasourceTable = ref<{ schema?: string | null, table?: string | null }>()
 
 const inMemoryDB = ref<DuckDBWasmDrizzleDatabase>()
-const remotePostgresDB = useRemotePostgres()
 
 async function inMemoryDBClient() {
   return (await inMemoryDB.value!.$client)
@@ -55,7 +58,11 @@ LIMIT ${pageSize.value} OFFSET ${(page.value - 1) * pageSize.value}
   results.value = res
 }
 
-async function loadFromSelectedDatasource() {
+async function prepareQuery(): Promise<{
+  driver: keyof DatasourceDriverMap
+  datasource: DatasourceThroughConnectionParameters
+  table?: { schema?: string | null, table?: string | null }
+} | undefined> {
   if (!queryFromDatasourceId.value) {
     return
   }
@@ -65,9 +72,81 @@ async function loadFromSelectedDatasource() {
     return
   }
 
-  if (queryFromDatasource.driver === 'postgres') {
-    await remotePostgresDB.connect(toDSN(queryFromDatasource.driver, queryFromDatasource as DatasourceThroughConnectionParameters, defaultParamsFromDriver(queryFromDatasource.driver)))
-    results.value = await remotePostgresDB.execute('SELECT * FROM generate_series(1, 10);')
+  const driver = queryFromDatasource.driver as keyof DatasourceDriverMap
+  const datasource = queryFromDatasource as DatasourceThroughConnectionParameters
+  await datasourceSessions.connectByParameters(driver, datasource)
+
+  const tables = await datasourceSessions.listTablesByParameters(driver, datasource)
+  queryFromDatasourceTables.value = tables
+    .map(t => ({ schema: t.table_schema, table: t.table_name }))
+    .filter((t) => {
+      if (!t.schema) {
+        return true
+      }
+
+      return t.schema !== 'information_schema' && t.schema !== 'pg_catalog'
+    })
+
+  if (queryFromDatasourceTable.value == null) {
+    return {
+      driver,
+      datasource,
+    }
+  }
+
+  const table = queryFromDatasourceTables.value.find(t => t.schema === queryFromDatasourceTable.value?.schema && t.table === queryFromDatasourceTable.value?.table)
+  if (!table) {
+    return {
+      driver,
+      datasource,
+    }
+  }
+
+  return {
+    driver,
+    datasource,
+    table,
+  }
+}
+
+async function tableFromPreparedQuery() {
+  const beforeQuery = await prepareQuery()
+  if (!beforeQuery) {
+    return
+  }
+
+  const { table } = beforeQuery
+  if (!table) {
+    return
+  }
+
+  return table
+}
+
+async function query<T>(query: SQL<T>) {
+  const beforeQuery = await prepareQuery()
+  if (!beforeQuery) {
+    return [] as Record<string, unknown>[]
+  }
+
+  const { driver, datasource } = beforeQuery
+
+  const table = await tableFromPreparedQuery()
+  if (!table) {
+    return [] as Record<string, unknown>[]
+  }
+
+  return await datasourceSessions.executeSQLByParameters<Record<string, unknown>>(driver, datasource, query)
+}
+
+async function loadFromSelectedDatasource() {
+  const table = await tableFromPreparedQuery()
+
+  if (table?.schema) {
+    results.value = await query(sql`SELECT * FROM ${sql.identifier(table.schema)}.${sql.identifier(table.table!)} LIMIT 20`)
+  }
+  else if (table?.table) {
+    results.value = await query(sql`SELECT * FROM ${sql.identifier(table.table!)} LIMIT 20`)
   }
 }
 
@@ -84,7 +163,7 @@ watch(queryFrom, async () => {
   }
 })
 
-watch(queryFromDatasourceId, async () => {
+watch([queryFromDatasourceId, queryFromDatasourceTable], async () => {
   results.value = []
 
   await loadFromSelectedDatasource()
@@ -178,9 +257,14 @@ function handleUpdateData(rowIndex: number, columnId: string, value: unknown) {
                 />
               </div>
               <div v-if="queryFrom === 'datasources'" h-full max-h-full flex flex-col gap-2 overflow-y-scroll rounded-lg>
-                <select v-model="queryFromDatasourceId">
+                <select v-model="queryFromDatasourceId" rounded-lg px-2 py-1 class="focus:outline-none">
                   <option v-for="datasource in _queryFromDatasources.datasources.value" :key="datasource.id" :value="datasource.id">
                     {{ datasource.name }}
+                  </option>
+                </select>
+                <select v-model="queryFromDatasourceTable" rounded-lg px-2 py-1 class="focus:outline-none" font-mono>
+                  <option v-for="table in queryFromDatasourceTables" :key="`${table.schema}.${table.table}`" :value="table" font-mono>
+                    {{ table.schema }}.{{ table.table }}
                   </option>
                 </select>
               </div>

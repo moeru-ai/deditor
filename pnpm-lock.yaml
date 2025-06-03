@@ -71,6 +71,9 @@ importers:
 
   apps/deditor:
     dependencies:
+      '@deditor-app/shared-schemas':
+        specifier: workspace:^
+        version: link:../../packages/shared-schemas
       '@electric-sql/pglite':
         specifier: ^0.3.2
         version: 0.3.2
@@ -240,9 +243,21 @@ importers:
 
   packages/shared:
     dependencies:
+      '@deditor-app/shared-schemas':
+        specifier: workspace:^
+        version: link:../shared-schemas
+      drizzle-orm:
+        specifier: '>=0.44.0'
+        version: 0.44.0(@electric-sql/pglite@0.3.2)(mysql2@3.14.1)(postgres@3.4.7)
       nanoid:
         specifier: ^5.1.5
         version: 5.1.5
+
+  packages/shared-schemas:
+    dependencies:
+      drizzle-orm:
+        specifier: '>=0.44.0'
+        version: 0.44.0(@electric-sql/pglite@0.3.2)(mysql2@3.14.1)(postgres@3.4.7)
 
 packages:
 
