@@ -320,7 +320,7 @@ useEventListener('keyup', handleGlobalKeyup)
         <DropdownMenuContent align="end" class="bg-neutral-900">
           <DropdownMenuCheckboxItem
             v-for="column in table.getAllColumns().filter((column) => column.getCanHide())"
-            :key="column.id" class="capitalize"
+            :key="column.id" class="overflow-y-scroll text-xs font-mono"
             :model-value="column.getIsVisible()"
             @update:model-value="(value) => column.toggleVisibility(!!value)"
           >
