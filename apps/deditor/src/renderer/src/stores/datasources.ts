@@ -1,11 +1,12 @@
 import type { SQL } from 'drizzle-orm'
+import type { PgSelectBuilder, PgSelectDynamic } from 'drizzle-orm/pg-core'
 
 import type { useRemoteMySQL } from '@/composables/ipc/databases/remote'
 
 import type { DSNExtraOptions } from '../libs/dsn'
 
 import { nanoid } from '@deditor-app/shared'
-import { PgDialect } from 'drizzle-orm/pg-core'
+import { PgDialect, PgSelectBase, QueryBuilder } from 'drizzle-orm/pg-core'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
@@ -75,9 +76,25 @@ function clientFromDriver(driver: DatasourceDriver) {
   throw new Error(`Unsupported driver: ${driver}`)
 }
 
-function sqlDialectFromDriver(driver: DatasourceDriver) {
+export function sqlDialectFromDriver(driver: DatasourceDriver) {
   if (driver === 'postgres') {
     return new PgDialect()
+  }
+
+  throw new Error(`Unsupported driver: ${driver}`)
+}
+
+export function queryBuilderFromDriver(driver: DatasourceDriver) {
+  if (driver === 'postgres') {
+    return new QueryBuilder()
+  }
+
+  throw new Error(`Unsupported driver: ${driver}`)
+}
+
+export function toDynamicQueryBuilder(driver: DatasourceDriver, qb: PgSelectBuilder<undefined, 'qb'>) {
+  if (driver === 'postgres') {
+    return qb as PgSelectDynamic<any>
   }
 
   throw new Error(`Unsupported driver: ${driver}`)

@@ -56,6 +56,7 @@ const emits = defineEmits<{
   (e: 'pageNext'): void
   (e: 'rowClick', index: number, row: Record<string, unknown>): void
   (e: 'updateData', rowIndex: number, columnId: string, value: unknown): void
+  (e: 'sortingChange', sortedColumns: { id: string, desc: boolean }[]): void
 }>()
 
 // Add column resizing state
@@ -76,6 +77,7 @@ const columns = computed<ColumnDef<Record<string, unknown>>[]>(() => {
     return {
       accessorKey: key,
       header: key,
+      enableSorting: true,
       cell: (cellProps: CellContext<Record<string, unknown>, unknown>) => {
         const value = cellProps.row.getValue(key) as string | number | boolean
         const rowIndex = cellProps.row.index
@@ -184,16 +186,21 @@ const table = useVueTable({
   get columns() {
     return columns.value || []
   },
-  enableSorting: false,
+  enableSorting: true,
   columnResizeMode: columnResizeMode.value,
   enableColumnResizing: true,
   manualPagination: true,
+  manualSorting: true,
   rowCount: props.total,
   getCoreRowModel: getCoreRowModel(),
   getSortedRowModel: getSortedRowModel(),
   getFilteredRowModel: getFilteredRowModel(),
   getExpandedRowModel: getExpandedRowModel(),
-  onSortingChange: updaterOrValue => valueUpdater(updaterOrValue, sorting),
+  onSortingChange: (updaterOrValue) => {
+    const newValue = typeof updaterOrValue === 'function' ? updaterOrValue(sorting.value) : updaterOrValue
+    sorting.value = newValue
+    emits('sortingChange', newValue.map(sort => ({ id: sort.id, desc: sort.desc })))
+  },
   onColumnFiltersChange: updaterOrValue => valueUpdater(updaterOrValue, columnFilters),
   onColumnVisibilityChange: updaterOrValue => valueUpdater(updaterOrValue, columnVisibility),
   onRowSelectionChange: updaterOrValue => valueUpdater(updaterOrValue, rowSelection),
@@ -345,10 +352,17 @@ useEventListener('keyup', handleGlobalKeyup)
               :colspan="header.colSpan"
               :data-column-id="header.column.id"
               class="relative select-none bg-neutral-900/50 font-mono"
+              :class="{ 'cursor-pointer': header.column.getCanSort() }"
+              @click="(e) => header.column.getToggleSortingHandler()?.(e)"
             >
               <div class="flex items-center justify-between gap-2">
-                <div v-if="!header.isPlaceholder" class="truncate">
+                <div v-if="!header.isPlaceholder" class="w-full flex items-center justify-between truncate">
                   <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
+                  <div v-if="header.column.getCanSort()" class="ml-2">
+                    <div v-if="header.column.getIsSorted() === 'asc'" i-ph:arrow-up-bold text-xs />
+                    <div v-else-if="header.column.getIsSorted() === 'desc'" i-ph:arrow-down-bold text-xs />
+                    <div v-else />
+                  </div>
                 </div>
 
                 <!-- Column resize handle -->

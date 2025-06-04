@@ -36,6 +36,8 @@ const queryFromDatasourceTable = ref<{ schema?: string | null, table?: string | 
 
 const inMemoryDB = ref<DuckDBWasmDrizzleDatabase>()
 
+const sortedColumns = ref<{ id: string, desc: boolean }[]>([])
+
 async function inMemoryDBClient() {
   return (await inMemoryDB.value!.$client)
 }
@@ -141,17 +143,34 @@ async function query<T>(query: SQL<T>) {
 
 async function loadFromSelectedDatasource() {
   const table = await tableFromPreparedQuery()
+  if (!table)
+    return
 
-  if (table?.schema) {
-    results.value = await query(sql`SELECT * FROM ${sql.identifier(table.schema)}.${sql.identifier(table.table!)} LIMIT 20`)
+  const q = sql`SELECT * FROM `
+  if (table.schema) {
+    q.append(sql`${sql.identifier(table.schema)}.${sql.identifier(table.table!)}`)
   }
-  else if (table?.table) {
-    results.value = await query(sql`SELECT * FROM ${sql.identifier(table.table!)} LIMIT 20`)
+  else {
+    q.append(sql`${sql.identifier(table.table!)}`)
   }
+
+  if (sortedColumns.value.length > 0) {
+    const orderByClauses = sortedColumns.value.map((col) => {
+      const direction = col.desc ? sql`DESC` : sql`ASC`
+      return sql`${sql.identifier(col.id)} ${direction}`
+    })
+
+    q.append(sql` ORDER BY ${sql.join(orderByClauses, sql`, `)}`)
+  }
+
+  q.append(sql` LIMIT ${pageSize.value} OFFSET ${(page.value - 1) * pageSize.value}`)
+
+  results.value = await query(q)
 }
 
 watch(queryFrom, async () => {
   results.value = []
+  sortedColumns.value = []
 
   switch (queryFrom.value) {
     case 'one-time':
@@ -165,6 +184,7 @@ watch(queryFrom, async () => {
 
 watch([queryFromDatasourceId, queryFromDatasourceTable], async () => {
   results.value = []
+  sortedColumns.value = []
 
   await loadFromSelectedDatasource()
 })
@@ -214,6 +234,11 @@ function handleUpdateData(rowIndex: number, columnId: string, value: unknown) {
   const newData = [...results.value]
   newData[rowIndex][columnId] = value
   results.value = newData
+}
+
+function handleSortingChange(newSortedColumns: { id: string, desc: boolean }[]) {
+  sortedColumns.value = newSortedColumns
+  loadFromSelectedDatasource()
 }
 </script>
 
@@ -289,6 +314,7 @@ function handleUpdateData(rowIndex: number, columnId: string, value: unknown) {
                 @page-next="handlePageNext"
                 @row-click="handleRowClick"
                 @update-data="handleUpdateData"
+                @sorting-change="handleSortingChange"
               />
             </PaneArea>
           </Pane>
