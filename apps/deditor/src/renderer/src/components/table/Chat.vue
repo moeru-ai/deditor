@@ -84,7 +84,7 @@ const columns = computed<ColumnDef<Record<string, unknown>>[]>(() => {
         if (editingCell.value?.rowIndex === rowIndex && editingCell.value?.columnId === key) {
           return h('input', {
             value: editValue.value,
-            class: 'editing-cell-input bg-neutral-900 w-full border-2 border-primary-800 rounded-md px-1.5 py-1 outline-none inline-flex',
+            class: 'editing-cell-input bg-neutral-900 w-full h-full border-2 border-primary-800 rounded-md px-1.5 py-1 outline-none flex',
             onInput: (e: Event) => {
               editValue.value = (e.target as HTMLInputElement).value
             },
@@ -107,20 +107,20 @@ const columns = computed<ColumnDef<Record<string, unknown>>[]>(() => {
         // Check if this cell is focused
         const isFocused = focusedCell.value?.rowIndex === rowIndex && focusedCell.value?.columnId === key
         const cellClass = [
-          'cursor-text px-1.5 py-1 inline-flex w-full overflow-hidden',
+          'cursor-text w-full border-2 px-1.5 py-1 outline-none flex min-h-32px',
           isFocused ? 'border-2 border-primary-800/50 rounded-md bg-neutral-900/50' : 'border-2 border-transparent',
         ].join(' ')
 
         // Regular cell display with double click to edit
         if (Array.isArray(value)) {
-          return h('span', {
+          return h('div', {
             onDblclick: () => startEditing(rowIndex, key, JSON.stringify(toRaw(value))),
             onClick: () => handleCellFocus(rowIndex, key),
             class: cellClass,
           }, JSON.stringify(toRaw(value)))
         }
 
-        return h('span', {
+        return h('div', {
           onDblclick: () => startEditing(rowIndex, key, value),
           onClick: () => handleCellFocus(rowIndex, key),
           class: cellClass,
