@@ -5,12 +5,12 @@ import { ref } from 'vue'
 import { defineClientMethod } from '../../define-client-method'
 
 export function useRemotePostgres() {
-  const methods = <TMethod extends keyof PostgresMethods>(method: TMethod) => defineClientMethod<PostgresMethods, TMethod>(method)
+  const methods = <TMethod extends keyof PostgresMethods>(method: TMethod) => defineClientMethod<PostgresMethods, TMethod>('databaseRemotePostgres', method)
   const databaseSessionId = ref<string>()
 
   return {
     connect: async (dsn: string) => {
-      const id = await methods('connectRemoteDatabasePostgres').call({ dsn })
+      const id = await methods('connect').call({ dsn })
       databaseSessionId.value = id.databaseSessionId
 
       return id
@@ -20,7 +20,7 @@ export function useRemotePostgres() {
         throw new Error('Database session ID is not set. Please connect to a database first.')
       }
 
-      const res = await methods('queryRemoteDatabasePostgres').call({
+      const res = await methods('query').call({
         databaseSessionId: databaseSessionId.value!,
         statement,
         parameters,

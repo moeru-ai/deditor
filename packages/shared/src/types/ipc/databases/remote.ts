@@ -4,12 +4,12 @@ import type {
 } from '@deditor-app/shared-schemas'
 
 export interface PostgresMethods {
-  connectRemoteDatabasePostgres: (params: { dsn: string }) => {
+  connect: (params: { dsn: string }) => {
     databaseSessionId: string
     dialect: 'postgres'
   }
 
-  queryRemoteDatabasePostgres: <T>(params: {
+  query: <T>(params: {
     databaseSessionId: string
     statement: string
     parameters?: any[]
@@ -38,12 +38,12 @@ export interface PostgresMethods {
 }
 
 export interface MySQL2Methods {
-  connectRemoteDatabaseMySQL2: (params: { dsn: string }) => {
+  connect: (params: { dsn: string }) => {
     databaseSessionId: string
     dialect: 'mysql2'
   }
 
-  queryRemoteDatabaseMySQL2: <T>(params: {
+  query: <T>(params: {
     databaseSessionId: string
     statement: string
     parameters?: any[]

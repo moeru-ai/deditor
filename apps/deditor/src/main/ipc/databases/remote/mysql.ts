@@ -10,7 +10,7 @@ import { defineIPCHandler } from '../../define-ipc-handler'
 const databaseSessions = new Map<string, MySql2Database>()
 
 export function registerMySQL2DatabaseDialect(window: BrowserWindow) {
-  defineIPCHandler<MySQL2Methods>(window, 'connectRemoteDatabaseMySQL2')
+  defineIPCHandler<MySQL2Methods>(window, 'databaseRemoteMySQL', 'connect')
     .handle(async (_, { dsn }) => {
       const dbSession = drizzle(dsn)
       const dbSessionId = nanoid()
@@ -20,7 +20,7 @@ export function registerMySQL2DatabaseDialect(window: BrowserWindow) {
       return { databaseSessionId: dbSessionId, dialect: 'mysql2' }
     })
 
-  defineIPCHandler<MySQL2Methods>(window, 'queryRemoteDatabaseMySQL2')
+  defineIPCHandler<MySQL2Methods>(window, 'databaseRemoteMySQL', 'query')
     .handle(async (_, { databaseSessionId, statement }) => {
       if (!databaseSessions.has(databaseSessionId)) {
         throw new Error('Database session ID not found in session map, please connect to the database first.')

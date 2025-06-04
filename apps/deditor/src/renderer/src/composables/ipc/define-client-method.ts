@@ -7,7 +7,7 @@ const eventListeners = new Map<string, { on: IpcRendererListener, off: () => voi
 const requestPromiseResolvers = new Map<string, (value: any) => void>()
 const requestPromiseRejectors = new Map<string, (reason?: any) => void>()
 
-export function defineClientMethod<TMethods, TMethodName extends keyof TMethods>(method: TMethodName) {
+export function defineClientMethod<TMethods, TMethodName extends keyof TMethods>(namespace: string, method: TMethodName) {
   type MethodType = TMethods[TMethodName]
   type MethodParamType = MethodType extends (params: infer P) => any ? P : never
   type MethodReturnType = MethodType extends (...args: any[]) => infer R ? R : never
@@ -16,8 +16,8 @@ export function defineClientMethod<TMethods, TMethodName extends keyof TMethods>
     onResponse?: (response: MethodReturnType) => void
     onError?: (error: Error) => void
   }) {
-    const responseEventKey = `response:${strings.kebabcase(String(method))}`
-    const responseErrorEventKey = `response:error:${strings.kebabcase(String(method))}`
+    const responseEventKey = `response:${namespace}:${strings.kebabcase(String(method))}`
+    const responseErrorEventKey = `response:error:${namespace}:${strings.kebabcase(String(method))}`
 
     if (!eventListeners.has(responseEventKey)) {
       const listener: IpcRendererListener = (_, res: Awaited<{ _eventId: string, returns: MethodReturnType }>) => {
@@ -77,7 +77,7 @@ export function defineClientMethod<TMethods, TMethodName extends keyof TMethods>
       requestPromiseResolvers.set(eventId, resolve)
       requestPromiseRejectors.set(eventId, reject)
 
-      const requestEventKey = `request:${strings.kebabcase(String(method))}`
+      const requestEventKey = `request:${namespace}:${strings.kebabcase(String(method))}`
 
       window.electron.ipcRenderer.send(requestEventKey, { _eventId: eventId, params })
 
@@ -90,7 +90,7 @@ export function defineClientMethod<TMethods, TMethodName extends keyof TMethods>
           requestPromiseResolvers.delete(eventId)
           requestPromiseRejectors.delete(eventId)
 
-          console.error(`Timeout after ${options.timeout}ms for method: ${String(method)}`)
+          console.error(`Timeout after ${options.timeout}ms for method: ${namespace}:${String(method)}`)
           reject(new Error(`Timeout after ${options.timeout}ms`))
         }, options.timeout)
       }

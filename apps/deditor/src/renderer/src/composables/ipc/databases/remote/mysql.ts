@@ -5,12 +5,12 @@ import { ref } from 'vue'
 import { defineClientMethod } from '../../define-client-method'
 
 export function useRemoteMySQL() {
-  const methods = <TMethod extends keyof MySQL2Methods>(method: TMethod) => defineClientMethod<MySQL2Methods, TMethod>(method)
+  const methods = <TMethod extends keyof MySQL2Methods>(method: TMethod) => defineClientMethod<MySQL2Methods, TMethod>('databaseRemoteMySQL', method)
   const databaseSessionId = ref<string>()
 
   return {
     connect: async (dsn: string) => {
-      const id = await methods('connectRemoteDatabaseMySQL2').call({ dsn })
+      const id = await methods('connect').call({ dsn })
       databaseSessionId.value = id.databaseSessionId
 
       return id
@@ -20,7 +20,7 @@ export function useRemoteMySQL() {
         throw new Error('Database session ID is not set. Please connect to a database first.')
       }
 
-      const res = await methods('queryRemoteDatabaseMySQL2').call({
+      const res = await methods('query').call({
         databaseSessionId: databaseSessionId.value!,
         statement,
         parameters,

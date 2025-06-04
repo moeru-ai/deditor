@@ -14,7 +14,7 @@ import { defineIPCHandler } from '../../define-ipc-handler'
 const databaseSessions = new Map<string, { drizzle: PostgresJsDatabase<typeof schema>, client: postgres.Sql }>()
 
 export function registerPostgresJsDatabaseDialect(window: BrowserWindow) {
-  defineIPCHandler<PostgresMethods>(window, 'connectRemoteDatabasePostgres')
+  defineIPCHandler<PostgresMethods>(window, 'databaseRemotePostgres', 'connect')
     .handle(async (_, { dsn }) => {
       try {
         const pgClient = postgres(dsn)
@@ -31,7 +31,7 @@ export function registerPostgresJsDatabaseDialect(window: BrowserWindow) {
       }
     })
 
-  defineIPCHandler<PostgresMethods>(window, 'queryRemoteDatabasePostgres')
+  defineIPCHandler<PostgresMethods>(window, 'databaseRemotePostgres', 'query')
     .handle(async (_, { databaseSessionId, statement, parameters }) => {
       if (!databaseSessions.has(databaseSessionId)) {
         throw new Error('Database session ID not found in session map, please connect to the database first.')
@@ -48,7 +48,7 @@ export function registerPostgresJsDatabaseDialect(window: BrowserWindow) {
       }
     })
 
-  defineIPCHandler<PostgresMethods>(window, 'listTables')
+  defineIPCHandler<PostgresMethods>(window, 'databaseRemotePostgres', 'listTables')
     .handle(async (_, { databaseSessionId }) => {
       if (!databaseSessions.has(databaseSessionId)) {
         throw new Error('Database session ID not found in session map, please connect to the database first.')
@@ -65,7 +65,7 @@ export function registerPostgresJsDatabaseDialect(window: BrowserWindow) {
       }
     })
 
-  defineIPCHandler<PostgresMethods>(window, 'listColumns')
+  defineIPCHandler<PostgresMethods>(window, 'databaseRemotePostgres', 'listColumns')
     .handle(async (_, { databaseSessionId, tableName, schema }) => {
       if (!databaseSessions.has(databaseSessionId)) {
         throw new Error('Database session ID not found in session map, please connect to the database first.')

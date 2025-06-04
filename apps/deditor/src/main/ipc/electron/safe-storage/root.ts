@@ -7,18 +7,18 @@ import { Buffer } from 'node:buffer'
 import { defineIPCHandler } from '../../define-ipc-handler'
 
 export function registerSafeStorage(window: BrowserWindow, _app: App) {
-  defineIPCHandler<SafeStorageMethods>(window, 'isEncryptionAvailable')
+  defineIPCHandler<SafeStorageMethods>(window, 'safeStorage', 'isEncryptionAvailable')
     .handle(async () => {
       return safeStorage.isEncryptionAvailable()
     })
 
-  defineIPCHandler<SafeStorageMethods>(window, 'encryptString')
+  defineIPCHandler<SafeStorageMethods>(window, 'safeStorage', 'encryptString')
     .handle(async (_, { plainText }) => {
       const res = safeStorage.encryptString(plainText)
       return res.buffer as ArrayBuffer
     })
 
-  defineIPCHandler<SafeStorageMethods>(window, 'decryptString')
+  defineIPCHandler<SafeStorageMethods>(window, 'safeStorage', 'decryptString')
     .handle(async (_, { encryptedData }) => {
       const res = safeStorage.decryptString(Buffer.from(encryptedData))
       return res

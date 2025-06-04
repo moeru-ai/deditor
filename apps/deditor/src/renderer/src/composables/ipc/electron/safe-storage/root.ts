@@ -6,7 +6,7 @@ import { computedAsync } from '@vueuse/core'
 import { typedArrayToBuffer } from '../../../utils'
 import { defineClientMethod } from '../../define-client-method'
 
-export const safeStorage = <TMethod extends keyof SafeStorageMethods>(method: TMethod) => defineClientMethod<SafeStorageMethods, TMethod>(method)
+export const safeStorage = <TMethod extends keyof SafeStorageMethods>(method: TMethod) => defineClientMethod<SafeStorageMethods, TMethod>('safeStorage', method)
 
 export function useSafeStorage() {
   const isAvailable = computedAsync(async () => safeStorage('isEncryptionAvailable').call())
