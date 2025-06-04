@@ -8,7 +8,7 @@ import { RouterView, useRoute, useRouter } from 'vue-router'
 
 import PaneArea from '../components/container/PaneArea.vue'
 import DatasourcesContextMenu from '../components/context-menu/datasources/index.vue'
-import { useDatasourcesStore } from '../stores/datasources'
+import { DatasourceDriverEnum, useDatasourcesStore } from '../stores/datasources'
 
 const route = useRoute('/datasources/[driver]/edit/[id]/') // nested view
 const router = useRouter()
@@ -42,7 +42,7 @@ function handleClick(datasource: Datasource) {
 }
 
 function handleAdd() {
-  const newDatasource = datasourcesStore.createDatasource('postgres')
+  const newDatasource = datasourcesStore.createDatasource(DatasourceDriverEnum.Postgres)
   datasourcesStore.datasources.push(newDatasource)
   router.push(`/datasources/${newDatasource.driver}/edit/${newDatasource.id}`)
 }

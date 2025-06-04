@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { DatasourceThroughConnectionParameters, Driver } from '../../../../../stores/datasources'
+import type { DatasourceDriver, DatasourceThroughConnectionParameters } from '../../../../../stores/datasources'
 
 import { useClipboard, useRefHistory } from '@vueuse/core'
 import { computed, onMounted, ref, watch } from 'vue'
@@ -15,7 +15,7 @@ import { useDatasourcesStore } from '../../../../../stores/datasources'
 const route = useRoute('/datasources/[driver]/edit/[id]/')
 
 const id = computed(() => route.params.id)
-const driver = computed<Driver>(() => route.params.driver as Driver)
+const driver = computed(() => route.params.driver as DatasourceDriver)
 
 const testConnectionConnecting = ref(false)
 const testConnectionSucceeded = ref(false)
@@ -27,7 +27,7 @@ const datasourcesStore = useDatasourcesStore()
 function datasourceFromId() {
   const datasource = datasourcesStore.datasources.find(ds => ds.id === id.value)
   if (typeof datasource === 'undefined') {
-    const newDatasource = datasourcesStore.createDatasource(driver.value)
+    const newDatasource = datasourcesStore.createDatasource(driver.value as DatasourceDriver)
     datasourcesStore.datasources.push(newDatasource)
     return newDatasource
   }

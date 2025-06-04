@@ -6,7 +6,7 @@ import type { useRemoteMySQL } from '@/composables/ipc/databases/remote'
 import type { DSNExtraOptions } from '../libs/dsn'
 
 import { nanoid } from '@deditor-app/shared'
-import { PgDialect, PgSelectBase, QueryBuilder } from 'drizzle-orm/pg-core'
+import { PgDialect, QueryBuilder } from 'drizzle-orm/pg-core'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
