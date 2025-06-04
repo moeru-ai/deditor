@@ -9,9 +9,9 @@ export interface BaseMenuItem {
   icon?: string
 }
 
-export interface MenuItem extends BaseMenuItem {
+export interface MenuItem<T> extends BaseMenuItem {
   type: 'item'
-  onClick?: <T>(context: { data?: T }) => void
+  onClick?: (context: { data?: T }) => void
 }
 
 export interface MenuSubItem extends BaseMenuItem {
@@ -42,8 +42,8 @@ export interface MenuLabelItem extends BaseMenuItem {
   type: 'label'
 }
 
-export type MenuItemConfig =
-  | MenuItem
+export type MenuItemConfig<T = any> =
+  | MenuItem<T>
   | MenuSubItem
   | MenuSeparatorItem
   | MenuCheckboxItem

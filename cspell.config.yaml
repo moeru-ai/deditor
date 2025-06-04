@@ -25,6 +25,7 @@ words:
   - pglite
   - pgvecto
   - pgvector
+  - pinia
   - reka
   - shadcn
   - Splitpanes

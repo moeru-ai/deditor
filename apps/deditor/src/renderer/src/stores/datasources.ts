@@ -1,14 +1,16 @@
 import type { SQL } from 'drizzle-orm'
 import type { PgSelectBuilder, PgSelectDynamic } from 'drizzle-orm/pg-core'
+import type { Ref } from 'vue'
 
 import type { useRemoteMySQL } from '@/composables/ipc/databases/remote'
 
 import type { DSNExtraOptions } from '../libs/dsn'
 
 import { nanoid } from '@deditor-app/shared'
+import { sql } from 'drizzle-orm'
 import { PgDialect, QueryBuilder } from 'drizzle-orm/pg-core'
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 
 import { useVersionedAppDataStorage } from '../composables/electron/use-app-data'
 import { useRemotePostgres } from '../composables/ipc/databases/remote'
@@ -205,3 +207,118 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
     executeSQLByParameters,
   }
 })
+
+export function useDatasource(
+  fromDatasourceId: Ref<string | undefined>,
+  datasources: Ref<Datasource[]>,
+) {
+  const datasourceSessionsStore = useDatasourceSessionsStore()
+
+  const datasource = ref<Datasource>()
+
+  async function datasourceFromId(fromId?: string | null) {
+    if (!fromId) {
+      return
+    }
+
+    const _queryFromDatasource = datasources.value
+    const queryFromDatasource = _queryFromDatasource.find(ds => ds.id === fromId)
+    if (!queryFromDatasource) {
+      return
+    }
+
+    return {
+      driver: queryFromDatasource.driver as keyof DatasourceDriverMap,
+      datasource: queryFromDatasource as DatasourceThroughConnectionParameters,
+    }
+  }
+
+  async function query<D = Record<string, unknown>, T = any>(query: SQL<T>) {
+    if (!datasource.value || !datasource.value.driver || !datasource.value) {
+      return []
+    }
+
+    return await datasourceSessionsStore.executeSQLByParameters<D>(
+      datasource.value?.driver,
+      datasource.value as DatasourceThroughConnectionParameters,
+      query,
+    )
+  }
+
+  async function findMany<T = Record<string, unknown>>(
+    table: { schema?: string | null, table: string },
+    sortedColumns: { id: string, desc: boolean }[],
+    pageSize: number,
+    page: number,
+  ) {
+    const q = sql`SELECT * FROM `
+    if (table.schema) {
+      q.append(sql`${sql.identifier(table.schema)}.${sql.identifier(table.table!)}`)
+    }
+    else {
+      q.append(sql`${sql.identifier(table.table!)}`)
+    }
+
+    if (sortedColumns != null) {
+      const sorted = sortedColumns
+      if (sorted.length > 0) {
+        const orderByClauses = sorted.map((col) => {
+          const direction = col.desc ? sql`DESC` : sql`ASC`
+          return sql`${sql.identifier(col.id)} ${direction}`
+        })
+
+        q.append(sql` ORDER BY ${sql.join(orderByClauses, sql`, `)}`)
+      }
+    }
+
+    if (pageSize != null && page != null) {
+      const pageSizeValue = pageSize
+      const pageValue = page
+      q.append(sql` LIMIT ${pageSizeValue} OFFSET ${(pageValue - 1) * pageSizeValue}`)
+    }
+
+    return await query<T>(q)
+  }
+
+  async function count(
+    table: { schema?: string | null, table: string },
+    sortedColumns: { id: string, desc: boolean }[],
+  ) {
+    const q = sql`SELECT COUNT(*) FROM `
+    if (table.schema) {
+      q.append(sql`${sql.identifier(table.schema)}.${sql.identifier(table.table!)}`)
+    }
+    else {
+      q.append(sql`${sql.identifier(table.table!)}`)
+    }
+
+    if (sortedColumns != null) {
+      const sorted = sortedColumns
+      if (sorted.length > 0) {
+        const orderByClauses = sorted.map((col) => {
+          const direction = col.desc ? sql`DESC` : sql`ASC`
+          return sql`${sql.identifier(col.id)} ${direction}`
+        })
+
+        q.append(sql` ORDER BY ${sql.join(orderByClauses, sql`, `)}`)
+      }
+    }
+
+    const result = await query<{ count: number }>(q)
+    return result[0]?.count || 0
+  }
+
+  watch([fromDatasourceId, datasources], async () => {
+    const ds = await datasourceFromId(fromDatasourceId.value)
+    datasource.value = ds?.datasource
+  }, {
+    immediate: true,
+  })
+
+  return {
+    datasource,
+    query,
+    findMany,
+    count,
+  }
+}

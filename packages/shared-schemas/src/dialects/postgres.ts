@@ -5,7 +5,7 @@ const postgresInformationSchema = pgSchema('information_schema')
 export const postgresInformationSchemaTables = postgresInformationSchema.table('tables', {
   table_catalog: text(),
   table_schema: text(),
-  table_name: text(),
+  table_name: text().notNull(),
   table_type: varchar(),
   self_referencing_column_name: text(),
   reference_generation: varchar(),

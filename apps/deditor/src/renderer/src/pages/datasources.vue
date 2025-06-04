@@ -21,6 +21,28 @@ const editing = computed(() => route.path.match(/\/datasources\/([^/]+)\/edit/))
 const breakpoints = useBreakpoints(breakpointsTailwind)
 const isSmallerThan2XL = breakpoints.smaller('2xl')
 
+function handleClick(datasource: Datasource) {
+  router.push(`/datasources/${datasource.driver}/inspect/${datasource.id}`)
+}
+
+function handleAdd() {
+  const newDatasource = datasourcesStore.createDatasource(DatasourceDriverEnum.Postgres)
+  datasourcesStore.datasources.push(newDatasource)
+  router.push(`/datasources/${newDatasource.driver}/edit/${newDatasource.id}`)
+}
+
+function handleEdit(datasource?: Datasource) {
+  if (!datasource) {
+    return
+  }
+  if (editing.value && id.value === datasource.id) {
+    // If already editing the same datasource, do nothing
+    return
+  }
+
+  router.push(`/datasources/${datasource.driver}/edit/${datasource.id}`)
+}
+
 function handleDelete(datasource?: Datasource) {
   if (!datasource)
     return
@@ -36,35 +58,26 @@ function handleDelete(datasource?: Datasource) {
   }
 }
 
-function handleClick(datasource: Datasource) {
-  if (editing.value && id.value === datasource.id) {
-    // If already editing the same datasource, do nothing
-    return
-  }
-
-  router.push(`/datasources/${datasource.driver}/edit/${datasource.id}`)
-}
-
-function handleAdd() {
-  const newDatasource = datasourcesStore.createDatasource(DatasourceDriverEnum.Postgres)
-  datasourcesStore.datasources.push(newDatasource)
-  router.push(`/datasources/${newDatasource.driver}/edit/${newDatasource.id}`)
-}
-
 // Define the menu configuration
-const menuConfig = computed<MenuItemConfig[]>(() => ([
+const menuConfig = computed<MenuItemConfig<Datasource>[]>(() => ([
+  {
+    type: 'item',
+    value: 'edit',
+    label: 'Edit',
+    shortcut: 'Enter',
+    onClick: ({ data }) => handleEdit(data),
+  },
   {
     type: 'item',
     value: 'delete',
     label: 'Delete',
     shortcut: '⌘ + Del',
-    onClick: ({ data }) => handleDelete(data as Datasource),
+    onClick: ({ data }) => handleDelete(data),
   },
 ]))
 
 const paneDatasourceListSize = computed(() => isSmallerThan2XL.value ? 20 : 10)
-const paneDatasourceEditSize = computed(() => isSmallerThan2XL.value ? 30 : 20)
-const paneDatasourcePreviewSize = computed(() => isSmallerThan2XL.value ? 50 : 70)
+const paneDatasourceEditSize = computed(() => isSmallerThan2XL.value ? 80 : 70)
 </script>
 
 <template>
@@ -139,11 +152,10 @@ const paneDatasourcePreviewSize = computed(() => isSmallerThan2XL.value ? 50 : 7
         </PaneArea>
       </Pane>
       <Pane :min-size="20" :size="paneDatasourceEditSize">
-        <PaneArea v-if="editing" flex flex-col gap-2>
+        <PaneArea flex flex-col gap-2>
           <RouterView />
         </PaneArea>
       </Pane>
-      <Pane :min-size="20" :size="paneDatasourcePreviewSize" />
     </Splitpanes>
   </div>
 </template>

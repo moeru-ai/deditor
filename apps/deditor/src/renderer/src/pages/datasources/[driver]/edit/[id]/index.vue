@@ -165,7 +165,7 @@ async function handlePasteDSN() {
         <div i-ph:x-bold text="neutral-300/80" />
       </RouterLink>
     </div>
-    <div h-full max-w-screen-sm flex flex-col>
+    <div h-full flex flex-col>
       <div mt-3 flex flex-1 flex-col gap-2>
         <Editable v-model="datasourceName" mb-3 font-bold @blur="handleBlur">
           {{ driver }}
