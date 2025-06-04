@@ -57,19 +57,23 @@ const menuConfig = computed<MenuItemConfig[]>(() => ([
     onClick: ({ data }) => handleDelete(data as Datasource),
   },
 ]))
+
+const paneDatasourceListSize = computed(() => editing.value ? 10 : 10)
+const paneDatasourceEditSize = computed(() => editing.value ? 20 : 20)
+const paneDatasourcePreviewSize = computed(() => editing.value ? 70 : 70)
 </script>
 
 <template>
   <div h-full w-full>
     <Splitpanes class="flex gap-0.8 bg-transparent">
-      <Pane :min-size="20" :size="20">
+      <Pane :min-size="10" :size="paneDatasourceListSize">
         <PaneArea flex flex-col gap-2>
           <div relative h-full w-full flex flex-col gap-2>
             <h2 text="neutral-300/80" mb-1 flex justify-between>
               Datasources
             </h2>
             <div relative flex flex-1 flex-col>
-              <div v-if="datasourcesStore.datasources.length === 0" class="text-neutral-500" flex flex-1 flex-col items-center justify-center gap-2>
+              <div v-if="datasourcesStore.datasources.length === 0" class="text-neutral-500 <lg:px-4" flex flex-1 flex-col items-center justify-center gap-2>
                 <div i-ph:empty-light text-4xl />
                 <div flex items-center justify-center>
                   <span>Connect one by</span>
@@ -130,11 +134,12 @@ const menuConfig = computed<MenuItemConfig[]>(() => ([
           </div>
         </PaneArea>
       </Pane>
-      <Pane v-if="editing" :min-size="20" :size="80">
-        <PaneArea flex flex-col gap-2>
+      <Pane :min-size="20" :size="paneDatasourceEditSize">
+        <PaneArea v-if="editing" flex flex-col gap-2>
           <RouterView />
         </PaneArea>
       </Pane>
+      <Pane :min-size="20" :size="paneDatasourcePreviewSize" />
     </Splitpanes>
   </div>
 </template>

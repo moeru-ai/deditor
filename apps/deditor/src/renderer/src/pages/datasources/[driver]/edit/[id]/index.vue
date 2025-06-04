@@ -156,7 +156,7 @@ async function handlePasteDSN() {
 </script>
 
 <template>
-  <div h-full max-w-screen-sm flex flex-col>
+  <div h-full flex flex-col>
     <div flex>
       <h2 text="neutral-300/80" mb-1 flex flex-1>
         Edit Datasource
@@ -165,118 +165,120 @@ async function handlePasteDSN() {
         <div i-ph:x-bold text="neutral-300/80" />
       </RouterLink>
     </div>
-    <div mt-3 flex flex-1 flex-col gap-2>
-      <Editable v-model="datasourceName" mb-3 font-bold @blur="handleBlur">
-        {{ driver }}
-      </Editable>
-      <div>
-        <label flex="~ col gap-2">
+    <div h-full max-w-screen-sm flex flex-col>
+      <div mt-3 flex flex-1 flex-col gap-2>
+        <Editable v-model="datasourceName" mb-3 font-bold @blur="handleBlur">
+          {{ driver }}
+        </Editable>
+        <div>
+          <label flex="~ col gap-2">
+            <div>
+              <div class="flex items-center gap-1 text-sm font-medium">
+                DSN
+              </div>
+              <div class="text-xs text-neutral-500 dark:text-neutral-400" text-nowrap>
+                Data Source Name for the database connection.
+              </div>
+            </div>
+            <div flex items-center gap-2>
+              <Input v-model="DSN" flex-1 />
+              <Button @click="handlePasteDSN">
+                Paste
+              </Button>
+            </div>
+          </label>
+        </div>
+        <div grid="~ cols-[1fr_2px_1fr] rows-[1fr_1fr]" items-center gap-2>
           <div>
             <div class="flex items-center gap-1 text-sm font-medium">
-              DSN
-            </div>
-            <div class="text-xs text-neutral-500 dark:text-neutral-400" text-nowrap>
-              Data Source Name for the database connection.
-            </div>
-          </div>
-          <div flex items-center gap-2>
-            <Input v-model="DSN" flex-1 />
-            <Button @click="handlePasteDSN">
-              Paste
-            </Button>
-          </div>
-        </label>
-      </div>
-      <div grid="~ cols-[1fr_2px_1fr] rows-[1fr_1fr]" items-center gap-2>
-        <div>
-          <div class="flex items-center gap-1 text-sm font-medium">
-            Host
-            <span class="text-red-500">*</span>
-          </div>
-          <div class="text-xs text-neutral-500 dark:text-neutral-400" text-nowrap>
-            Host or IP address of the database server.
-          </div>
-        </div>
-        <div />
-        <div>
-          <div class="flex items-center gap-1 text-sm font-medium">
-            Port
-            <span class="text-red-500">*</span>
-          </div>
-          <div class="text-xs text-neutral-500 dark:text-neutral-400" text-nowrap>
-            Port number of the database server.
-          </div>
-        </div>
-        <Input v-model="(datasource as DatasourceThroughConnectionParameters).host" />
-        <div translate-y="-1.5px" text="neutral-500" w-fit text-lg font-bold>
-          <span>:</span>
-        </div>
-        <Input v-model="(datasource as DatasourceThroughConnectionParameters).port" />
-      </div>
-      <div>
-        <label flex="~ col gap-2">
-          <div>
-            <div class="flex items-center gap-1 text-sm font-medium">
-              User
+              Host
               <span class="text-red-500">*</span>
             </div>
             <div class="text-xs text-neutral-500 dark:text-neutral-400" text-nowrap>
-              Username for the database connection. This user must have the necessary permissions to access the database.
+              Host or IP address of the database server.
             </div>
           </div>
-          <Input v-model="(datasource as DatasourceThroughConnectionParameters).user" />
-        </label>
-      </div>
-      <div>
-        <label flex="~ col gap-2">
+          <div />
           <div>
             <div class="flex items-center gap-1 text-sm font-medium">
-              Password
+              Port
+              <span class="text-red-500">*</span>
             </div>
             <div class="text-xs text-neutral-500 dark:text-neutral-400" text-nowrap>
-              Password for the database user. Ensure this is kept secure and not hard-coded in your application.
+              Port number of the database server.
             </div>
           </div>
-          <Input v-model="(datasource as DatasourceThroughConnectionParameters).password" type="password" />
-        </label>
-      </div>
-      <div>
-        <label flex="~ col gap-2">
-          <div>
-            <div class="flex items-center gap-1 text-sm font-medium">
-              Database
-            </div>
-            <div class="text-xs text-neutral-500 dark:text-neutral-400" text-nowrap>
-              Name of the database to connect to. If not specified, the default database for the user will be used.
-            </div>
+          <Input v-model="(datasource as DatasourceThroughConnectionParameters).host" />
+          <div translate-y="-1.5px" text="neutral-500" w-fit text-lg font-bold>
+            <span>:</span>
           </div>
-          <Input v-model="(datasource as DatasourceThroughConnectionParameters).database" />
-        </label>
-      </div>
-      <div>
-        <label flex="~ col gap-2">
-          <div>
-            <div class="flex items-center gap-1 text-sm font-medium">
-              SSL Mode
+          <Input v-model="(datasource as DatasourceThroughConnectionParameters).port" />
+        </div>
+        <div>
+          <label flex="~ col gap-2">
+            <div>
+              <div class="flex items-center gap-1 text-sm font-medium">
+                User
+                <span class="text-red-500">*</span>
+              </div>
+              <div class="text-xs text-neutral-500 dark:text-neutral-400" text-nowrap>
+                Username for the database connection. This user must have the necessary permissions to access the database.
+              </div>
             </div>
-            <div class="text-xs text-neutral-500 dark:text-neutral-400" text-nowrap>
-              SSL mode for the connection.
+            <Input v-model="(datasource as DatasourceThroughConnectionParameters).user" />
+          </label>
+        </div>
+        <div>
+          <label flex="~ col gap-2">
+            <div>
+              <div class="flex items-center gap-1 text-sm font-medium">
+                Password
+              </div>
+              <div class="text-xs text-neutral-500 dark:text-neutral-400" text-nowrap>
+                Password for the database user. Ensure this is kept secure and not hard-coded in your application.
+              </div>
             </div>
-          </div>
-          <Input v-model="(datasource as DatasourceThroughConnectionParameters).sslmode" />
-        </label>
+            <Input v-model="(datasource as DatasourceThroughConnectionParameters).password" type="password" />
+          </label>
+        </div>
+        <div>
+          <label flex="~ col gap-2">
+            <div>
+              <div class="flex items-center gap-1 text-sm font-medium">
+                Database
+              </div>
+              <div class="text-xs text-neutral-500 dark:text-neutral-400" text-nowrap>
+                Name of the database to connect to. If not specified, the default database for the user will be used.
+              </div>
+            </div>
+            <Input v-model="(datasource as DatasourceThroughConnectionParameters).database" />
+          </label>
+        </div>
+        <div>
+          <label flex="~ col gap-2">
+            <div>
+              <div class="flex items-center gap-1 text-sm font-medium">
+                SSL Mode
+              </div>
+              <div class="text-xs text-neutral-500 dark:text-neutral-400" text-nowrap>
+                SSL mode for the connection.
+              </div>
+            </div>
+            <Input v-model="(datasource as DatasourceThroughConnectionParameters).sslmode" />
+          </label>
+        </div>
       </div>
-    </div>
-    <div flex flex-col gap-3>
-      <div v-if="testConnectionErrored" class="mt-2 text-sm text-red-500" border="2 solid red-800/50" bg="red-900/50" flex items-center gap-1 rounded-lg px-3 py-2 text-lg>
-        <div i-ph:warning-circle-bold mr-1 inline-block />
-        {{ testConnectionErrorMessage }}
+      <div flex flex-col gap-3>
+        <div v-if="testConnectionErrored" class="mt-2 text-sm text-red-500" border="2 solid red-800/50" bg="red-900/50" flex items-center gap-1 rounded-lg px-3 py-2 text-lg>
+          <div i-ph:warning-circle-bold mr-1 inline-block />
+          {{ testConnectionErrorMessage }}
+        </div>
+        <button bg="green-800/50" flex items-center justify-center gap-2 rounded-lg px-3 py-2 @click="handleTestConnection">
+          Test
+          <div v-if="testConnectionConnecting" i-svg-spinners:270-ring />
+          <div v-else-if="testConnectionSucceeded" i-ph:check-bold />
+        </button>
       </div>
-      <button bg="green-800/50" flex items-center justify-center gap-2 rounded-lg px-3 py-2 @click="handleTestConnection">
-        Test
-        <div v-if="testConnectionConnecting" i-svg-spinners:270-ring />
-        <div v-else-if="testConnectionSucceeded" i-ph:check-bold />
-      </button>
     </div>
   </div>
 </template>
