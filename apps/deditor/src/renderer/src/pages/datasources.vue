@@ -2,6 +2,7 @@
 import type { MenuItemConfig } from '../components/context-menu/basic/builder/types'
 import type { Datasource } from '../stores/datasources'
 
+import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 import { Pane, Splitpanes } from 'splitpanes'
 import { computed } from 'vue'
 import { RouterView, useRoute, useRouter } from 'vue-router'
@@ -16,6 +17,9 @@ const datasourcesStore = useDatasourcesStore()
 
 const id = computed(() => route.params.id)
 const editing = computed(() => route.path.match(/\/datasources\/([^/]+)\/edit/))
+
+const breakpoints = useBreakpoints(breakpointsTailwind)
+const isSmallerThan2XL = breakpoints.smaller('2xl')
 
 function handleDelete(datasource?: Datasource) {
   if (!datasource)
@@ -58,9 +62,9 @@ const menuConfig = computed<MenuItemConfig[]>(() => ([
   },
 ]))
 
-const paneDatasourceListSize = computed(() => editing.value ? 10 : 10)
-const paneDatasourceEditSize = computed(() => editing.value ? 20 : 20)
-const paneDatasourcePreviewSize = computed(() => editing.value ? 70 : 70)
+const paneDatasourceListSize = computed(() => isSmallerThan2XL.value ? 20 : 10)
+const paneDatasourceEditSize = computed(() => isSmallerThan2XL.value ? 30 : 20)
+const paneDatasourcePreviewSize = computed(() => isSmallerThan2XL.value ? 50 : 70)
 </script>
 
 <template>

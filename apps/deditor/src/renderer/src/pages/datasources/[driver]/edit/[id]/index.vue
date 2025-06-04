@@ -176,7 +176,7 @@ async function handlePasteDSN() {
               <div class="flex items-center gap-1 text-sm font-medium">
                 DSN
               </div>
-              <div class="text-xs text-neutral-500 dark:text-neutral-400" text-nowrap>
+              <div class="text-xs text-neutral-500 dark:text-neutral-400">
                 Data Source Name for the database connection.
               </div>
             </div>
@@ -188,13 +188,13 @@ async function handlePasteDSN() {
             </div>
           </label>
         </div>
-        <div grid="~ cols-[1fr_2px_1fr] rows-[1fr_1fr]" items-center gap-2>
+        <div grid="~ cols-[1fr_2px_1fr] rows-[1fr_32px]" gap-col-2 gap-row-1>
           <div>
             <div class="flex items-center gap-1 text-sm font-medium">
               Host
               <span class="text-red-500">*</span>
             </div>
-            <div class="text-xs text-neutral-500 dark:text-neutral-400" text-nowrap>
+            <div class="text-xs text-neutral-500 dark:text-neutral-400">
               Host or IP address of the database server.
             </div>
           </div>
@@ -204,7 +204,7 @@ async function handlePasteDSN() {
               Port
               <span class="text-red-500">*</span>
             </div>
-            <div class="text-xs text-neutral-500 dark:text-neutral-400" text-nowrap>
+            <div class="text-xs text-neutral-500 dark:text-neutral-400">
               Port number of the database server.
             </div>
           </div>
@@ -221,7 +221,7 @@ async function handlePasteDSN() {
                 User
                 <span class="text-red-500">*</span>
               </div>
-              <div class="text-xs text-neutral-500 dark:text-neutral-400" text-nowrap>
+              <div class="text-xs text-neutral-500 dark:text-neutral-400">
                 Username for the database connection. This user must have the necessary permissions to access the database.
               </div>
             </div>
@@ -234,7 +234,7 @@ async function handlePasteDSN() {
               <div class="flex items-center gap-1 text-sm font-medium">
                 Password
               </div>
-              <div class="text-xs text-neutral-500 dark:text-neutral-400" text-nowrap>
+              <div class="text-xs text-neutral-500 dark:text-neutral-400">
                 Password for the database user. Ensure this is kept secure and not hard-coded in your application.
               </div>
             </div>
@@ -247,7 +247,7 @@ async function handlePasteDSN() {
               <div class="flex items-center gap-1 text-sm font-medium">
                 Database
               </div>
-              <div class="text-xs text-neutral-500 dark:text-neutral-400" text-nowrap>
+              <div class="text-xs text-neutral-500 dark:text-neutral-400">
                 Name of the database to connect to. If not specified, the default database for the user will be used.
               </div>
             </div>
@@ -260,7 +260,7 @@ async function handlePasteDSN() {
               <div class="flex items-center gap-1 text-sm font-medium">
                 SSL Mode
               </div>
-              <div class="text-xs text-neutral-500 dark:text-neutral-400" text-nowrap>
+              <div class="text-xs text-neutral-500 dark:text-neutral-400">
                 SSL mode for the connection.
               </div>
             </div>

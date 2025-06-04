@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { nanoid } from '@deditor-app/shared'
+import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 import { Pane, Splitpanes } from 'splitpanes'
 import { computed } from 'vue'
 import { RouterView, useRoute, useRouter } from 'vue-router'
@@ -9,14 +10,18 @@ import PaneArea from '../components/container/PaneArea.vue'
 const route = useRoute('/datasets/[type]/edit/[id]/')
 const router = useRouter()
 
+const breakpoints = useBreakpoints(breakpointsTailwind)
+const isSmallerThan2XL = breakpoints.smaller('2xl')
+
 const editing = computed(() => route.path.match(/\/datasets\/([^/]+)\/edit/))
 
 function handleNew() {
   router.push(`/datasets/text/edit/${nanoid()}`)
 }
-const paneDatasourceListSize = computed(() => editing.value ? 10 : 10)
-const paneDatasourceEditSize = computed(() => editing.value ? 20 : 20)
-const paneDatasourcePreviewSize = computed(() => editing.value ? 70 : 70)
+
+const paneDatasourceListSize = computed(() => isSmallerThan2XL.value ? 20 : 10)
+const paneDatasourceEditSize = computed(() => isSmallerThan2XL.value ? 30 : 20)
+const paneDatasourcePreviewSize = computed(() => isSmallerThan2XL.value ? 50 : 70)
 </script>
 
 <template>
