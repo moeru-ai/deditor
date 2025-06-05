@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { MenuItemConfig } from '../components/context-menu/basic/builder/types'
-import type { Datasource } from '../stores/datasources'
+import type { Datasource } from '../stores'
 
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 import { Pane, Splitpanes } from 'splitpanes'
@@ -9,7 +9,7 @@ import { RouterView, useRoute, useRouter } from 'vue-router'
 
 import PaneArea from '../components/container/PaneArea.vue'
 import DatasourcesContextMenu from '../components/context-menu/datasources/index.vue'
-import { DatasourceDriverEnum, useDatasourcesStore } from '../stores/datasources'
+import { DatasourceDriverEnum, useDatasourcesStore } from '../stores'
 
 const route = useRoute('/datasources/[driver]/edit/[id]/') // nested view
 const router = useRouter()

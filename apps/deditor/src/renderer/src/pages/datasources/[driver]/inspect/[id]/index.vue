@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { DatasourceThroughConnectionParameters } from '../../../../../stores/datasources'
+import type { DatasourceThroughConnectionParameters } from '../../../../../stores'
 
 import { computedAsync } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
@@ -7,7 +7,7 @@ import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 import Chat from '../../../../../components/table/Chat.vue'
-import { useDatasource, useDatasourceSessionsStore, useDatasourcesStore } from '../../../../../stores/datasources'
+import { useDatasource, useDatasourceSessionsStore, useDatasourcesStore } from '../../../../../stores'
 
 const route = useRoute('/datasources/[driver]/edit/[id]/')
 const id = computed(() => route.params.id)

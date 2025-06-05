@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { DuckDBWasmDrizzleDatabase } from '@proj-airi/drizzle-duckdb-wasm'
 
-import type { DatasourceThroughConnectionParameters } from '../stores/datasources'
+import type { DatasourceThroughConnectionParameters } from '../stores'
 
 import { drizzle } from '@proj-airi/drizzle-duckdb-wasm'
 import { getImportUrlBundles } from '@proj-airi/drizzle-duckdb-wasm/bundles/import-url-browser'
@@ -14,7 +14,7 @@ import { onMounted, onUnmounted, ref, watch } from 'vue'
 import Button from '../components/basic/Button.vue'
 import PaneArea from '../components/container/PaneArea.vue'
 import Chat from '../components/table/Chat.vue'
-import { useDatasource, useDatasourceSessionsStore, useDatasourcesStore } from '../stores/datasources'
+import { useDatasource, useDatasourceSessionsStore, useDatasourcesStore } from '../stores'
 
 const input = ref(`[${Array.from({ length: 100 }, (_, i) => `{"question": "What is the answer to ${i}?", "answer": "It's ${i}."}`).join(',')}]`)
 
