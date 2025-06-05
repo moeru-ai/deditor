@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { Pane, Splitpanes } from 'splitpanes'
+
+import PaneArea from '@/components/container/PaneArea.vue'
+import ProjectionControls from '@/components/visualizer/ProjectionControls.vue'
 </script>
 
 <template>
@@ -8,13 +11,13 @@ import { Pane, Splitpanes } from 'splitpanes'
       <Pane :min-size="20" :size="70">
         <Splitpanes horizontal class="h-full w-full gap-0.8 bg-transparent">
           <Pane :min-size="20" :size="60">
-            <PaneArea no-padding no-scroll>
+            <PaneArea overflow="hidden!" p="0!" flex items-center justify-center>
               Visualizer
             </PaneArea>
           </Pane>
 
           <Pane :min-size="20" :size="40">
-            <PaneArea flex="~ col gap-4">
+            <PaneArea flex="~ col gap-4" items-center justify-center>
               Navigator
             </PaneArea>
           </Pane>
@@ -23,7 +26,7 @@ import { Pane, Splitpanes } from 'splitpanes'
 
       <Pane :min-size="20" :size="30">
         <PaneArea flex flex-col gap-6>
-          Controls
+          <ProjectionControls />
         </PaneArea>
       </Pane>
     </Splitpanes>
