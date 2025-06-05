@@ -108,6 +108,25 @@ onMounted(() => {
             </div>
           </RouterLink>
           <RouterLink
+            to="/visualize"
+            flex items-center gap-1 whitespace-nowrap rounded-xl p-1 outline-none
+            active-class="bg-neutral-500/20 font-bold"
+            transition="all duration-300 ease-in-out"
+          >
+            <div h-full max-h-8 max-w-8 min-h-8 min-w-8 w-full flex items-center justify-center>
+              <div i-ph:chart-scatter-bold text-lg />
+            </div>
+            <div
+              v-if="isNavExpanded"
+              v-motion
+              :initial="{ opacity: 0.3, x: -10 }"
+              :enter="{ opacity: 1, x: 0 }"
+              whitespace-nowrap text-sm
+            >
+              Visualize
+            </div>
+          </RouterLink>
+          <RouterLink
             to="/datasources"
             flex items-center gap-1 whitespace-nowrap rounded-xl p-1 outline-none
             active-class="bg-neutral-500/20 font-bold"
