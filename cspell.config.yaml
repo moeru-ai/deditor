@@ -5,6 +5,7 @@ dictionaries: []
 words:
   - airi
   - Attributify
+  - cientos
   - Deditor
   - duckdb
   - etcdctl
@@ -36,6 +37,7 @@ words:
   - tanstack
   - taze
   - tensorchord
+  - tresjs
   - TSNE
   - UMAP
   - unocss
