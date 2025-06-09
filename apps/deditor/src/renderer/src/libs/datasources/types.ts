@@ -24,8 +24,8 @@ export type ConnectionThroughParameters<D = DatasourceDriverEnum> = DatasourceBa
   extraOptions?: DSNExtraOptions
 }
 
-export interface DSNExtraOptions extends Record<string, string | string[] | number | boolean> {
-  sslmode: boolean | 'require' | 'allow' | 'prefer' | 'verify-full'
+export interface DSNExtraOptions extends Record<string, string | string[] | number | boolean | undefined> {
+  sslmode?: boolean | 'require' | 'allow' | 'prefer' | 'verify-full'
 }
 
 export interface DSNDefaultParams {

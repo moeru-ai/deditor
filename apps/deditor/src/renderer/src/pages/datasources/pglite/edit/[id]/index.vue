@@ -76,6 +76,29 @@ const DSN = computed({
   },
 })
 
+const dataDir = computed({
+  get: () => {
+    const paramsFromDSN = fromDSN(
+      DSN.value,
+      defaultParamsFromDriver(driver.value),
+    )
+
+    return paramsFromDSN.extraOptions?.dataDir as string
+  },
+  set: (val) => {
+    return toDSN(
+      driver.value,
+      {
+        ...datasource.value,
+        extraOptions: {
+          dataDir: val,
+        },
+      } as ConnectionThroughParameters,
+      defaultParamsFromDriver(driver.value),
+    )
+  },
+})
+
 const datasourceName = computed({
   get: () => datasource.value.name || 'New Datasource',
   set: (value) => {
@@ -175,14 +198,14 @@ async function handlePasteDSN() {
           <label flex="~ col gap-2">
             <div>
               <div class="flex items-center gap-1 text-sm font-medium">
-                DSN
+                Data Directory
               </div>
               <div class="text-xs text-neutral-500 dark:text-neutral-400">
-                Data Source Name for the database connection.
+                Data directory contains PGLite data over OS file system
               </div>
             </div>
             <div flex items-center gap-2>
-              <Input v-model="DSN" flex-1 />
+              <Input v-model="dataDir" flex-1 />
               <Button @click="handlePasteDSN">
                 Paste
               </Button>
