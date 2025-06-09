@@ -51,7 +51,17 @@ const commonClasses = 'group text-grass11 data-[disabled]:text-mauve8 relative h
     :disabled="item.disabled"
     @click="item.onClick && item.onClick({ data: props.data })"
   >
-    {{ item.label }}
+    <template v-if="item.renderLabel">
+      <component
+        :is="item.renderLabel"
+      />
+    </template>
+    <template v-else-if="item.label">
+      {{ item.label }}
+    </template>
+    <template v-else>
+      ?
+    </template>
     <div v-if="item.shortcut" class="text-mauve11 group-data-[disabled]:text-mauve8 ml-auto pl-[20px] group-data-[highlighted]:text-white">
       {{ item.shortcut }}
     </div>

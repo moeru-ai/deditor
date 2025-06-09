@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { DatasourceDriver, DatasourceThroughConnectionParameters } from '../../../../../stores/datasources'
+import type { ConnectionThroughParameters } from '../../../../../libs/datasources'
+import type { DatasourceDriver } from '../../../../../stores/datasources'
 
 import { useClipboard, useRefHistory } from '@vueuse/core'
 import { computed, onMounted, ref, watch } from 'vue'
@@ -9,13 +10,13 @@ import Button from '../../../../../components/basic/Button.vue'
 import Editable from '../../../../../components/basic/Editable.vue'
 import { Input } from '../../../../../components/ui/input'
 import { useRemotePostgres } from '../../../../../composables/ipc/databases/remote'
-import { defaultParamsFromDriver, fromDSN, toDSN } from '../../../../../libs/dsn'
+import { DatasourceDriverEnum, defaultParamsFromDriver, fromDSN, toDSN } from '../../../../../libs/datasources'
 import { useDatasourcesStore } from '../../../../../stores/datasources'
 
-const route = useRoute('/datasources/[driver]/edit/[id]/')
+const route = useRoute('/datasources/postgres/edit/[id]/')
 
 const id = computed(() => route.params.id)
-const driver = computed(() => route.params.driver as DatasourceDriver)
+const driver = computed(() => DatasourceDriverEnum.Postgres)
 
 const testConnectionConnecting = ref(false)
 const testConnectionSucceeded = ref(false)
@@ -52,7 +53,7 @@ const DSN = computed({
   get: () => {
     return toDSN(
       driver.value,
-      datasource.value as DatasourceThroughConnectionParameters,
+      datasource.value as ConnectionThroughParameters,
       defaultParamsFromDriver(driver.value),
     )
   },
@@ -60,7 +61,7 @@ const DSN = computed({
     if (!datasource.value)
       return
 
-    const params = datasource.value as DatasourceThroughConnectionParameters
+    const params = datasource.value as ConnectionThroughParameters
     const paramsFromDSN = fromDSN(
       value,
       defaultParamsFromDriver(driver.value),
@@ -88,7 +89,7 @@ const { undo, clear } = useRefHistory(datasourceName)
 onMounted(() => {
   DSN.value = toDSN(
     driver.value,
-    datasource.value as DatasourceThroughConnectionParameters,
+    datasource.value as ConnectionThroughParameters,
     defaultParamsFromDriver(driver.value),
   )
 })
@@ -126,7 +127,7 @@ async function handleTestConnection() {
     }
   }
   else {
-    const params = datasource.value as DatasourceThroughConnectionParameters
+    const params = datasource.value as ConnectionThroughParameters
     try {
       testConnectionSucceeded.value = false
       testConnectionConnecting.value = true
@@ -208,11 +209,11 @@ async function handlePasteDSN() {
               Port number of the database server.
             </div>
           </div>
-          <Input v-model="(datasource as DatasourceThroughConnectionParameters).host" />
+          <Input v-model="(datasource as ConnectionThroughParameters).host" />
           <div translate-y="-1.5px" text="neutral-500" w-fit text-lg font-bold>
             <span>:</span>
           </div>
-          <Input v-model="(datasource as DatasourceThroughConnectionParameters).port" />
+          <Input v-model="(datasource as ConnectionThroughParameters).port" />
         </div>
         <div>
           <label flex="~ col gap-2">
@@ -225,7 +226,7 @@ async function handlePasteDSN() {
                 Username for the database connection. This user must have the necessary permissions to access the database.
               </div>
             </div>
-            <Input v-model="(datasource as DatasourceThroughConnectionParameters).user" />
+            <Input v-model="(datasource as ConnectionThroughParameters).user" />
           </label>
         </div>
         <div>
@@ -238,7 +239,7 @@ async function handlePasteDSN() {
                 Password for the database user. Ensure this is kept secure and not hard-coded in your application.
               </div>
             </div>
-            <Input v-model="(datasource as DatasourceThroughConnectionParameters).password" type="password" />
+            <Input v-model="(datasource as ConnectionThroughParameters).password" type="password" />
           </label>
         </div>
         <div>
@@ -251,7 +252,7 @@ async function handlePasteDSN() {
                 Name of the database to connect to. If not specified, the default database for the user will be used.
               </div>
             </div>
-            <Input v-model="(datasource as DatasourceThroughConnectionParameters).database" />
+            <Input v-model="(datasource as ConnectionThroughParameters).database" />
           </label>
         </div>
         <div>
@@ -264,7 +265,23 @@ async function handlePasteDSN() {
                 SSL mode for the connection.
               </div>
             </div>
-            <Input v-model="(datasource as DatasourceThroughConnectionParameters).sslmode" />
+            <select v-model="(datasource as ConnectionThroughParameters).extraOptions!.sslmode">
+              <option :value="false">
+                OFF
+              </option>
+              <option value="require">
+                Require
+              </option>
+              <option value="allow">
+                Allow
+              </option>
+              <option value="prefer">
+                Prefer
+              </option>
+              <option value="verify-full">
+                Verify Full
+              </option>
+            </select>
           </label>
         </div>
       </div>

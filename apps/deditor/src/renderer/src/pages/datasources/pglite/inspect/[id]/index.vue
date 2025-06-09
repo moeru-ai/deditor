@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { DatasourceThroughConnectionParameters } from '../../../../../stores'
+import type { ConnectionThroughParameters } from '../../../../../libs/datasources'
 
 import { computedAsync } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
@@ -9,7 +9,7 @@ import { useRoute } from 'vue-router'
 import Chat from '../../../../../components/table/Chat.vue'
 import { useDatasource, useDatasourceSessionsStore, useDatasourcesStore } from '../../../../../stores'
 
-const route = useRoute('/datasources/[driver]/edit/[id]/')
+const route = useRoute('/datasources/pglite/edit/[id]/')
 const id = computed(() => route.params.id)
 
 const results = ref<Record<string, unknown>[]>([])
@@ -33,7 +33,7 @@ const datasourceTables = computedAsync(async () => {
 
   const tables = await datasourceSessionsStore.listTablesByParameters(
     datasource.datasource.value?.driver,
-    datasource.datasource.value as DatasourceThroughConnectionParameters,
+    datasource.datasource.value as ConnectionThroughParameters,
   )
 
   return tables
@@ -141,7 +141,7 @@ function handleSortingChange(newSortedColumns: { id: string, desc: boolean }[]) 
   <div h-full flex flex-col>
     <div flex>
       <h2 text="neutral-300/80" mb-1 flex flex-1>
-        Inspect Datasource
+        Inspect PGLite Datasource
       </h2>
       <RouterLink to="/datasources">
         <div i-ph:x-bold text="neutral-300/80" />

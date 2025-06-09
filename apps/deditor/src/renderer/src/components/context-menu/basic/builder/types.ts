@@ -1,9 +1,12 @@
+import type { RenderFunction } from 'vue'
+
 export type MenuItemType = 'item' | 'sub' | 'separator' | 'checkbox' | 'radio' | 'label'
 
 export interface BaseMenuItem {
   type: MenuItemType
   value?: string
   label?: string
+  renderLabel?: RenderFunction
   shortcut?: string
   disabled?: boolean
   icon?: string

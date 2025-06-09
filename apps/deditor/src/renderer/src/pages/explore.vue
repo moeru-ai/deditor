@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { DuckDBWasmDrizzleDatabase } from '@proj-airi/drizzle-duckdb-wasm'
 
-import type { DatasourceThroughConnectionParameters } from '../stores'
+import type { ConnectionThroughParameters } from '../libs/datasources'
 
 import { drizzle } from '@proj-airi/drizzle-duckdb-wasm'
 import { getImportUrlBundles } from '@proj-airi/drizzle-duckdb-wasm/bundles/import-url-browser'
@@ -44,7 +44,7 @@ const queryFromDatasourceTables = computedAsync(async () => {
 
   const tables = await datasourceSessionsStore.listTablesByParameters(
     datasource.datasource.value?.driver,
-    datasource.datasource.value as DatasourceThroughConnectionParameters,
+    datasource.datasource.value as ConnectionThroughParameters,
   )
 
   return tables

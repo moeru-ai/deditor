@@ -4,18 +4,20 @@ import type { Datasource } from '../stores'
 
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 import { Pane, Splitpanes } from 'splitpanes'
-import { computed } from 'vue'
+import { computed, h } from 'vue'
 import { RouterView, useRoute, useRouter } from 'vue-router'
 
 import PaneArea from '../components/container/PaneArea.vue'
 import DatasourcesContextMenu from '../components/context-menu/datasources/index.vue'
-import { DatasourceDriverEnum, useDatasourcesStore } from '../stores'
+import DatasourcesContextMenuPaneArea from '../components/context-menu/datasources/pane-area.vue'
+import { DatasourceDriverEnum } from '../libs/datasources'
+import { useDatasourcesStore } from '../stores'
 
-const route = useRoute('/datasources/[driver]/edit/[id]/') // nested view
+const route = useRoute() // nested view
 const router = useRouter()
 const datasourcesStore = useDatasourcesStore()
 
-const id = computed(() => route.params.id)
+const id = computed(() => (route.params as any)?.id)
 const editing = computed(() => route.path.match(/\/datasources\/([^/]+)\/edit/))
 
 const breakpoints = useBreakpoints(breakpointsTailwind)
@@ -76,6 +78,67 @@ const menuConfig = computed<MenuItemConfig<Datasource>[]>(() => ([
   },
 ]))
 
+const paneAreaMenuConfig = computed<MenuItemConfig[]>(() => ([
+  {
+    type: 'sub',
+    label: 'Add...',
+    shortcut: '⌘ + D',
+    children: [
+      {
+        type: 'item',
+        value: 'postgres',
+        renderLabel: () => {
+          return h('div', {
+            class: 'inline-flex items-center gap-2',
+          }, [
+            h('div', { class: 'i-drizzle-orm-icons:postgresql' }),
+            h('div', 'Postgres'),
+          ])
+        },
+        onClick: () => {
+          const newDatasource = datasourcesStore.createDatasource(DatasourceDriverEnum.Postgres)
+          datasourcesStore.datasources.push(newDatasource)
+          router.push(`/datasources/${newDatasource.driver}/edit/${newDatasource.id}`)
+        },
+      },
+      {
+        type: 'item',
+        value: 'pglite',
+        renderLabel: () => {
+          return h('div', {
+            class: 'inline-flex items-center gap-2',
+          }, [
+            h('div', { class: 'i-drizzle-orm-icons:pglite' }),
+            h('div', 'PGLite'),
+          ])
+        },
+        onClick: () => {
+          const newDatasource = datasourcesStore.createDatasource(DatasourceDriverEnum.PGLite)
+          datasourcesStore.datasources.push(newDatasource)
+          router.push(`/datasources/${newDatasource.driver}/edit/${newDatasource.id}`)
+        },
+      },
+      {
+        type: 'item',
+        value: 'duckdb-wasm',
+        renderLabel: () => {
+          return h('div', {
+            class: 'inline-flex items-center gap-2',
+          }, [
+            h('div', { class: 'i-drizzle-orm-icons:mysql' }),
+            h('div', 'DuckDB WASM'),
+          ])
+        },
+        onClick: () => {
+          const newDatasource = datasourcesStore.createDatasource(DatasourceDriverEnum.DuckDBWasm)
+          datasourcesStore.datasources.push(newDatasource)
+          router.push(`/datasources/${newDatasource.driver}/edit/${newDatasource.id}`)
+        },
+      },
+    ],
+  },
+]))
+
 const paneDatasourceListSize = computed(() => isSmallerThan2XL.value ? 20 : 10)
 const paneDatasourceEditSize = computed(() => isSmallerThan2XL.value ? 80 : 70)
 </script>
@@ -103,7 +166,7 @@ const paneDatasourceEditSize = computed(() => isSmallerThan2XL.value ? 80 : 70)
                   </button>
                 </div>
               </div>
-              <div flex flex-col gap="0.5">
+              <div gap="0.5" h-fit max-h="[calc(100dvh-9rem)]" flex flex-col overflow-y-scroll>
                 <DatasourcesContextMenu
                   v-for="(datasource, index) in datasourcesStore.datasources"
                   :key="index"
@@ -111,7 +174,7 @@ const paneDatasourceEditSize = computed(() => isSmallerThan2XL.value ? 80 : 70)
                   :data="datasource"
                   @click="() => handleClick(datasource)"
                 >
-                  <template v-if="datasource.driver === 'postgres'">
+                  <template v-if="datasource?.driver === DatasourceDriverEnum.Postgres">
                     <div
                       bg="hover:neutral-700/80"
                       active-class="bg-neutral-700/50"
@@ -119,7 +182,29 @@ const paneDatasourceEditSize = computed(() => isSmallerThan2XL.value ? 80 : 70)
                       flex cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1 text-sm
                     >
                       <div i-drizzle-orm-icons:postgresql />
-                      <div>{{ datasource.name }}</div>
+                      <div>{{ datasource?.name }}</div>
+                    </div>
+                  </template>
+                  <template v-else-if="datasource?.driver === DatasourceDriverEnum.MySQL">
+                    <div
+                      bg="hover:neutral-700/80"
+                      active-class="bg-neutral-700/50"
+                      transition="all duration-100 ease-in-out"
+                      flex cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1 text-sm
+                    >
+                      <div i-drizzle-orm-icons:mysql />
+                      <div>{{ datasource?.name }}</div>
+                    </div>
+                  </template>
+                  <template v-else-if="datasource?.driver === DatasourceDriverEnum.PGLite">
+                    <div
+                      bg="hover:neutral-700/80"
+                      active-class="bg-neutral-700/50"
+                      transition="all duration-100 ease-in-out"
+                      flex cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1 text-sm
+                    >
+                      <div i-drizzle-orm-icons:pglite />
+                      <div>{{ datasource?.name }}</div>
                     </div>
                   </template>
                   <template v-else>
@@ -130,15 +215,19 @@ const paneDatasourceEditSize = computed(() => isSmallerThan2XL.value ? 80 : 70)
                       flex cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1 text-sm
                     >
                       <div i-ph:question />
-                      <div>{{ datasource.name }}</div>
+                      <div>{{ datasource?.name }}</div>
                     </div>
                   </template>
                 </DatasourcesContextMenu>
               </div>
+              <DatasourcesContextMenuPaneArea :config="paneAreaMenuConfig">
+                <div h-full flex-1 max-h="[calc(100dvh-10rem)]" />
+              </DatasourcesContextMenuPaneArea>
               <button
                 bg="neutral-900/70 hover:neutral-900"
                 w="[calc(100%-1rem)]"
                 fixed bottom-2 left-2 flex items-center gap-1 rounded-xl px-3 py-2 text-sm outline-none
+                backdrop-blur-sm
                 transition="all duration-300 ease-in-out"
                 @click="handleAdd"
               >

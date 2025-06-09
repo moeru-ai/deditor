@@ -1,28 +1,15 @@
-export interface DSNExtraOptions extends Record<string, string | string[] | number | boolean> {
-  sslmode: boolean | 'require' | 'allow' | 'prefer' | 'verify-full'
-}
+import type { ConnectionThroughParameters, DSNDefaultParams } from './types'
 
-export interface DSNConnectionParameters {
-  host: string
-  port: number
-  user: string
-  password: string
-  database?: string
-  extraOptions?: DSNExtraOptions
-}
-
-export interface DSNDefaultParams {
-  params?: DSNConnectionParameters
-  applyParamsURLSearchParams?: (search: URLSearchParams) => void
-  applyURL?: (url: URL) => void
-}
+import { DatasourceDriverEnum } from './types'
 
 export function defaultParamsFromDriver(driver: string): DSNDefaultParams {
   switch (driver) {
-    case 'postgres':
+    case DatasourceDriverEnum.Postgres:
       return postgresDefaultParams()
-    case 'mysql':
+    case DatasourceDriverEnum.MySQL:
       return mysqlDefaultParams()
+    case DatasourceDriverEnum.PGLite:
+      return pgliteDefaultParams()
     default:
       throw new Error(`Unsupported driver: ${driver}`)
   }
@@ -31,6 +18,7 @@ export function defaultParamsFromDriver(driver: string): DSNDefaultParams {
 export function postgresDefaultParams(): DSNDefaultParams {
   return {
     params: {
+      driver: DatasourceDriverEnum.Postgres,
       host: '127.0.0.1',
       password: '',
       port: 5432,
@@ -46,6 +34,7 @@ export function postgresDefaultParams(): DSNDefaultParams {
 export function mysqlDefaultParams(): DSNDefaultParams {
   return {
     params: {
+      driver: DatasourceDriverEnum.MySQL,
       host: '127.0.0.1',
       password: '',
       port: 3306,
@@ -54,9 +43,21 @@ export function mysqlDefaultParams(): DSNDefaultParams {
   }
 }
 
+export function pgliteDefaultParams(): DSNDefaultParams {
+  return {
+    params: {
+      driver: DatasourceDriverEnum.PGLite,
+      host: '127.0.0.1',
+      password: '',
+      port: 0,
+      user: '',
+    },
+  }
+}
+
 export function toDSN(
   driver: string,
-  params: DSNConnectionParameters,
+  params: ConnectionThroughParameters,
   defaultParams?: DSNDefaultParams,
 ) {
   const {
@@ -96,8 +97,8 @@ export function toDSN(
   return dsn.toString().replace('https', driver)
 }
 
-export function fromDSN(dsn: string, defaultParams: DSNDefaultParams): DSNConnectionParameters {
-  const params: DSNConnectionParameters = {
+export function fromDSN(dsn: string, defaultParams: DSNDefaultParams): ConnectionThroughParameters {
+  const params: ConnectionThroughParameters = {
     ...defaultParams.params!,
   }
 

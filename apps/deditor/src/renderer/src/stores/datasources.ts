@@ -2,9 +2,8 @@ import type { SQL } from 'drizzle-orm'
 import type { PgSelectBuilder, PgSelectDynamic } from 'drizzle-orm/pg-core'
 import type { Ref } from 'vue'
 
-import type { useRemoteMySQL } from '@/composables/ipc/databases/remote'
-
-import type { DSNExtraOptions } from '../libs/dsn'
+import type { useRemoteMySQL } from '../composables/ipc/databases/remote'
+import type { ConnectionThroughParameters, Datasource as LibDatasource } from '../libs/datasources'
 
 import { nanoid } from '@deditor-app/shared'
 import { sql } from 'drizzle-orm'
@@ -14,19 +13,18 @@ import { ref, watch } from 'vue'
 
 import { useVersionedAppDataStorage } from '../composables/electron/use-app-data'
 import { useRemotePostgres } from '../composables/ipc/databases/remote'
-import { defaultParamsFromDriver, toDSN } from '../libs/dsn'
-
-export enum DatasourceDriverEnum {
-  Postgres = 'postgres',
-  MySQL = 'mysql',
-  SQLite = 'sqlite',
-  PGLite = 'pglite',
-  DuckDBWasm = 'duckdb-wasm',
-}
+import { DatasourceDriverEnum, defaultParamsFromDriver, toDSN } from '../libs/datasources'
 
 export interface DatasourceDriverMap {
   [DatasourceDriverEnum.Postgres]: ReturnType<typeof useRemotePostgres>
   [DatasourceDriverEnum.MySQL]: ReturnType<typeof useRemoteMySQL>
+  [DatasourceDriverEnum.PGLite]: never
+  [DatasourceDriverEnum.DuckDBWasm]: never
+}
+
+export type Datasource = LibDatasource<keyof DatasourceDriverMap> & {
+  id: string
+  name: string
 }
 
 export type DatasourceDriver = keyof DatasourceDriverMap
@@ -36,32 +34,11 @@ export interface DatasourceDriverClient<D extends DatasourceDriver> {
   session: DatasourceDriverMap[D]
 }
 
-export type Datasource =
-  | DatasourceThroughConnectionString
-  | DatasourceThroughConnectionParameters
-
-export interface DatasourceBase {
-  id: string
-  driver: DatasourceDriver
-  name: string
-}
-
-export type DatasourceThroughConnectionString = DatasourceBase & { connectionString: string }
-export type DatasourceThroughConnectionParameters = DatasourceBase & {
-  host: string
-  port: number
-  user: string
-  password: string
-  database?: string
-  sslmode: string
-  extraOptions?: DSNExtraOptions
-}
-
 export const useDatasourcesStore = defineStore('datasources', () => {
   const datasources = useVersionedAppDataStorage<Datasource[]>('ai.moeru.deditor/config.json', 'datasources', [], { defaultVersion: '0.0.1' })
 
   function createDatasource(driver: DatasourceDriver) {
-    return { id: nanoid(), name: 'New Datasource', driver, connectionString: '', sslmode: '' } satisfies Datasource
+    return { id: nanoid(), name: 'New Datasource', driver, connectionString: '', extraOptions: { sslmode: false } } satisfies Datasource
   }
 
   return {
@@ -71,7 +48,7 @@ export const useDatasourcesStore = defineStore('datasources', () => {
 })
 
 function clientFromDriver(driver: DatasourceDriver) {
-  if (driver === 'postgres') {
+  if (driver === DatasourceDriverEnum.Postgres) {
     return useRemotePostgres()
   }
 
@@ -79,7 +56,7 @@ function clientFromDriver(driver: DatasourceDriver) {
 }
 
 export function sqlDialectFromDriver(driver: DatasourceDriver) {
-  if (driver === 'postgres') {
+  if (driver === DatasourceDriverEnum.Postgres) {
     return new PgDialect()
   }
 
@@ -87,7 +64,7 @@ export function sqlDialectFromDriver(driver: DatasourceDriver) {
 }
 
 export function queryBuilderFromDriver(driver: DatasourceDriver) {
-  if (driver === 'postgres') {
+  if (driver === DatasourceDriverEnum.Postgres) {
     return new QueryBuilder()
   }
 
@@ -95,7 +72,7 @@ export function queryBuilderFromDriver(driver: DatasourceDriver) {
 }
 
 export function toDynamicQueryBuilder(driver: DatasourceDriver, qb: PgSelectBuilder<undefined, 'qb'>) {
-  if (driver === 'postgres') {
+  if (driver === DatasourceDriverEnum.Postgres) {
     return qb as PgSelectDynamic<any>
   }
 
@@ -132,7 +109,7 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
     return { driver: connectedSessions[0].driver as D, session: connectedSessions[0].session } as DatasourceDriverClient<D>
   }
 
-  async function connectByParameters<D extends DatasourceDriver>(driver: D, parameters: DatasourceThroughConnectionParameters) {
+  async function connectByParameters<D extends DatasourceDriver>(driver: D, parameters: ConnectionThroughParameters) {
     return connect<D>(driver, toDSN(driver, parameters, defaultParamsFromDriver(driver)))
   }
 
@@ -149,7 +126,7 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
     }
   }
 
-  async function listTablesByParameters<D extends DatasourceDriver>(driver: D, parameters: DatasourceThroughConnectionParameters) {
+  async function listTablesByParameters<D extends DatasourceDriver>(driver: D, parameters: ConnectionThroughParameters) {
     return listTables<D>(driver, toDSN(driver, parameters, defaultParamsFromDriver(driver)))
   }
 
@@ -163,7 +140,7 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
     }
   }
 
-  async function listColumnsByParameters<D extends DatasourceDriver>(driver: D, parameters: DatasourceThroughConnectionParameters, schema: string, table: string) {
+  async function listColumnsByParameters<D extends DatasourceDriver>(driver: D, parameters: ConnectionThroughParameters, schema: string, table: string) {
     return listColumns<D>(driver, toDSN(driver, parameters, defaultParamsFromDriver(driver)), schema, table)
   }
 
@@ -180,7 +157,7 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
     }
   }
 
-  async function executeByParameters<T, D extends DatasourceDriver = DatasourceDriver>(driver: D, parameters: DatasourceThroughConnectionParameters, query: string, params?: unknown[]): Promise<T[]> {
+  async function executeByParameters<T, D extends DatasourceDriver = DatasourceDriver>(driver: D, parameters: ConnectionThroughParameters, query: string, params?: unknown[]): Promise<T[]> {
     return execute<T, D>(driver, toDSN(driver, parameters, defaultParamsFromDriver(driver)), query, params)
   }
 
@@ -190,7 +167,7 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
     return execute<T, D>(driver, dsn, sql, params)
   }
 
-  async function executeSQLByParameters<T, S = any, D extends DatasourceDriver = DatasourceDriver>(driver: D, parameters: DatasourceThroughConnectionParameters, query: SQL<S>): Promise<T[]> {
+  async function executeSQLByParameters<T, S = any, D extends DatasourceDriver = DatasourceDriver>(driver: D, parameters: ConnectionThroughParameters, query: SQL<S>): Promise<T[]> {
     return executeSQL<T, S, D>(driver, toDSN(driver, parameters, defaultParamsFromDriver(driver)), query)
   }
 
@@ -213,7 +190,6 @@ export function useDatasource(
   datasources: Ref<Datasource[]>,
 ) {
   const datasourceSessionsStore = useDatasourceSessionsStore()
-
   const datasource = ref<Datasource>()
 
   async function datasourceFromId(fromId?: string | null) {
@@ -228,8 +204,8 @@ export function useDatasource(
     }
 
     return {
-      driver: queryFromDatasource.driver as keyof DatasourceDriverMap,
-      datasource: queryFromDatasource as DatasourceThroughConnectionParameters,
+      driver: queryFromDatasource.driver,
+      datasource: queryFromDatasource,
     }
   }
 
@@ -240,7 +216,7 @@ export function useDatasource(
 
     return await datasourceSessionsStore.executeSQLByParameters<D>(
       datasource.value?.driver,
-      datasource.value as DatasourceThroughConnectionParameters,
+      datasource.value as ConnectionThroughParameters,
       query,
     )
   }
