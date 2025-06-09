@@ -1,0 +1,71 @@
+name: Build App
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Attach to a specific tag/commit for the release
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ()
+    strategy:
+      matrix:
+        include:
+          - os: macos-13
+            artifact: darwin-x64
+            platform: mac
+            ext: dmg
+          - os: macos-latest
+            artifact: darwin-arm64
+            platform: mac
+            ext: dmg
+          - os: ubuntu-latest
+            artifact: linux-x64
+            platform: linux
+            ext: AppImage
+          - os: ubuntu-24.04-arm
+            artifact: linux-arm64
+            platform: linux
+            ext: AppImage
+          - os: windows-latest
+            artifact: windows-x64-setup
+            platform: win
+            ext: exe
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build
+        run: |
+          pnpm run build:packages
+          cd apps/deditor && pnpm run build:${{ matrix.platform }}
+
+      - name: get-npm-version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@v1.3.1
+        with:
+          path: apps/deditor
+
+      - name: Upload To GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/Deditor-${{ steps.package-version.outputs.current-version }}-${{ matrix.artifact }}.${{ matrix.ext }}
+          generate_release_notes: true
+          tag_name: ${{ github.event.inputs.tag }}
