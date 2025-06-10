@@ -52,15 +52,13 @@ jobs:
           pnpm run build:packages
           pnpm run build:electron
 
-      - name: get-npm-version
-        id: package-version
-        uses: martinbeentjes/npm-get-version-action@v1.3.1
-        with:
-          path: apps/deditor
+      - id: version
+        run: |
+          echo "VERSION=$(pnpm run get:version)" >> $GITHUB_ENV
 
       - name: Upload To GitHub Releases
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/Deditor-${{ steps.package-version.outputs.current-version }}-${{ matrix.artifact }}.${{ matrix.ext }}
+          files: dist/Deditor-v${{ steps.version.outputs.VERSION }}-${{ matrix.artifact }}.${{ matrix.ext }}
           generate_release_notes: true
           tag_name: ${{ github.event.inputs.tag }}
