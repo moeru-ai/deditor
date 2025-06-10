@@ -9,7 +9,7 @@ import { RouterLink, useRoute } from 'vue-router'
 import Button from '../../../../../components/basic/Button.vue'
 import Editable from '../../../../../components/basic/Editable.vue'
 import { Input } from '../../../../../components/ui/input'
-import { useRemotePostgres } from '../../../../../composables/ipc/databases/remote'
+import { useLocalPGLite } from '../../../../../composables/ipc/databases/local'
 import { dialog } from '../../../../../composables/ipc/electron'
 import { DatasourceDriverEnum, defaultParamsFromDriver, fromDSN, toDSN } from '../../../../../libs/datasources'
 import { useDatasourcesStore } from '../../../../../stores/datasources'
@@ -130,47 +130,34 @@ function handleBlur() {
 }
 
 async function handleTestConnection() {
-  const { connect, execute } = useRemotePostgres()
+  const { connect, execute } = useLocalPGLite()
+  let dsn = ''
+
   if ('connectionString' in datasource.value && !!datasource.value.connectionString) {
-    try {
-      testConnectionSucceeded.value = false
-      testConnectionConnecting.value = true
-      await connect(datasource.value.connectionString)
-      // eslint-disable-next-line no-console
-      console.debug(await execute('SELECT 1'))
-      testConnectionSucceeded.value = true
-    }
-    catch (err) {
-      testConnectionErrored.value = true
-      testConnectionErrorMessage.value = (err as Error).message || 'Unknown error occurred while testing connection.'
-      console.error('Error testing connection:', testConnectionErrorMessage.value)
-      return
-    }
-    finally {
-      testConnectionConnecting.value = false
-    }
+    dsn = datasource.value.connectionString
   }
   else {
     const params = datasource.value as ConnectionThroughParameters
-    try {
-      testConnectionSucceeded.value = false
-      testConnectionConnecting.value = true
+    dsn = toDSN(driver.value, params, defaultParamsFromDriver(driver.value))
+  }
 
-      await connect(toDSN(driver.value, params, defaultParamsFromDriver(driver.value)))
-      // eslint-disable-next-line no-console
-      console.debug(await execute('SELECT 1'))
+  try {
+    testConnectionSucceeded.value = false
+    testConnectionConnecting.value = true
 
-      testConnectionSucceeded.value = true
-    }
-    catch (err) {
-      testConnectionErrored.value = true
-      testConnectionErrorMessage.value = (err as Error).message || 'Unknown error occurred while testing connection.'
-      console.error('Error testing connection:', testConnectionErrorMessage.value)
-      return
-    }
-    finally {
-      testConnectionConnecting.value = false
-    }
+    await connect(dsn)
+    // eslint-disable-next-line no-console
+    console.debug(await execute('SELECT 1'))
+
+    testConnectionSucceeded.value = true
+  }
+  catch (err) {
+    testConnectionErrored.value = true
+    testConnectionErrorMessage.value = (err as Error).message || 'Unknown error occurred while testing connection.'
+    console.error('Error testing connection:', testConnectionErrorMessage.value)
+  }
+  finally {
+    testConnectionConnecting.value = false
   }
 }
 
