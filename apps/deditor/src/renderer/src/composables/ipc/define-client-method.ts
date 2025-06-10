@@ -1,6 +1,6 @@
 import type { IpcRendererListener } from '@electron-toolkit/preload'
 
-import { nanoid } from '@deditor-app/shared'
+import { fromErrorObject, nanoid } from '@deditor-app/shared'
 import strings from '@stdlib/string'
 
 const eventListeners = new Map<string, { on: IpcRendererListener, off: () => void }>()
@@ -34,12 +34,31 @@ export function defineClientMethod<TMethods, TMethodName extends keyof TMethods>
       eventListeners.set(responseEventKey, { on: listener, off: window.electron.ipcRenderer.on(responseEventKey, listener) })
     }
     if (!eventListeners.has(responseErrorEventKey)) {
-      const listener: IpcRendererListener = (_, err: { _eventId: string, error: Error }) => {
+      const listener: IpcRendererListener = (_, err: { _eventId: string, error: {
+        name: string
+        message: string
+        stack?: string
+        cause?: any
+      } }) => {
+        const gotError = fromErrorObject(err.error)
         if (hooks?.onError) {
-          hooks.onError(err.error)
+          if (gotError == null) {
+            console.warn(`Received an error object that could not be converted to an Error instance:`, err.error)
+          }
+          else {
+            hooks.onError(gotError)
+          }
         }
         if (err._eventId && requestPromiseRejectors.has(err._eventId)) {
-          requestPromiseRejectors.get(err._eventId)!(err.error)
+          const reject = requestPromiseRejectors.get(err._eventId)!
+          if (gotError == null) {
+            console.warn(`Received an error object that could not be converted to an Error instance:`, err.error)
+            reject(new Error(`Received an error object that could not be converted to an Error instance: ${JSON.stringify(err.error)}`))
+          }
+          else {
+            reject(gotError)
+          }
+
           requestPromiseRejectors.delete(err._eventId)
           requestPromiseResolvers.delete(err._eventId)
         }

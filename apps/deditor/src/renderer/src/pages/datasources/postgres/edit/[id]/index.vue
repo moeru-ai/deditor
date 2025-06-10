@@ -129,7 +129,13 @@ async function handleTestConnection() {
   }
   catch (err) {
     testConnectionErrored.value = true
-    testConnectionErrorMessage.value = (err as Error).message || 'Unknown error occurred while testing connection.'
+
+    const e = err as Error
+    testConnectionErrorMessage.value = e.message || 'Unknown error occurred while testing connection.'
+    if (e.cause != null) {
+      testConnectionErrorMessage.value += ` Cause: ${String(e.cause)}`
+    }
+
     console.error('Error testing connection:', testConnectionErrorMessage.value)
   }
   finally {

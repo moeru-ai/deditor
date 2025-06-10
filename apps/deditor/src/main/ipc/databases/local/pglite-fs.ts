@@ -6,7 +6,7 @@ import { nanoid } from '@deditor-app/shared'
 import * as schema from '@deditor-app/shared-schemas'
 import { postgresInformationSchemaColumns } from '@deditor-app/shared-schemas'
 import { PGlite } from '@electric-sql/pglite'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/pglite'
 
 import { defineIPCHandler } from '../../define-ipc-handler'
@@ -26,6 +26,13 @@ export function registerPGLiteDatabaseDialect(window: BrowserWindow) {
         databaseSessions.set(dbSessionId, { drizzle: pgDrizzle, client: pgliteClient })
 
         await pgDrizzle.execute('SELECT 1')
+        await pgDrizzle.execute(sql`CREATE SCHEMA IF NOT EXISTS "public"`)
+        await pgDrizzle.execute(sql`SET search_path TO "public"`)
+        await pgDrizzle.execute(sql`CREATE TABLE IF NOT EXISTS public."test_table" (
+          id SERIAL PRIMARY KEY,
+          name TEXT NOT NULL DEFAULT ''
+        )`)
+
         return { databaseSessionId: dbSessionId, dialect: 'pglite' }
       }
       catch (err) {

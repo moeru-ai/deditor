@@ -1,5 +1,6 @@
 import type { BrowserWindow, IpcMainEvent } from 'electron'
 
+import { toErrorObject } from '@deditor-app/shared'
 import strings from '@stdlib/string'
 import debug from 'debug'
 import { ipcMain } from 'electron'
@@ -33,12 +34,19 @@ export function defineIPCHandler<
             })
             .catch((err) => {
               debugIpcHandler(`error${eventName}:`, err)
-              window.webContents.send(`response:error:${eventName}`, { _eventId: request._eventId, error: err })
+              window.webContents.send(`response:error:${eventName}`, {
+                _eventId: request._eventId,
+                error: toErrorObject(err),
+              })
             })
         }
         catch (err) {
           debugIpcHandler(`unexpected caught error:`, err)
-          window.webContents.send(`response:error:${eventName}`, { _eventId: request._eventId, error: err as Error })
+          const e = err as Error
+          window.webContents.send(`response:error:${eventName}`, {
+            _eventId: request._eventId,
+            error: toErrorObject(e),
+          })
         }
       }
 
