@@ -1,7 +1,7 @@
 {
   "name": "@deditor-app/drizzle-orm-icons",
   "type": "module",
-  "version": "1.0.0",
+  "version": "0.0.1-alpha1",
   "packageManager": "pnpm@10.11.0",
   "description": "Iconify JSON IconSet port for @drizzle-orm supported icons",
   "author": {
