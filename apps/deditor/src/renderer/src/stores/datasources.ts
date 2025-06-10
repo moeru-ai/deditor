@@ -2,24 +2,25 @@ import type { SQL } from 'drizzle-orm'
 import type { PgSelectBuilder, PgSelectDynamic } from 'drizzle-orm/pg-core'
 import type { Ref } from 'vue'
 
-import type { useRemoteMySQL } from '../composables/ipc/databases/remote'
 import type { ConnectionThroughParameters, Datasource as LibDatasource } from '../libs/datasources'
 
 import { nanoid } from '@deditor-app/shared'
 import { sql } from 'drizzle-orm'
-import { PgDialect, QueryBuilder } from 'drizzle-orm/pg-core'
+import { PgDialect, QueryBuilder as PgQueryBuilder } from 'drizzle-orm/pg-core'
 import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
 
+import { useLocalPGLite } from '@/composables/ipc/databases/local'
+
 import { useVersionedAppDataStorage } from '../composables/electron/use-app-data'
-import { useRemotePostgres } from '../composables/ipc/databases/remote'
+import { useRemoteMySQL, useRemotePostgres } from '../composables/ipc/databases/remote'
 import { DatasourceDriverEnum, defaultParamsFromDriver, toDSN } from '../libs/datasources'
 
 export interface DatasourceDriverMap {
   [DatasourceDriverEnum.Postgres]: ReturnType<typeof useRemotePostgres>
   [DatasourceDriverEnum.Supabase]: never
   [DatasourceDriverEnum.Neon]: never
-  [DatasourceDriverEnum.PGLite]: never
+  [DatasourceDriverEnum.PGLite]: ReturnType<typeof useLocalPGLite>
   [DatasourceDriverEnum.DuckDBWasm]: never
   [DatasourceDriverEnum.CloudflareD2]: never
   [DatasourceDriverEnum.MySQL]: ReturnType<typeof useRemoteMySQL>
@@ -55,6 +56,27 @@ function clientFromDriver(driver: DatasourceDriver) {
   if (driver === DatasourceDriverEnum.Postgres) {
     return useRemotePostgres()
   }
+  else if (driver === DatasourceDriverEnum.MySQL) {
+    return useRemoteMySQL()
+  }
+  else if (driver === DatasourceDriverEnum.Supabase) {
+    throw new Error('Supabase is not supported yet')
+  }
+  else if (driver === DatasourceDriverEnum.Neon) {
+    throw new Error('Neon is not supported yet')
+  }
+  else if (driver === DatasourceDriverEnum.PGLite) {
+    return useLocalPGLite()
+  }
+  else if (driver === DatasourceDriverEnum.DuckDBWasm) {
+    throw new Error('DuckDBWasm is not supported yet')
+  }
+  else if (driver === DatasourceDriverEnum.CloudflareD2) {
+    throw new Error('Cloudflare D2 is not supported yet')
+  }
+  else if (driver === DatasourceDriverEnum.SQLite) {
+    throw new Error('SQLite is not supported yet')
+  }
 
   throw new Error(`Unsupported driver: ${driver}`)
 }
@@ -63,13 +85,55 @@ export function sqlDialectFromDriver(driver: DatasourceDriver) {
   if (driver === DatasourceDriverEnum.Postgres) {
     return new PgDialect()
   }
+  else if (driver === DatasourceDriverEnum.MySQL) {
+    throw new Error('MySQL is not supported yet')
+  }
+  else if (driver === DatasourceDriverEnum.Supabase) {
+    throw new Error('Supabase is not supported yet')
+  }
+  else if (driver === DatasourceDriverEnum.Neon) {
+    throw new Error('Neon is not supported yet')
+  }
+  else if (driver === DatasourceDriverEnum.PGLite) {
+    return new PgDialect() // PGLite uses the same dialect as Postgres
+  }
+  else if (driver === DatasourceDriverEnum.DuckDBWasm) {
+    return new PgDialect() // DuckDBWasm uses a similar dialect to Postgres
+  }
+  else if (driver === DatasourceDriverEnum.CloudflareD2) {
+    throw new Error('Cloudflare D2 is not supported yet')
+  }
+  else if (driver === DatasourceDriverEnum.SQLite) {
+    throw new Error('SQLite is not supported yet')
+  }
 
   throw new Error(`Unsupported driver: ${driver}`)
 }
 
 export function queryBuilderFromDriver(driver: DatasourceDriver) {
   if (driver === DatasourceDriverEnum.Postgres) {
-    return new QueryBuilder()
+    return new PgQueryBuilder()
+  }
+  else if (driver === DatasourceDriverEnum.MySQL) {
+    throw new Error('MySQL is not supported yet')
+  }
+  else if (driver === DatasourceDriverEnum.Supabase) {
+    throw new Error('Supabase is not supported yet')
+  }
+  else if (driver === DatasourceDriverEnum.Neon) {
+    throw new Error('Neon is not supported yet')
+  }
+  else if (driver === DatasourceDriverEnum.PGLite) {
+    return new PgQueryBuilder() // PGLite uses the same query builder as Postgres
+  }
+  else if (driver === DatasourceDriverEnum.DuckDBWasm) {
+    return new PgQueryBuilder() // DuckDBWasm uses a similar query builder to Postgres
+  }
+  else if (driver === DatasourceDriverEnum.CloudflareD2) {
+    throw new Error('Cloudflare D2 is not supported yet')
+  }
+  else if (driver === DatasourceDriverEnum.SQLite) {
+    throw new Error('SQLite is not supported yet')
   }
 
   throw new Error(`Unsupported driver: ${driver}`)
@@ -78,6 +142,27 @@ export function queryBuilderFromDriver(driver: DatasourceDriver) {
 export function toDynamicQueryBuilder(driver: DatasourceDriver, qb: PgSelectBuilder<undefined, 'qb'>) {
   if (driver === DatasourceDriverEnum.Postgres) {
     return qb as PgSelectDynamic<any>
+  }
+  else if (driver === DatasourceDriverEnum.MySQL) {
+    throw new Error('MySQL is not supported yet')
+  }
+  else if (driver === DatasourceDriverEnum.Supabase) {
+    throw new Error('Supabase is not supported yet')
+  }
+  else if (driver === DatasourceDriverEnum.Neon) {
+    throw new Error('Neon is not supported yet')
+  }
+  else if (driver === DatasourceDriverEnum.PGLite) {
+    return qb as PgSelectDynamic<any> // PGLite uses the same query builder as Postgres
+  }
+  else if (driver === DatasourceDriverEnum.DuckDBWasm) {
+    return qb as PgSelectDynamic<any> // DuckDBWasm uses a similar query builder to Postgres
+  }
+  else if (driver === DatasourceDriverEnum.CloudflareD2) {
+    throw new Error('Cloudflare D2 is not supported yet')
+  }
+  else if (driver === DatasourceDriverEnum.SQLite) {
+    throw new Error('SQLite is not supported yet')
   }
 
   throw new Error(`Unsupported driver: ${driver}`)
@@ -92,6 +177,30 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
 
   function isMySQLSession(session: DatasourceDriverClient<DatasourceDriver>): session is DatasourceDriverClient<DatasourceDriverEnum.MySQL> {
     return session.driver === DatasourceDriverEnum.MySQL
+  }
+
+  function isPGLiteSession(session: DatasourceDriverClient<DatasourceDriver>): session is DatasourceDriverClient<DatasourceDriverEnum.PGLite> {
+    return session.driver === DatasourceDriverEnum.PGLite
+  }
+
+  function isDuckDBWasmSession(session: DatasourceDriverClient<DatasourceDriver>): session is DatasourceDriverClient<DatasourceDriverEnum.DuckDBWasm> {
+    return session.driver === DatasourceDriverEnum.DuckDBWasm
+  }
+
+  function isCloudflareD2Session(session: DatasourceDriverClient<DatasourceDriver>): session is DatasourceDriverClient<DatasourceDriverEnum.CloudflareD2> {
+    return session.driver === DatasourceDriverEnum.CloudflareD2
+  }
+
+  function isSQLiteSession(session: DatasourceDriverClient<DatasourceDriver>): session is DatasourceDriverClient<DatasourceDriverEnum.SQLite> {
+    return session.driver === DatasourceDriverEnum.SQLite
+  }
+
+  function isSupabaseSession(session: DatasourceDriverClient<DatasourceDriver>): session is DatasourceDriverClient<DatasourceDriverEnum.Supabase> {
+    return session.driver === DatasourceDriverEnum.Supabase
+  }
+
+  function isNeonSession(session: DatasourceDriverClient<DatasourceDriver>): session is DatasourceDriverClient<DatasourceDriverEnum.Neon> {
+    return session.driver === DatasourceDriverEnum.Neon
   }
 
   async function connect<D extends DatasourceDriver>(driver: D, dsn: string, options?: { sqawn?: boolean }): Promise<DatasourceDriverClient<D>> {
@@ -125,6 +234,24 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
     else if (isMySQLSession(session)) {
       throw new Error('MySQL is not supported yet')
     }
+    else if (isPGLiteSession(session)) {
+      return session.session.listTables()
+    }
+    else if (isDuckDBWasmSession(session)) {
+      throw new Error('DuckDBWasm is not supported yet')
+    }
+    else if (isCloudflareD2Session(session)) {
+      throw new Error('Cloudflare D2 is not supported yet')
+    }
+    else if (isSQLiteSession(session)) {
+      throw new Error('SQLite is not supported yet')
+    }
+    else if (isSupabaseSession(session)) {
+      throw new Error('Supabase is not supported yet')
+    }
+    else if (isNeonSession(session)) {
+      throw new Error('Neon is not supported yet')
+    }
     else {
       throw new Error(`Unsupported driver: ${driver}`)
     }
@@ -138,6 +265,27 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
     const session = await connect(driver, dsn)
     if (isPostgresSession(session)) {
       return session.session.listColumns(schema, table)
+    }
+    else if (isMySQLSession(session)) {
+      throw new Error('MySQL is not supported yet')
+    }
+    else if (isPGLiteSession(session)) {
+      return session.session.listColumns(schema, table)
+    }
+    else if (isDuckDBWasmSession(session)) {
+      throw new Error('DuckDBWasm is not supported yet')
+    }
+    else if (isCloudflareD2Session(session)) {
+      throw new Error('Cloudflare D2 is not supported yet')
+    }
+    else if (isSQLiteSession(session)) {
+      throw new Error('SQLite is not supported yet')
+    }
+    else if (isSupabaseSession(session)) {
+      throw new Error('Supabase is not supported yet')
+    }
+    else if (isNeonSession(session)) {
+      throw new Error('Neon is not supported yet')
     }
     else {
       throw new Error(`Unsupported driver: ${driver}`)
@@ -155,6 +303,24 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
     }
     else if (isMySQLSession(session)) {
       throw new Error('MySQL is not supported yet')
+    }
+    else if (isPGLiteSession(session)) {
+      return session.session.execute<T>(query, parameters)
+    }
+    else if (isDuckDBWasmSession(session)) {
+      throw new Error('DuckDBWasm is not supported yet')
+    }
+    else if (isCloudflareD2Session(session)) {
+      throw new Error('Cloudflare D2 is not supported yet')
+    }
+    else if (isSQLiteSession(session)) {
+      throw new Error('SQLite is not supported yet')
+    }
+    else if (isSupabaseSession(session)) {
+      throw new Error('Supabase is not supported yet')
+    }
+    else if (isNeonSession(session)) {
+      throw new Error('Neon is not supported yet')
     }
     else {
       throw new Error(`Unsupported driver: ${driver}`)
