@@ -25,11 +25,10 @@ nsis:
 mac:
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
-    - NSCameraUsageDescription: Application requests access to the device's camera.
-    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
   notarize: false
+  executableName: Deditor
 dmg:
   artifactName: ${productName}-${version}-darwin-${arch}.${ext}
 linux:
@@ -37,8 +36,10 @@ linux:
     - AppImage
     - snap
     - deb
-  maintainer: electronjs.org
+  maintainer: moeru.ai
   category: Utility
+  executableName: Deditor
+  artifactName: ${productName}-${version}-linux-${arch}.${ext}
 appImage:
   artifactName: ${productName}-${version}-linux-${arch}.${ext}
 npmRebuild: false
