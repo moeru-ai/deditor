@@ -34,12 +34,15 @@ export function defineClientMethod<TMethods, TMethodName extends keyof TMethods>
       eventListeners.set(responseEventKey, { on: listener, off: window.electron.ipcRenderer.on(responseEventKey, listener) })
     }
     if (!eventListeners.has(responseErrorEventKey)) {
-      const listener: IpcRendererListener = (_, err: { _eventId: string, error: {
-        name: string
-        message: string
-        stack?: string
-        cause?: any
-      } }) => {
+      const listener: IpcRendererListener = (_, err: {
+        _eventId: string
+        error: {
+          name: string
+          message: string
+          stack?: string
+          cause?: any
+        }
+      }) => {
         const gotError = fromErrorObject(err.error)
         if (hooks?.onError) {
           if (gotError == null) {
