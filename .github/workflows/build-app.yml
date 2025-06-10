@@ -54,8 +54,7 @@ jobs:
 
       - id: version
         run: |
-          export VERSION=$(pnpm run get:version)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo VERSION=$(pnpm exec tsx scripts/get-package-json-version.ts) >> $GITHUB_ENV
 
       - name: Upload To GitHub Releases
         uses: softprops/action-gh-release@v2

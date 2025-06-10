@@ -26,8 +26,7 @@
     "lint": "eslint --cache .",
     "lint:fix": "eslint --cache --fix .",
     "typecheck": "pnpm -r -F=\"./packages/*\" -F=\"./apps/*\" run --parallel typecheck",
-    "up": "taze -w -r -I -f && pnpm prune && pnpm dedupe",
-    "get:version": "tsx scripts/get-package-json-version.ts"
+    "up": "taze -w -r -I -f && pnpm prune && pnpm dedupe"
   },
   "workspaces": [
     "apps/*",
