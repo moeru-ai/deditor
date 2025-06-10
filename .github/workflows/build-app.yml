@@ -54,7 +54,8 @@ jobs:
 
       - id: version
         run: |
-          echo "VERSION=$(pnpm run get:version)" >> $GITHUB_ENV
+          export VERSION=$(pnpm run get:version)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Upload To GitHub Releases
         uses: softprops/action-gh-release@v2
