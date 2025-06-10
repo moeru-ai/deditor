@@ -23,23 +23,18 @@ jobs:
         include:
           - os: macos-13
             artifact: darwin-x64
-            platform: mac
             ext: dmg
           - os: macos-latest
             artifact: darwin-arm64
-            platform: mac
             ext: dmg
           - os: ubuntu-latest
             artifact: linux-x64
-            platform: linux
             ext: AppImage
           - os: ubuntu-24.04-arm
             artifact: linux-arm64
-            platform: linux
             ext: AppImage
           - os: windows-latest
             artifact: windows-x64-setup
-            platform: win
             ext: exe
     runs-on: ${{ matrix.os }}
     steps:
@@ -55,7 +50,7 @@ jobs:
       - name: Build
         run: |
           pnpm run build:packages
-          cd apps/deditor && pnpm run build:${{ matrix.platform }}
+          pnpm run build:electron
 
       - name: get-npm-version
         id: package-version

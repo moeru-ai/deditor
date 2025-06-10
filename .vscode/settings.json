@@ -44,5 +44,9 @@
   "[rust]": {
     "editor.defaultFormatter": "rust-lang.rust-analyzer",
     "editor.formatOnSave": true
+  },
+
+  "yaml.schemas": {
+    "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json": "apps/deditor/electron-builder.yml"
   }
 }

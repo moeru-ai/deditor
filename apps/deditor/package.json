@@ -20,9 +20,7 @@
     "typecheck": "vue-tsc --noEmit && tsc --noEmit -p tsconfig.node.json",
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "pnpm run build && electron-builder --dir",
-    "build:win": "pnpm run build && electron-builder --win",
-    "build:mac": "pnpm run build && electron-builder --mac",
-    "build:linux": "pnpm run build && electron-builder --linux"
+    "build:electron": "pnpm run build && electron-builder"
   },
   "dependencies": {
     "@deditor-app/deditor-icons": "workspace:^",
