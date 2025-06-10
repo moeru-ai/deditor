@@ -10,6 +10,7 @@ import Button from '../../../../../components/basic/Button.vue'
 import Editable from '../../../../../components/basic/Editable.vue'
 import { Input } from '../../../../../components/ui/input'
 import { useRemotePostgres } from '../../../../../composables/ipc/databases/remote'
+import { dialog } from '../../../../../composables/ipc/electron'
 import { DatasourceDriverEnum, defaultParamsFromDriver, fromDSN, toDSN } from '../../../../../libs/datasources'
 import { useDatasourcesStore } from '../../../../../stores/datasources'
 
@@ -86,16 +87,16 @@ const dataDir = computed({
     return paramsFromDSN.extraOptions?.dataDir as string
   },
   set: (val) => {
-    return toDSN(
+    const dsn = toDSN(
       driver.value,
       {
         ...datasource.value,
-        extraOptions: {
-          dataDir: val,
-        },
+        extraOptions: { dataDir: val },
       } as ConnectionThroughParameters,
       defaultParamsFromDriver(driver.value),
     )
+
+    DSN.value = dsn
   },
 })
 
@@ -173,6 +174,17 @@ async function handleTestConnection() {
   }
 }
 
+async function handlePick() {
+  const res = await dialog('showOpenDialog').call({
+    properties: ['createDirectory', 'openDirectory'],
+  })
+  if (!res.filePaths) {
+    return
+  }
+
+  dataDir.value = res.filePaths[0] || ''
+}
+
 async function handlePasteDSN() {
   const { text } = useClipboard()
   DSN.value = text.value || ''
@@ -206,6 +218,9 @@ async function handlePasteDSN() {
             </div>
             <div flex items-center gap-2>
               <Input v-model="dataDir" flex-1 />
+              <Button @click="handlePick">
+                Pick
+              </Button>
               <Button @click="handlePasteDSN">
                 Paste
               </Button>

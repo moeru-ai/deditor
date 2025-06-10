@@ -126,6 +126,23 @@ export function fromDSN(dsn: string, defaultParams: DSNDefaultParams): Connectio
         params.extraOptions!.sslmode = sslMode as 'require' | 'allow' | 'prefer' | 'verify-full'
       }
     }
+
+    // Parse other extra options from query params
+    url.searchParams.forEach((value, key) => {
+      if (key === 'sslmode') {
+        return
+      }
+
+      if (params.extraOptions![key] === undefined) {
+        params.extraOptions![key] = value
+      }
+      else if (Array.isArray(params.extraOptions![key])) {
+        (params.extraOptions![key] as string[]).push(value)
+      }
+      else {
+        params.extraOptions![key] = [params.extraOptions![key] as string, value]
+      }
+    })
   }
   catch (err) {
     console.warn('Invalid connection string format:', err)

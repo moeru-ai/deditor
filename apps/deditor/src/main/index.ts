@@ -7,7 +7,7 @@ import { isMacOS } from 'std-env'
 
 import icon from '../../resources/icon.png?asset'
 import { registerDatabaseDialects } from './ipc/databases/remote/'
-import { registerApp, registerFs, registerPath, registerSafeStorage } from './ipc/electron'
+import { registerApp, registerDialog, registerFs, registerPath, registerSafeStorage } from './ipc/electron'
 
 app.dock?.setIcon(icon)
 
@@ -94,6 +94,7 @@ app.whenReady().then(() => {
   // Electron specific IPC handlers
   registerApp(mainWindow, app)
   registerSafeStorage(mainWindow, app)
+  registerDialog(mainWindow, app)
 
   // Deditor specific IPC handlers
   registerDatabaseDialects(mainWindow)
