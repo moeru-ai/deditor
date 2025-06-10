@@ -273,6 +273,10 @@ importers:
       nanoid:
         specifier: ^5.1.5
         version: 5.1.5
+    devDependencies:
+      electron:
+        specifier: ^36.3.2
+        version: 36.3.2
 
   packages/shared-schemas:
     dependencies:

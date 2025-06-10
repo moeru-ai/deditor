@@ -4,7 +4,7 @@ import type { App, BrowserWindow } from 'electron'
 import { defineIPCHandler } from '../define-ipc-handler'
 
 export function registerApp(window: BrowserWindow, app: App) {
-  defineIPCHandler<AppMethods>(window, 'app', 'getPath')
+  defineIPCHandler<AppMethods>(window, 'electron/app', 'getPath')
     .handle(async (_, { name }) => {
       return app.getPath(name)
     })

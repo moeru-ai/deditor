@@ -5,7 +5,7 @@ import { isRef, onMounted, ref, toValue, watch } from 'vue'
 
 import { defineClientMethod } from '../define-client-method'
 
-export const app = <TMethod extends keyof AppMethods>(method: TMethod) => defineClientMethod<AppMethods, TMethod>('app', method)
+export const app = <TMethod extends keyof AppMethods>(method: TMethod) => defineClientMethod<AppMethods, TMethod>('electron/app', method)
 
 export type AppGetPathParameterName = Parameters<AppMethods['getPath']>[0]['name']
 

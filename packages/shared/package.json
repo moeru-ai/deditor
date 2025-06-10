@@ -45,5 +45,8 @@
   "dependencies": {
     "@deditor-app/shared-schemas": "workspace:^",
     "nanoid": "^5.1.5"
+  },
+  "devDependencies": {
+    "electron": "^36.3.2"
   }
 }

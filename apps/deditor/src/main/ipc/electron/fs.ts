@@ -33,13 +33,13 @@ export function isENOENTError(error: unknown): boolean {
 }
 
 export function registerFs(window: BrowserWindow, _app: App) {
-  defineIPCHandler<FsMethods>(window, 'fs', 'exists').handle(async (_, params) => await exists(params.path))
-  defineIPCHandler<FsMethods>(window, 'fs', 'readFile').handle(async (_, params) => {
+  defineIPCHandler<FsMethods>(window, 'node/fs', 'exists').handle(async (_, params) => await exists(params.path))
+  defineIPCHandler<FsMethods>(window, 'node/fs', 'readFile').handle(async (_, params) => {
     const buffer = await readFile(params.path, params.options)
     if (typeof buffer === 'string')
       return Buffer.from(buffer).buffer
     return buffer.buffer
   })
-  defineIPCHandler<FsMethods>(window, 'fs', 'writeFile').handle(async (_, params) => writeFileSync(params.path, Buffer.from(params.data), params.options))
-  defineIPCHandler<FsMethods>(window, 'fs', 'mkdir').handle(async (_, params) => await mkdir(params.path, params.options))
+  defineIPCHandler<FsMethods>(window, 'node/fs', 'writeFile').handle(async (_, params) => writeFileSync(params.path, Buffer.from(params.data), params.options))
+  defineIPCHandler<FsMethods>(window, 'node/fs', 'mkdir').handle(async (_, params) => await mkdir(params.path, params.options))
 }

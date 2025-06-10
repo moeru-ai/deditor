@@ -1,4 +1,5 @@
 export * from './app'
+export * from './dialog'
 export * from './fs'
 export * from './path'
 export * from './safe-storage'
