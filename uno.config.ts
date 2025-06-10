@@ -113,6 +113,7 @@ export function sharedUnoConfig() {
       presetIcons({
         scale: 1.2,
         collections: {
+          ...createExternalPackageIconLoader('@deditor-app/deditor-icons'),
           ...createExternalPackageIconLoader('@deditor-app/drizzle-orm-icons'),
         },
       }),
@@ -166,6 +167,30 @@ export function sharedUnoConfig() {
       colors: {
         primary: createColorSchemeConfig(),
         complementary: createColorSchemeConfig(180),
+      },
+      /**
+       * https://github.com/unocss/unocss/blob/1031312057a3bea1082b7d938eb2ad640f57613a/packages-presets/preset-wind4/src/theme/animate.ts
+       * https://unocss.dev/presets/wind4#transformdirectives
+       */
+      animation: {
+        keyframes: {
+          slideUpAndFade: '{from{opacity:0;transform:translateY(2px)}to{opacity:1;transform:translateY(0)}}',
+          slideRightAndFade: '{from{opacity:0;transform:translateX(-2px)}to{opacity:1;transform:translateX(0)}}',
+          slideDownAndFade: '{from{opacity:0;transform:translateY(-2px)}to{opacity:1;transform:translateY(0)}}',
+          slideLeftAndFade: '{from{opacity:0;transform:translateX(2px)}to{opacity:1;transform:translateX(0)}}',
+        },
+        durations: {
+          slideUpAndFade: '400ms',
+          slideRightAndFade: '400ms',
+          slideDownAndFade: '400ms',
+          slideLeftAndFade: '400ms',
+        },
+        timingFns: {
+          slideUpAndFade: 'cubic-bezier(0.16, 1, 0.3, 1)',
+          slideRightAndFade: 'cubic-bezier(0.16, 1, 0.3, 1)',
+          slideDownAndFade: 'cubic-bezier(0.16, 1, 0.3, 1)',
+          slideLeftAndFade: 'cubic-bezier(0.16, 1, 0.3, 1)',
+        },
       },
     },
   })

@@ -71,6 +71,9 @@ importers:
 
   apps/deditor:
     dependencies:
+      '@deditor-app/deditor-icons':
+        specifier: workspace:^
+        version: link:../../packages/deditor-icons
       '@deditor-app/shared-schemas':
         specifier: workspace:^
         version: link:../../packages/shared-schemas
@@ -255,6 +258,12 @@ importers:
       vue-tsc:
         specifier: ^2.2.10
         version: 2.2.10(typescript@5.8.3)
+
+  packages/deditor-icons:
+    devDependencies:
+      '@iconify/tools':
+        specifier: ^4.1.2
+        version: 4.1.2
 
   packages/drizzle-orm-icons:
     devDependencies:

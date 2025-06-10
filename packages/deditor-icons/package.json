@@ -1,0 +1,46 @@
+{
+  "name": "@deditor-app/deditor-icons",
+  "type": "module",
+  "version": "1.0.0",
+  "packageManager": "pnpm@10.11.0",
+  "description": "Iconify JSON IconSet port for Deditor.app supported icons",
+  "author": {
+    "name": "Moeru AI - Project AIRI Team",
+    "email": "airi@moeru.ai",
+    "url": "https://github.com/moeru-ai"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/moeru-ai/deditor.git",
+    "directory": "packages/deditor-icons"
+  },
+  "exports": {
+    "./*": "./*",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./icons.json": "./dist/icons.json",
+    "./info.json": "./dist/info.json",
+    "./metadata.json": "./dist/metadata.json"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "README.md",
+    "dist",
+    "package.json"
+  ],
+  "scripts": {
+    "dev": "unbuild",
+    "stub": "unbuild",
+    "build": "unbuild",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@iconify/tools": "^4.1.2"
+  }
+}

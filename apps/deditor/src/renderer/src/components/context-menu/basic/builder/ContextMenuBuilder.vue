@@ -215,7 +215,7 @@ provide(contextMenuStates, {
       <slot />
     </ContextMenuTrigger>
     <ContextMenuPortal :to="portalTo || '#app'">
-      <ContextMenuContent :side-offset="sideOffset || 5">
+      <ContextMenuContent :side-offset="sideOffset || 5" side="bottom">
         <template v-for="(item, _index) in menuConfig" :key="_index">
           <ContextMenuRenderer :item="item" :data="data" />
         </template>

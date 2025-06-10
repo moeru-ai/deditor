@@ -17,9 +17,13 @@ import { DatasourceDriverEnum, defaultParamsFromDriver, toDSN } from '../libs/da
 
 export interface DatasourceDriverMap {
   [DatasourceDriverEnum.Postgres]: ReturnType<typeof useRemotePostgres>
-  [DatasourceDriverEnum.MySQL]: ReturnType<typeof useRemoteMySQL>
+  [DatasourceDriverEnum.Supabase]: never
+  [DatasourceDriverEnum.Neon]: never
   [DatasourceDriverEnum.PGLite]: never
   [DatasourceDriverEnum.DuckDBWasm]: never
+  [DatasourceDriverEnum.CloudflareD2]: never
+  [DatasourceDriverEnum.MySQL]: ReturnType<typeof useRemoteMySQL>
+  [DatasourceDriverEnum.SQLite]: never
 }
 
 export type Datasource = LibDatasource<keyof DatasourceDriverMap> & {

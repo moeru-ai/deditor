@@ -25,6 +25,7 @@
     "build:linux": "pnpm run build && electron-builder --linux"
   },
   "dependencies": {
+    "@deditor-app/deditor-icons": "workspace:^",
     "@deditor-app/shared-schemas": "workspace:^",
     "@electric-sql/pglite": "^0.3.2",
     "@electron-toolkit/preload": "^3.0.2",

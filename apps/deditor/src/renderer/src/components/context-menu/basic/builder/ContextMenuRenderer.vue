@@ -78,7 +78,7 @@ const commonClasses = 'group text-grass11 data-[disabled]:text-mauve8 relative h
     <ContextMenuPortal>
       <ContextMenuSubContent
         :side-offset="item.sideOffset || 2"
-        :align-offset="item.alignOffset || -5"
+        :align-offset="item.alignOffset || -2"
       >
         <template v-for="(childItem, _index) in item.children" :key="_index">
           <ContextMenuRenderer :item="childItem" />

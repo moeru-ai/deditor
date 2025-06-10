@@ -1,9 +1,12 @@
 export enum DatasourceDriverEnum {
   Postgres = 'postgres',
-  MySQL = 'mysql',
-  SQLite = 'sqlite',
+  Supabase = 'supabase',
+  Neon = 'neon',
+  CloudflareD2 = 'cloudflare-d2',
   PGLite = 'pglite',
   DuckDBWasm = 'duckdb-wasm',
+  MySQL = 'mysql',
+  SQLite = 'sqlite',
 }
 
 export type Datasource<D = DatasourceDriverEnum> =

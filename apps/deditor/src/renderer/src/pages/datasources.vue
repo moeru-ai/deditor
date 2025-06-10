@@ -78,7 +78,7 @@ const menuConfig = computed<MenuItemConfig<Datasource>[]>(() => ([
   },
 ]))
 
-const paneAreaMenuConfig = computed<MenuItemConfig[]>(() => ([
+const paneAreaMenuConfig = computed<MenuItemConfig<any, DatasourceDriverEnum>[]>(() => ([
   {
     type: 'sub',
     label: 'Add...',
@@ -86,7 +86,7 @@ const paneAreaMenuConfig = computed<MenuItemConfig[]>(() => ([
     children: [
       {
         type: 'item',
-        value: 'postgres',
+        value: DatasourceDriverEnum.Postgres,
         renderLabel: () => {
           return h('div', {
             class: 'inline-flex items-center gap-2',
@@ -103,12 +103,63 @@ const paneAreaMenuConfig = computed<MenuItemConfig[]>(() => ([
       },
       {
         type: 'item',
-        value: 'pglite',
+        value: DatasourceDriverEnum.Supabase,
         renderLabel: () => {
           return h('div', {
             class: 'inline-flex items-center gap-2',
           }, [
-            h('div', { class: 'i-drizzle-orm-icons:pglite' }),
+            h('div', { class: 'i-drizzle-orm-icons:supabase' }),
+            h('div', 'Supabase'),
+          ])
+        },
+        onClick: () => {
+          const newDatasource = datasourcesStore.createDatasource(DatasourceDriverEnum.Supabase)
+          datasourcesStore.datasources.push(newDatasource)
+          router.push(`/datasources/${newDatasource.driver}/edit/${newDatasource.id}`)
+        },
+      },
+      {
+        type: 'item',
+        value: DatasourceDriverEnum.Neon,
+        renderLabel: () => {
+          return h('div', {
+            class: 'inline-flex items-center gap-2',
+          }, [
+            h('div', { class: 'i-drizzle-orm-icons:neon-dark' }),
+            h('div', 'Neon'),
+          ])
+        },
+        onClick: () => {
+          const newDatasource = datasourcesStore.createDatasource(DatasourceDriverEnum.Neon)
+          datasourcesStore.datasources.push(newDatasource)
+          router.push(`/datasources/${newDatasource.driver}/edit/${newDatasource.id}`)
+        },
+      },
+      {
+        type: 'item',
+        value: DatasourceDriverEnum.CloudflareD2,
+        renderLabel: () => {
+          return h('div', {
+            class: 'inline-flex items-center gap-2',
+          }, [
+            h('div', { class: 'i-drizzle-orm-icons:cloudflare' }),
+            h('div', 'Cloudflare D2'),
+          ])
+        },
+        onClick: () => {
+          const newDatasource = datasourcesStore.createDatasource(DatasourceDriverEnum.CloudflareD2)
+          datasourcesStore.datasources.push(newDatasource)
+          router.push(`/datasources/${newDatasource.driver}/edit/${newDatasource.id}`)
+        },
+      },
+      {
+        type: 'item',
+        value: DatasourceDriverEnum.PGLite,
+        renderLabel: () => {
+          return h('div', {
+            class: 'inline-flex items-center gap-2',
+          }, [
+            h('div', { class: 'i-drizzle-orm-icons:pglite translate-x--2px' }),
             h('div', 'PGLite'),
           ])
         },
@@ -120,17 +171,51 @@ const paneAreaMenuConfig = computed<MenuItemConfig[]>(() => ([
       },
       {
         type: 'item',
-        value: 'duckdb-wasm',
+        value: DatasourceDriverEnum.DuckDBWasm,
         renderLabel: () => {
           return h('div', {
             class: 'inline-flex items-center gap-2',
           }, [
-            h('div', { class: 'i-drizzle-orm-icons:mysql' }),
+            h('div', { class: 'i-deditor-icons:duckdb-dark' }),
             h('div', 'DuckDB WASM'),
           ])
         },
         onClick: () => {
           const newDatasource = datasourcesStore.createDatasource(DatasourceDriverEnum.DuckDBWasm)
+          datasourcesStore.datasources.push(newDatasource)
+          router.push(`/datasources/${newDatasource.driver}/edit/${newDatasource.id}`)
+        },
+      },
+      {
+        type: 'item',
+        value: DatasourceDriverEnum.MySQL,
+        renderLabel: () => {
+          return h('div', {
+            class: 'inline-flex items-center gap-2',
+          }, [
+            h('div', { class: 'i-drizzle-orm-icons:mysql-dark' }),
+            h('div', 'MySQL'),
+          ])
+        },
+        onClick: () => {
+          const newDatasource = datasourcesStore.createDatasource(DatasourceDriverEnum.MySQL)
+          datasourcesStore.datasources.push(newDatasource)
+          router.push(`/datasources/${newDatasource.driver}/edit/${newDatasource.id}`)
+        },
+      },
+      {
+        type: 'item',
+        value: DatasourceDriverEnum.SQLite,
+        renderLabel: () => {
+          return h('div', {
+            class: 'inline-flex items-center gap-2',
+          }, [
+            h('div', { class: 'i-drizzle-orm-icons:sqlite' }),
+            h('div', 'SQLite'),
+          ])
+        },
+        onClick: () => {
+          const newDatasource = datasourcesStore.createDatasource(DatasourceDriverEnum.SQLite)
           datasourcesStore.datasources.push(newDatasource)
           router.push(`/datasources/${newDatasource.driver}/edit/${newDatasource.id}`)
         },
