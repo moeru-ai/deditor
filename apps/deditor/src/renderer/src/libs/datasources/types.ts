@@ -36,3 +36,8 @@ export interface DSNDefaultParams {
   applyParamsURLSearchParams?: (search: URLSearchParams) => void
   applyURL?: (url: URL) => void
 }
+
+export interface DatasourceTable {
+  schema?: string | null
+  table: string
+}

@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import type { ConnectionThroughParameters } from '../../../../../libs/datasources'
+import type { ConnectionThroughParameters, DatasourceTable } from '../../../../../libs/datasources'
 
 import { computedAsync } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+
+import { fullyQualifiedTableName } from '@/libs/datasources/utils'
 
 import Chat from '../../../../../components/table/Chat.vue'
 import { useDatasource, useDatasourceSessionsStore, useDatasourcesStore } from '../../../../../stores'
@@ -37,7 +39,7 @@ const datasourceTables = computedAsync(async () => {
   )
 
   return tables
-    .map(t => ({
+    .map<DatasourceTable>(t => ({
       schema: t.table_schema,
       table: t.table_name,
     }))
@@ -151,7 +153,7 @@ function handleSortingChange(newSortedColumns: { id: string, desc: boolean }[]) 
       <div mb-10>
         <select v-model="datasourceTable" class="focus:outline-none" w-full rounded-lg px-2 py-1 font-mono>
           <option v-for="(table, index) of datasourceTables" :key="index" :value="table" font-mono>
-            {{ table?.schema ? `${table.schema}.` : '' }}{{ table?.table || 'unknown' }}
+            {{ fullyQualifiedTableName(table) }}
           </option>
         </select>
       </div>
