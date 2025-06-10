@@ -1,15 +1,12 @@
-name: Build App
+name: Release App
 
 permissions:
   contents: write
 
 on:
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: Attach to a specific tag/commit for the release
-        required: true
-        type: string
+  release:
+    types:
+      - prereleased
 
 jobs:
   build:
@@ -57,4 +54,3 @@ jobs:
         with:
           files: dist/Deditor-v${{ steps.version.outputs.VERSION }}-${{ matrix.artifact }}.${{ matrix.ext }}
           generate_release_notes: true
-          tag_name: ${{ github.event.inputs.tag }}
