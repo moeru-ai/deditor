@@ -7,7 +7,7 @@ import { Pane, Splitpanes } from 'splitpanes'
 import { computed, h } from 'vue'
 import { RouterView, useRoute, useRouter } from 'vue-router'
 
-import DatasourceIcon from '@/components/datasource/DatasourceIcon.vue'
+import { DATASOURCE_DRIVER_ICONS, DATASOURCE_DRIVER_NAMES } from '@/libs/datasources'
 
 import PaneArea from '../components/container/PaneArea.vue'
 import DatasourcesContextMenu from '../components/context-menu/datasources/index.vue'
@@ -85,144 +85,23 @@ const paneAreaMenuConfig = computed<MenuItemConfig<any, DatasourceDriverEnum>[]>
     type: 'sub',
     label: 'Add...',
     shortcut: '⌘ + D',
-    children: [
-      {
-        type: 'item',
-        value: DatasourceDriverEnum.Postgres,
-        renderLabel: () => {
-          return h('div', {
-            class: 'inline-flex items-center gap-2',
-          }, [
-            h('div', { class: 'i-drizzle-orm-icons:postgresql' }),
-            h('div', 'Postgres'),
-          ])
-        },
-        onClick: () => {
-          const newDatasource = datasourcesStore.createDatasource(DatasourceDriverEnum.Postgres)
-          datasourcesStore.datasources.push(newDatasource)
-          router.push(`/datasources/${newDatasource.driver}/edit/${newDatasource.id}`)
-        },
+    children: Object.values(DatasourceDriverEnum).map(driver => ({
+      type: 'item',
+      value: driver,
+      renderLabel: () => {
+        return h('div', {
+          class: 'inline-flex items-center gap-2',
+        }, [
+          h('div', { class: DATASOURCE_DRIVER_ICONS[driver] ?? 'i-ph:question' }),
+          h('div', DATASOURCE_DRIVER_NAMES[driver] ?? driver),
+        ])
       },
-      {
-        type: 'item',
-        value: DatasourceDriverEnum.Supabase,
-        renderLabel: () => {
-          return h('div', {
-            class: 'inline-flex items-center gap-2',
-          }, [
-            h('div', { class: 'i-drizzle-orm-icons:supabase' }),
-            h('div', 'Supabase'),
-          ])
-        },
-        onClick: () => {
-          const newDatasource = datasourcesStore.createDatasource(DatasourceDriverEnum.Supabase)
-          datasourcesStore.datasources.push(newDatasource)
-          router.push(`/datasources/${newDatasource.driver}/edit/${newDatasource.id}`)
-        },
+      onClick: () => {
+        const newDatasource = datasourcesStore.createDatasource(driver)
+        datasourcesStore.datasources.push(newDatasource)
+        router.push(`/datasources/${newDatasource.driver}/edit/${newDatasource.id}`)
       },
-      {
-        type: 'item',
-        value: DatasourceDriverEnum.Neon,
-        renderLabel: () => {
-          return h('div', {
-            class: 'inline-flex items-center gap-2',
-          }, [
-            h('div', { class: 'i-drizzle-orm-icons:neon-dark' }),
-            h('div', 'Neon'),
-          ])
-        },
-        onClick: () => {
-          const newDatasource = datasourcesStore.createDatasource(DatasourceDriverEnum.Neon)
-          datasourcesStore.datasources.push(newDatasource)
-          router.push(`/datasources/${newDatasource.driver}/edit/${newDatasource.id}`)
-        },
-      },
-      {
-        type: 'item',
-        value: DatasourceDriverEnum.CloudflareD2,
-        renderLabel: () => {
-          return h('div', {
-            class: 'inline-flex items-center gap-2',
-          }, [
-            h('div', { class: 'i-drizzle-orm-icons:cloudflare' }),
-            h('div', 'Cloudflare D2'),
-          ])
-        },
-        onClick: () => {
-          const newDatasource = datasourcesStore.createDatasource(DatasourceDriverEnum.CloudflareD2)
-          datasourcesStore.datasources.push(newDatasource)
-          router.push(`/datasources/${newDatasource.driver}/edit/${newDatasource.id}`)
-        },
-      },
-      {
-        type: 'item',
-        value: DatasourceDriverEnum.PGLite,
-        renderLabel: () => {
-          return h('div', {
-            class: 'inline-flex items-center gap-2',
-          }, [
-            h('div', { class: 'i-drizzle-orm-icons:pglite translate-x--2px' }),
-            h('div', 'PGLite'),
-          ])
-        },
-        onClick: () => {
-          const newDatasource = datasourcesStore.createDatasource(DatasourceDriverEnum.PGLite)
-          datasourcesStore.datasources.push(newDatasource)
-          router.push(`/datasources/${newDatasource.driver}/edit/${newDatasource.id}`)
-        },
-      },
-      {
-        type: 'item',
-        value: DatasourceDriverEnum.DuckDBWasm,
-        renderLabel: () => {
-          return h('div', {
-            class: 'inline-flex items-center gap-2',
-          }, [
-            h('div', { class: 'i-deditor-icons:duckdb-dark' }),
-            h('div', 'DuckDB WASM'),
-          ])
-        },
-        onClick: () => {
-          const newDatasource = datasourcesStore.createDatasource(DatasourceDriverEnum.DuckDBWasm)
-          datasourcesStore.datasources.push(newDatasource)
-          router.push(`/datasources/${newDatasource.driver}/edit/${newDatasource.id}`)
-        },
-      },
-      {
-        type: 'item',
-        value: DatasourceDriverEnum.MySQL,
-        renderLabel: () => {
-          return h('div', {
-            class: 'inline-flex items-center gap-2',
-          }, [
-            h('div', { class: 'i-drizzle-orm-icons:mysql-dark' }),
-            h('div', 'MySQL'),
-          ])
-        },
-        onClick: () => {
-          const newDatasource = datasourcesStore.createDatasource(DatasourceDriverEnum.MySQL)
-          datasourcesStore.datasources.push(newDatasource)
-          router.push(`/datasources/${newDatasource.driver}/edit/${newDatasource.id}`)
-        },
-      },
-      {
-        type: 'item',
-        value: DatasourceDriverEnum.SQLite,
-        renderLabel: () => {
-          return h('div', {
-            class: 'inline-flex items-center gap-2',
-          }, [
-            h('div', { class: 'i-drizzle-orm-icons:sqlite' }),
-            h('div', 'SQLite'),
-          ])
-        },
-        onClick: () => {
-          const newDatasource = datasourcesStore.createDatasource(DatasourceDriverEnum.SQLite)
-          datasourcesStore.datasources.push(newDatasource)
-          router.push(`/datasources/${newDatasource.driver}/edit/${newDatasource.id}`)
-        },
-      },
-    ],
+    })),
   },
 ]))
 
@@ -267,7 +146,7 @@ const paneDatasourceEditSize = computed(() => isSmallerThan2XL.value ? 80 : 70)
                     transition="all duration-100 ease-in-out"
                     flex cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1 text-sm
                   >
-                    <DatasourceIcon :driver="datasource.driver" />
+                    <div :class="DATASOURCE_DRIVER_ICONS[datasource.driver] ?? 'i-ph:question'" />
                     <div>{{ datasource?.name }}</div>
                   </div>
                 </DatasourcesContextMenu>

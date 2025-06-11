@@ -10,11 +10,10 @@ import { storeToRefs } from 'pinia'
 import { computed, h, ref, toRaw, watch } from 'vue'
 
 import Button from '@/components/basic/Button.vue'
-import DatasourceIcon from '@/components/datasource/DatasourceIcon.vue'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { filterPgTables, fullyQualifiedTableName } from '@/libs/datasources/utils'
+import { DATASOURCE_DRIVER_ICONS, DATASOURCE_DRIVER_NAMES, filterPgTables, fullyQualifiedTableName } from '@/libs/datasources'
 import { valueUpdater } from '@/libs/shadcn/utils'
 import { useDatasource, useDatasourceSessionsStore, useDatasourcesStore, useVisualizerStore } from '@/stores'
 
@@ -218,17 +217,17 @@ function handleRowClick(_index: number) {
         <Select v-model="datasourceId">
           <SelectTrigger>
             <SelectValue flex="~ row gap-2" items-center>
-              <DatasourceIcon :driver="datasource?.driver" />
+              <div :class="datasource?.driver ? DATASOURCE_DRIVER_ICONS[datasource.driver] : 'i-ph:question'" />
               <div>{{ datasource?.name ?? 'Select datasource' }}</div>
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <template v-if="Object.keys(datasourceGroups).length > 0">
               <SelectGroup v-for="(group, driver) in datasourceGroups" :key="driver">
-                <SelectLabel>{{ driver }}</SelectLabel>
+                <SelectLabel>{{ DATASOURCE_DRIVER_NAMES[driver] ?? driver }}</SelectLabel>
                 <SelectItem v-for="(ds, index) in group" :key="index" :value="ds.id">
                   <div flex="~ row gap-2" items-center>
-                    <DatasourceIcon :driver="ds.driver" />
+                    <div :class="DATASOURCE_DRIVER_ICONS[ds.driver] ?? 'i-ph:question'" />
                     <div>{{ ds.name }}</div>
                   </div>
                 </SelectItem>
