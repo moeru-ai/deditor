@@ -15,7 +15,7 @@ import DatasourceTablePicker from '@/components/datasource/DatasourceTablePicker
 
 import Button from '../components/basic/Button.vue'
 import PaneArea from '../components/container/PaneArea.vue'
-import Chat from '../components/table/Chat.vue'
+import DataTable from '../components/table/DataTable.vue'
 import { useDatasource, useDatasourcesStore } from '../stores'
 
 const input = ref(`[${Array.from({ length: 100 }, (_, i) => `{"question": "What is the answer to ${i}?", "answer": "It's ${i}."}`).join(',')}]`)
@@ -228,7 +228,7 @@ function handleSortingChange(newSortedColumns: { id: string, desc: boolean }[]) 
                   Results
                 </div>
               </h2>
-              <Chat
+              <DataTable
                 :data="results"
                 :total="Number(total)"
                 :page="page"

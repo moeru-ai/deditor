@@ -8,7 +8,7 @@ import { useRoute } from 'vue-router'
 
 import { fullyQualifiedTableName } from '@/libs/datasources/utils'
 
-import Chat from '../../../../../components/table/Chat.vue'
+import DataTable from '../../../../../components/table/DataTable.vue'
 import { useDatasource, useDatasourceSessionsStore, useDatasourcesStore } from '../../../../../stores'
 
 const route = useRoute('/datasources/pglite/edit/[id]/')
@@ -157,7 +157,7 @@ function handleSortingChange(newSortedColumns: { id: string, desc: boolean }[]) 
           </option>
         </select>
       </div>
-      <Chat
+      <DataTable
         :data="results"
         :total="Number(total)"
         :page="page"

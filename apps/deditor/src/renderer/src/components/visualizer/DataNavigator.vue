@@ -1,19 +1,13 @@
 <script setup lang="ts">
-import type { CellContext, ColumnDef, ColumnFiltersState, ColumnResizeMode, ColumnSizingState, ExpandedState, SortingState, VisibilityState } from '@tanstack/vue-table'
-
 import type { DatasourceTable } from '@/libs/datasources'
 import type { Datasource } from '@/stores'
 
-import { BasicTextarea } from '@proj-airi/ui'
-import { FlexRender, getCoreRowModel, getExpandedRowModel, getFilteredRowModel, getSortedRowModel, useVueTable } from '@tanstack/vue-table'
+import { computedAsync } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
-import { computed, h, ref, toRaw, watch } from 'vue'
+import { computed, ref } from 'vue'
 
-import Button from '@/components/basic/Button.vue'
 import DatasourceTablePicker from '@/components/datasource/DatasourceTablePicker.vue'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { valueUpdater } from '@/libs/shadcn/utils'
+import DataTable from '@/components/table/DataTable.vue'
 import { useDatasource, useDatasourcesStore } from '@/stores'
 
 const datasourcesStore = useDatasourcesStore()
@@ -26,137 +20,10 @@ const { findMany } = useDatasource(computed(() => queryFromDatasource.value?.id)
 
 const page = ref(1)
 const pageSize = ref(20)
-const data = ref<any[]>([])
-
-watch(queryFromTable, async (table) => {
-  data.value = table
-    ? await findMany(table, [], pageSize.value, page.value)
+const results = computedAsync(() => {
+  return queryFromTable.value
+    ? findMany(queryFromTable.value, [], pageSize.value, page.value)
     : []
-}, { immediate: true })
-
-const SELECT_COLUMN_WIDTH = 50
-
-const columnSizing = ref<ColumnSizingState>({})
-const columnResizeMode = ref<ColumnResizeMode>('onChange')
-
-const sorting = ref<SortingState>([])
-const columnFilters = ref<ColumnFiltersState>([])
-const columnVisibility = ref<VisibilityState>({})
-const rowSelection = ref({})
-const expanded = ref<ExpandedState>({})
-
-const columns = computed<ColumnDef<Record<string, unknown>>[]>(() => {
-  const fields = [
-    { label: 'Content', key: 'content', initialWidth: 300 },
-    { label: 'Vector(1024)', key: 'content_vector_1024', initialWidth: 500 },
-  ].map(({ label, key, initialWidth }) => {
-    return {
-      accessorKey: key,
-      header: label,
-      cell: (cellProps: CellContext<Record<string, unknown>, unknown>) => {
-        const value = cellProps.row.getValue(key) as string | number | boolean
-        if (Array.isArray(value)) {
-          return h('span', {}, JSON.stringify(toRaw(value)))
-        }
-
-        return h('span', {}, value)
-      },
-      size: initialWidth,
-      minSize: 60,
-      maxSize: 800,
-      enableResizing: true,
-    } as ColumnDef<Record<string, unknown>>
-  })
-
-  return [
-    {
-      id: 'select',
-      header: ({ table }) => h(Checkbox, {
-        'modelValue': table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate'),
-        'onUpdate:modelValue': value => table.toggleAllPageRowsSelected(!!value),
-        'ariaLabel': 'Select all',
-      }),
-      cell: ({ row }) => h(Checkbox, {
-        'modelValue': row.getIsSelected(),
-        'onUpdate:modelValue': value => row.toggleSelected(!!value),
-        'ariaLabel': 'Select row',
-      }),
-      enableSorting: false,
-      enableHiding: false,
-      size: SELECT_COLUMN_WIDTH,
-      minSize: SELECT_COLUMN_WIDTH,
-      maxSize: SELECT_COLUMN_WIDTH,
-      enableResizing: false,
-    },
-    ...fields,
-    {
-      id: 'spacer',
-      header: '',
-      cell: () => null,
-      enableSorting: false,
-      enableHiding: false,
-      enableResizing: false,
-      size: 10,
-      minSize: 10,
-      maxSize: 2000,
-    },
-  ]
-})
-
-const table = useVueTable({
-  data,
-  get columns() {
-    return columns.value || []
-  },
-  enableSorting: false,
-  columnResizeMode: columnResizeMode.value,
-  enableColumnResizing: true,
-  // manualPagination: true,
-  // rowCount: data.value.length,
-  getCoreRowModel: getCoreRowModel(),
-  getSortedRowModel: getSortedRowModel(),
-  getFilteredRowModel: getFilteredRowModel(),
-  getExpandedRowModel: getExpandedRowModel(),
-  onSortingChange: updaterOrValue => valueUpdater(updaterOrValue, sorting),
-  onColumnFiltersChange: updaterOrValue => valueUpdater(updaterOrValue, columnFilters),
-  onColumnVisibilityChange: updaterOrValue => valueUpdater(updaterOrValue, columnVisibility),
-  onRowSelectionChange: updaterOrValue => valueUpdater(updaterOrValue, rowSelection),
-  onExpandedChange: updaterOrValue => valueUpdater(updaterOrValue, expanded),
-  onColumnSizingChange: updaterOrValue => valueUpdater(updaterOrValue, columnSizing),
-  state: {
-    get sorting() { return sorting.value },
-    get columnFilters() { return columnFilters.value },
-    get columnVisibility() { return columnVisibility.value },
-    get rowSelection() { return rowSelection.value },
-    get expanded() { return expanded.value },
-    get columnSizing() { return columnSizing.value },
-    // get pagination() {
-    //   return {
-    //     pageIndex: page.value,
-    //     pageSize: pageSize.value,
-    //   }
-    // },
-  },
-  // initialState: {
-  //   pagination: {
-  //     pageIndex: page.value,
-  //     pageSize: pageSize.value,
-  //   },
-  // },
-})
-
-// Calculate column size variables once for better performance
-const columnSizeVars = computed(() => {
-  const headers = table.getFlatHeaders()
-  const colSizes: Record<string, string> = {}
-
-  for (let i = 0; i < headers.length; i++) {
-    const header = headers[i]
-    colSizes[`--header-${header.id}-size`] = `${header.getSize()}px`
-    colSizes[`--col-${header.column.id}-size`] = `${header.column.getSize()}px`
-  }
-
-  return colSizes
 })
 
 function handleRowClick(_index: number) {
@@ -173,69 +40,18 @@ function handleRowClick(_index: number) {
     />
 
     <div flex="grow" border="~ neutral-700/50" w-full overflow-y-scroll rounded-lg>
-      <Table :style="columnSizeVars" class="w-full table-fixed">
-        <TableHeader>
-          <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id" class="relative">
-            <TableHead
-              v-for="header in headerGroup.headers"
-              :key="header.id"
-              :style="{
-                width: `var(--header-${header.id}-size)`,
-                position: 'relative',
-              }"
-              :colspan="header.colSpan"
-              :data-column-id="header.column.id"
-              class="relative select-none bg-neutral-900/50"
-            >
-              <div class="flex items-center justify-between gap-2">
-                <div v-if="!header.isPlaceholder" class="truncate">
-                  <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
-                </div>
-
-                <!-- Column resize handle -->
-                <div
-                  v-if="header.column.getCanResize()" class="resizer"
-                  :class="{ isResizing: header.column.getIsResizing() }"
-                  @dblclick="header.column.resetSize()"
-                  @mousedown="header.getResizeHandler()?.($event)"
-                  @touchstart="header.getResizeHandler()?.($event)"
-                />
-              </div>
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <template v-if="table.getRowModel().rows?.length">
-            <template v-for="row in table.getRowModel().rows" :key="row.id">
-              <TableRow
-                :data-state="row.getIsSelected() && 'selected'"
-                class="w-full bg-neutral-900/20"
-                @click="handleRowClick(row.index)"
-              >
-                <TableCell
-                  v-for="cell in row.getVisibleCells()" :key="cell.id"
-                  :style="{ width: `var(--col-${cell.column.id}-size)` }"
-                  :data-column-id="cell.column.id"
-                  class="truncate"
-                >
-                  <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
-                </TableCell>
-              </TableRow>
-              <TableRow v-if="row.getIsExpanded()">
-                <TableCell :colspan="row.getAllCells().length">
-                  {{ JSON.stringify(row.original) }}
-                </TableCell>
-              </TableRow>
-            </template>
-          </template>
-
-          <TableRow v-else class="border-b border-neutral-700/50">
-            <TableCell :colspan="columns.length" class="h-24 text-center">
-              No results.
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
+      <DataTable
+        v-if="results"
+        :data="results"
+        :total="results.length"
+        :page="page"
+        :page-size="pageSize"
+        @page-previous="() => {}"
+        @page-next="() => {}"
+        @row-click="() => {}"
+        @update-data="() => {}"
+        @sorting-change="() => {}"
+      />
     </div>
 
     <div flex flex-col items-start gap-2>
