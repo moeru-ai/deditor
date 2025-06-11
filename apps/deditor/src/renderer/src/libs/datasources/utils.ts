@@ -1,13 +1,17 @@
 import type { DatasourceTable } from '@/libs/datasources/types'
 
-export function fullyQualifiedTableName(datasourceTable?: DatasourceTable): string {
-  if (!datasourceTable) {
+export function fullyQualifiedTableName(t?: DatasourceTable): string {
+  if (!t) {
     return '<unknown>'
   }
 
-  if (!datasourceTable.schema) {
-    return datasourceTable.table
+  if (!t.schema) {
+    return t.table
   }
 
-  return `${datasourceTable.schema}.${datasourceTable.table}`
+  return `${t.schema}.${t.table}`
+}
+
+export function filterPgTables(t: DatasourceTable): boolean {
+  return !t.schema || (t.schema !== 'information_schema' && t.schema !== 'pg_catalog')
 }

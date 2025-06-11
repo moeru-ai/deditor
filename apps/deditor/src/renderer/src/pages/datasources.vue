@@ -7,6 +7,8 @@ import { Pane, Splitpanes } from 'splitpanes'
 import { computed, h } from 'vue'
 import { RouterView, useRoute, useRouter } from 'vue-router'
 
+import DatasourceIcon from '@/components/datasource/DatasourceIcon.vue'
+
 import PaneArea from '../components/container/PaneArea.vue'
 import DatasourcesContextMenu from '../components/context-menu/datasources/index.vue'
 import DatasourcesContextMenuPaneArea from '../components/context-menu/datasources/pane-area.vue'
@@ -259,50 +261,15 @@ const paneDatasourceEditSize = computed(() => isSmallerThan2XL.value ? 80 : 70)
                   :data="datasource"
                   @click="() => handleClick(datasource)"
                 >
-                  <template v-if="datasource?.driver === DatasourceDriverEnum.Postgres">
-                    <div
-                      bg="hover:neutral-700/80"
-                      active-class="bg-neutral-700/50"
-                      transition="all duration-100 ease-in-out"
-                      flex cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1 text-sm
-                    >
-                      <div i-drizzle-orm-icons:postgresql />
-                      <div>{{ datasource?.name }}</div>
-                    </div>
-                  </template>
-                  <template v-else-if="datasource?.driver === DatasourceDriverEnum.MySQL">
-                    <div
-                      bg="hover:neutral-700/80"
-                      active-class="bg-neutral-700/50"
-                      transition="all duration-100 ease-in-out"
-                      flex cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1 text-sm
-                    >
-                      <div i-drizzle-orm-icons:mysql />
-                      <div>{{ datasource?.name }}</div>
-                    </div>
-                  </template>
-                  <template v-else-if="datasource?.driver === DatasourceDriverEnum.PGLite">
-                    <div
-                      bg="hover:neutral-700/80"
-                      active-class="bg-neutral-700/50"
-                      transition="all duration-100 ease-in-out"
-                      flex cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1 text-sm
-                    >
-                      <div i-drizzle-orm-icons:pglite />
-                      <div>{{ datasource?.name }}</div>
-                    </div>
-                  </template>
-                  <template v-else>
-                    <div
-                      bg="hover:neutral-700/80"
-                      active-class="bg-neutral-700/50"
-                      transition="all duration-100 ease-in-out"
-                      flex cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1 text-sm
-                    >
-                      <div i-ph:question />
-                      <div>{{ datasource?.name }}</div>
-                    </div>
-                  </template>
+                  <div
+                    bg="hover:neutral-700/80"
+                    active-class="bg-neutral-700/50"
+                    transition="all duration-100 ease-in-out"
+                    flex cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1 text-sm
+                  >
+                    <DatasourceIcon :driver="datasource.driver" />
+                    <div>{{ datasource?.name }}</div>
+                  </div>
                 </DatasourcesContextMenu>
               </div>
               <DatasourcesContextMenuPaneArea :config="paneAreaMenuConfig">
