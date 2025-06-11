@@ -31,9 +31,6 @@ const columnVisibility = ref<VisibilityState>({})
 const rowSelection = ref({})
 const expanded = ref<ExpandedState>({})
 
-const page = ref(1)
-const pageSize = ref(10)
-
 const columns = computed<ColumnDef<Record<string, unknown>>[]>(() => {
   const fields = [
     { label: 'Style', key: 'style', initialWidth: 100 },
@@ -148,8 +145,8 @@ const columnSizeVars = computed(() => {
   return colSizes
 })
 
-function handleRowClick(index: number) {
-  console.log(`Row clicked at index: ${index}`, table.getRowModel().rows[index].original)
+function handleRowClick(_index: number) {
+  // console.log(`Row clicked at index: ${index}`, table.getRowModel().rows[index].original)
   // emits('rowClick', index, table.getRowModel().rows[index].original)
 }
 </script>
