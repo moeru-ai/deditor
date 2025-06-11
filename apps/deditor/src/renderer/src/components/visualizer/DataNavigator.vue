@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { CellContext, ColumnDef, ColumnFiltersState, ColumnResizeMode, ColumnSizingState, ExpandedState, SortingState, VisibilityState } from '@tanstack/vue-table'
 
-import type { ConnectionThroughParameters, DatasourceTable } from '@/libs/datasources'
-import type { Datasource, DatasourceDriver } from '@/stores'
+import type { DatasourceTable } from '@/libs/datasources'
+import type { Datasource } from '@/stores'
 
 import { BasicTextarea } from '@proj-airi/ui'
 import { FlexRender, getCoreRowModel, getExpandedRowModel, getFilteredRowModel, getSortedRowModel, useVueTable } from '@tanstack/vue-table'
@@ -10,74 +10,29 @@ import { storeToRefs } from 'pinia'
 import { computed, h, ref, toRaw, watch } from 'vue'
 
 import Button from '@/components/basic/Button.vue'
+import DatasourceTablePicker from '@/components/datasource/DatasourceTablePicker.vue'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { DATASOURCE_DRIVER_ICONS, DATASOURCE_DRIVER_NAMES, filterPgTables, fullyQualifiedTableName } from '@/libs/datasources'
 import { valueUpdater } from '@/libs/shadcn/utils'
-import { useDatasource, useDatasourceSessionsStore, useDatasourcesStore, useVisualizerStore } from '@/stores'
-
-const visualizerStore = useVisualizerStore()
+import { useDatasource, useDatasourcesStore } from '@/stores'
 
 const datasourcesStore = useDatasourcesStore()
-const datasourceSessionsStore = useDatasourceSessionsStore()
 
-const datasourceId = ref<string>()
+const queryFromDatasource = ref<Datasource>()
+const queryFromTable = ref<DatasourceTable>()
+
 const { datasources } = storeToRefs(datasourcesStore)
-const { datasource } = useDatasource(datasourceId, datasources)
+const { findMany } = useDatasource(computed(() => queryFromDatasource.value?.id), datasources)
 
-const datasourceGroups = computed(() =>
-  datasources.value.reduce((groups, ds) => {
-    groups[ds.driver] ??= []
-    groups[ds.driver].push(ds)
-    return groups
-  }, {} as Record<DatasourceDriver, Datasource[]>),
-)
+const page = ref(1)
+const pageSize = ref(20)
+const data = ref<any[]>([])
 
-const datasourceTables = ref<DatasourceTable[]>([])
-const tableName = ref<string>()
-
-// watch([datasources, datasourceId], ([datasources, id]) => {
-//   if (!datasources.some(ds => ds.id === id)) {
-//     datasourceId.value = datasources.length > 0 ? datasources[0].id : undefined
-//   }
-// }, { immediate: true })
-
-watch(datasource, async (datasource) => {
-  if (!datasource) {
-    return
-  }
-
-  try {
-    datasourceTables.value = (
-      await datasourceSessionsStore
-        .listTablesByParameters(datasource.driver, datasource as ConnectionThroughParameters))
-      .map<DatasourceTable>(t => ({ schema: t.table_schema, table: t.table_name }))
-      .filter(filterPgTables)
-  }
-  catch (e) {
-    console.error('Failed to fetch tables:', e)
-    datasourceTables.value = []
-  }
+watch(queryFromTable, async (table) => {
+  data.value = table
+    ? await findMany(table, [], pageSize.value, page.value)
+    : []
 }, { immediate: true })
-
-// watch(datasourceTables, (tables) => {
-//   if (!tables.some(t => fullyQualifiedTableName(t) === tableName.value)) {
-//     if (tables.length === 0) {
-//       tableName.value = undefined
-//     }
-//     else {
-//       tableName.value = fullyQualifiedTableName(tables[0])
-//     }
-//   }
-// }, { immediate: true })
-
-const data = computed(() => {
-  return visualizerStore.data.map((text, i) => ({
-    text,
-    style: visualizerStore.styles[i],
-  }))
-})
 
 const SELECT_COLUMN_WIDTH = 50
 
@@ -92,8 +47,8 @@ const expanded = ref<ExpandedState>({})
 
 const columns = computed<ColumnDef<Record<string, unknown>>[]>(() => {
   const fields = [
-    { label: 'Style', key: 'style', initialWidth: 100 },
-    { label: 'Text', key: 'text', initialWidth: 500 },
+    { label: 'Content', key: 'content', initialWidth: 300 },
+    { label: 'Vector(1024)', key: 'content_vector_1024', initialWidth: 500 },
   ].map(({ label, key, initialWidth }) => {
     return {
       accessorKey: key,
@@ -212,58 +167,10 @@ function handleRowClick(_index: number) {
 
 <template>
   <div flex="~ col gap-3" h-full w-full py-1>
-    <div flex="~ row gap-2" items-center justify-start>
-      <div flex="~ row gap-2" items-center justify-center>
-        <Select v-model="datasourceId">
-          <SelectTrigger>
-            <SelectValue flex="~ row gap-2" items-center>
-              <div :class="datasource?.driver ? DATASOURCE_DRIVER_ICONS[datasource.driver] : 'i-ph:question'" />
-              <div>{{ datasource?.name ?? 'Select datasource' }}</div>
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <template v-if="Object.keys(datasourceGroups).length > 0">
-              <SelectGroup v-for="(group, driver) in datasourceGroups" :key="driver">
-                <SelectLabel>{{ DATASOURCE_DRIVER_NAMES[driver] ?? driver }}</SelectLabel>
-                <SelectItem v-for="(ds, index) in group" :key="index" :value="ds.id">
-                  <div flex="~ row gap-2" items-center>
-                    <div :class="DATASOURCE_DRIVER_ICONS[ds.driver] ?? 'i-ph:question'" />
-                    <div>{{ ds.name }}</div>
-                  </div>
-                </SelectItem>
-              </SelectGroup>
-            </template>
-            <SelectItem v-else value="_" disabled>
-              No datasources available
-            </SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div i-ph:arrow-right />
-
-      <div flex="~ row gap-2" items-center justify-center>
-        <Select v-model="tableName">
-          <SelectTrigger>
-            <SelectValue placeholder="Select table" />
-          </SelectTrigger>
-          <SelectContent>
-            <template v-if="datasourceTables.length > 0">
-              <SelectItem
-                v-for="(t, index) in datasourceTables"
-                :key="index"
-                :value="fullyQualifiedTableName(t)"
-              >
-                {{ fullyQualifiedTableName(t) }}
-              </SelectItem>
-            </template>
-            <SelectItem v-else value="_" disabled>
-              No tables available
-            </SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
+    <DatasourceTablePicker
+      v-model:datasource="queryFromDatasource"
+      v-model:table="queryFromTable"
+    />
 
     <div flex="grow" border="~ neutral-700/50" w-full overflow-y-scroll rounded-lg>
       <Table :style="columnSizeVars" class="w-full table-fixed">

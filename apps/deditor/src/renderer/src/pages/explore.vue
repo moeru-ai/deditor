@@ -1,20 +1,22 @@
 <script setup lang="ts">
 import type { DuckDBWasmDrizzleDatabase } from '@proj-airi/drizzle-duckdb-wasm'
 
-import type { ConnectionThroughParameters } from '../libs/datasources'
+import type { DatasourceTable } from '../libs/datasources'
+import type { Datasource } from '../stores'
 
 import { drizzle } from '@proj-airi/drizzle-duckdb-wasm'
 import { getImportUrlBundles } from '@proj-airi/drizzle-duckdb-wasm/bundles/import-url-browser'
 import { BasicTextarea } from '@proj-airi/ui'
-import { computedAsync } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { Pane, Splitpanes } from 'splitpanes'
-import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+
+import DatasourceTablePicker from '@/components/datasource/DatasourceTablePicker.vue'
 
 import Button from '../components/basic/Button.vue'
 import PaneArea from '../components/container/PaneArea.vue'
 import Chat from '../components/table/Chat.vue'
-import { useDatasource, useDatasourceSessionsStore, useDatasourcesStore } from '../stores'
+import { useDatasource, useDatasourcesStore } from '../stores'
 
 const input = ref(`[${Array.from({ length: 100 }, (_, i) => `{"question": "What is the answer to ${i}?", "answer": "It's ${i}."}`).join(',')}]`)
 
@@ -24,44 +26,14 @@ const selectedRow = ref<Record<string, unknown>>()
 
 const queryFrom = ref<'one-time' | 'files' | 'datasets' | 'datasources'>('one-time')
 
-const queryFromDatasourceId = ref<string>()
-const _queryFromDatasources = storeToRefs(useDatasourcesStore())
-const datasourceSessionsStore = useDatasourceSessionsStore()
+const queryFromDatasource = ref<Datasource>()
+const queryFromTable = ref<DatasourceTable>()
+const { datasources } = storeToRefs(useDatasourcesStore())
+const { findMany } = useDatasource(computed(() => queryFromDatasource.value?.id), datasources)
 
 const page = ref(1)
 const pageSize = ref(20)
 const sortedColumns = ref<{ id: string, desc: boolean }[]>([])
-
-const datasource = useDatasource(
-  queryFromDatasourceId,
-  _queryFromDatasources.datasources,
-)
-
-const queryFromDatasourceTables = computedAsync(async () => {
-  if (!datasource.datasource.value?.driver || !datasource.datasource.value) {
-    return []
-  }
-
-  const tables = await datasourceSessionsStore.listTablesByParameters(
-    datasource.datasource.value?.driver,
-    datasource.datasource.value as ConnectionThroughParameters,
-  )
-
-  return tables
-    .map(t => ({
-      schema: t.table_schema,
-      table: t.table_name,
-    }))
-    .filter((t) => {
-      if (!t.schema) {
-        return true
-      }
-
-      return t.schema !== 'information_schema'
-        && t.schema !== 'pg_catalog'
-    })
-})
-const queryFromDatasourceTable = ref<{ schema?: string | null, table: string }>()
 
 const inMemoryDB = ref<DuckDBWasmDrizzleDatabase>()
 
@@ -91,7 +63,7 @@ watch(queryFrom, async () => {
   results.value = []
   sortedColumns.value = []
 
-  if (!queryFromDatasourceTable.value) {
+  if (!queryFromTable.value) {
     return
   }
 
@@ -100,8 +72,8 @@ watch(queryFrom, async () => {
       await loadFromSelectedOneTime()
       break
     case 'datasources':
-      results.value = await datasource.findMany(
-        queryFromDatasourceTable.value,
+      results.value = await findMany(
+        queryFromTable.value,
         sortedColumns.value,
         pageSize.value,
         page.value,
@@ -111,16 +83,16 @@ watch(queryFrom, async () => {
   }
 })
 
-watch([queryFromDatasourceId, queryFromDatasourceTable], async () => {
+watch(queryFromTable, async (table) => {
   results.value = []
   sortedColumns.value = []
 
-  if (!queryFromDatasourceTable.value) {
+  if (!table) {
     return
   }
 
-  results.value = await datasource.findMany(
-    queryFromDatasourceTable.value,
+  results.value = await findMany(
+    table,
     sortedColumns.value,
     pageSize.value,
     page.value,
@@ -130,7 +102,7 @@ watch([queryFromDatasourceId, queryFromDatasourceTable], async () => {
 onMounted(async () => {
   inMemoryDB.value = drizzle({ connection: { bundles: getImportUrlBundles(), logger: false } })
 
-  if (!queryFromDatasourceTable.value) {
+  if (!queryFromTable.value) {
     return
   }
 
@@ -139,8 +111,8 @@ onMounted(async () => {
       await loadFromSelectedOneTime()
       break
     case 'datasources':
-      results.value = await datasource.findMany(
-        queryFromDatasourceTable.value,
+      results.value = await findMany(
+        queryFromTable.value,
         sortedColumns.value,
         pageSize.value,
         page.value,
@@ -186,12 +158,12 @@ function handleUpdateData(rowIndex: number, columnId: string, value: unknown) {
 function handleSortingChange(newSortedColumns: { id: string, desc: boolean }[]) {
   sortedColumns.value = newSortedColumns
 
-  if (!queryFromDatasourceTable.value) {
+  if (!queryFromTable.value) {
     return
   }
 
-  datasource.findMany(
-    queryFromDatasourceTable.value,
+  findMany(
+    queryFromTable.value,
     sortedColumns.value,
     pageSize.value,
     page.value,
@@ -239,16 +211,10 @@ function handleSortingChange(newSortedColumns: { id: string, desc: boolean }[]) 
                 />
               </div>
               <div v-if="queryFrom === 'datasources'" h-full max-h-full flex flex-col gap-2 overflow-y-scroll rounded-lg>
-                <select v-model="queryFromDatasourceId" rounded-lg px-2 py-1 class="focus:outline-none">
-                  <option v-for="item in _queryFromDatasources.datasources.value" :key="item.id" :value="item.id">
-                    {{ item.name }}
-                  </option>
-                </select>
-                <select v-model="queryFromDatasourceTable" rounded-lg px-2 py-1 class="focus:outline-none" font-mono>
-                  <option v-for="table in queryFromDatasourceTables" :key="`${table.schema}.${table.table}`" :value="table" font-mono>
-                    {{ table.schema }}.{{ table.table }}
-                  </option>
-                </select>
+                <DatasourceTablePicker
+                  v-model:datasource="queryFromDatasource"
+                  v-model:table="queryFromTable"
+                />
               </div>
             </PaneArea>
           </Pane>
