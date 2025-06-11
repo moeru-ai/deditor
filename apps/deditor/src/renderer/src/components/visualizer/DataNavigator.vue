@@ -25,11 +25,6 @@ const results = computedAsync(() => {
     ? findMany(queryFromTable.value, [], pageSize.value, page.value)
     : []
 })
-
-function handleRowClick(_index: number) {
-  // console.log(`Row clicked at index: ${index}`, table.getRowModel().rows[index].original)
-  // emits('rowClick', index, table.getRowModel().rows[index].original)
-}
 </script>
 
 <template>
