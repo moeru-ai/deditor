@@ -34,8 +34,6 @@ dmg:
 linux:
   target:
     - AppImage
-    - snap
-    - deb
   maintainer: moeru.ai
   category: Utility
   executableName: Deditor
