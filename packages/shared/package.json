@@ -34,13 +34,10 @@
     "package.json"
   ],
   "scripts": {
-    "dev": "pnpm run stub",
-    "stub": "unbuild --stub",
-    "build": "unbuild",
+    "dev": "pnpm run build",
+    "stub": "pnpm run build",
+    "build": "tsdown",
     "typecheck": "tsc --noEmit"
-  },
-  "peerDependencies": {
-    "drizzle-orm": ">=0.44.0"
   },
   "dependencies": {
     "@deditor-app/shared-schemas": "workspace:^",
