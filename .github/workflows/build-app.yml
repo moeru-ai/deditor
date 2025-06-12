@@ -26,9 +26,9 @@ jobs:
           - os: ubuntu-latest
             artifact: linux-x64
             ext: AppImage
-          - os: ubuntu-24.04-arm
-            artifact: linux-arm64
-            ext: AppImage
+          # - os: ubuntu-24.04-arm
+          #   artifact: linux-arm64
+          #   ext: AppImage
           - os: windows-latest
             artifact: windows-x64-setup
             ext: exe
