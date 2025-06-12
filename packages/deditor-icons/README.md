@@ -43,3 +43,7 @@ export default defineConfig({
   ],
 })
 ```
+
+## License
+
+- `jsonl` file icon comes from [`si:json-alt-1-fill`](https://icones.js.org/collection/all?s=json&icon=si:json-alt-1-fill)

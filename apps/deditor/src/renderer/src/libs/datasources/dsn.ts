@@ -1,6 +1,6 @@
 import type { ConnectionThroughParameters, DSNDefaultParams } from './types'
 
-import { DatasourceDriverEnum } from './types'
+import { DatasourceDriverEnum } from './driver'
 
 export function defaultParamsFromDriver(driver: string): DSNDefaultParams {
   switch (driver) {

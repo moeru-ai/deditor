@@ -63,6 +63,7 @@
     "@deditor-app/drizzle-orm-icons": "workspace:^",
     "@deditor-app/shared": "workspace:^",
     "@iconify-json/ph": "^1.2.2",
+    "@iconify-json/simple-icons": "^1.2.38",
     "@iconify-json/svg-spinners": "^1.2.2",
     "@radix-icons/vue": "^1.0.0",
     "@tresjs/cientos": "^4.3.1",

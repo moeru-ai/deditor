@@ -1,38 +1,33 @@
 import type { SQL } from 'drizzle-orm'
-import type { PgSelectBuilder, PgSelectDynamic } from 'drizzle-orm/pg-core'
 import type { Ref } from 'vue'
 
-import type { ConnectionThroughParameters, Datasource as LibDatasource } from '../libs/datasources'
+import type { ConnectionThroughParameters, DatasourceDriver, DatasourceDriverMap, Datasource as LibDatasource } from '../libs/datasources'
 
 import { nanoid } from '@deditor-app/shared'
 import { sql } from 'drizzle-orm'
-import { PgDialect, QueryBuilder as PgQueryBuilder } from 'drizzle-orm/pg-core'
 import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
 
-import { useLocalPGLite } from '@/composables/ipc/databases/local'
-
 import { useVersionedAppDataStorage } from '../composables/electron/use-app-data'
-import { useRemoteMySQL, useRemotePostgres } from '../composables/ipc/databases/remote'
-import { DatasourceDriverEnum, defaultParamsFromDriver, toDSN } from '../libs/datasources'
-
-export interface DatasourceDriverMap {
-  [DatasourceDriverEnum.Postgres]: ReturnType<typeof useRemotePostgres>
-  [DatasourceDriverEnum.Supabase]: never
-  [DatasourceDriverEnum.Neon]: never
-  [DatasourceDriverEnum.PGLite]: ReturnType<typeof useLocalPGLite>
-  [DatasourceDriverEnum.DuckDBWasm]: never
-  [DatasourceDriverEnum.CloudflareD2]: never
-  [DatasourceDriverEnum.MySQL]: ReturnType<typeof useRemoteMySQL>
-  [DatasourceDriverEnum.SQLite]: never
-}
+import { defaultParamsFromDriver, toDSN } from '../libs/datasources'
+import {
+  DATASOURCE_DRIVER_CLIENT,
+  DATASOURCE_DRIVER_QUERY_BUILDER,
+  DATASOURCE_DRIVER_SQL_DIALECT,
+  isCloudflareD2Session,
+  isDuckDBWasmSession,
+  isMySQLSession,
+  isNeonSession,
+  isPGLiteSession,
+  isPostgresSession,
+  isSQLiteSession,
+  isSupabaseSession,
+} from '../libs/datasources/driver'
 
 export type Datasource = LibDatasource<keyof DatasourceDriverMap> & {
   id: string
   name: string
 }
-
-export type DatasourceDriver = keyof DatasourceDriverMap
 
 export interface DatasourceDriverClient<D extends DatasourceDriver> {
   driver: D
@@ -53,159 +48,23 @@ export const useDatasourcesStore = defineStore('datasources', () => {
 })
 
 function clientFromDriver(driver: DatasourceDriver) {
-  if (driver === DatasourceDriverEnum.Postgres) {
-    return useRemotePostgres()
-  }
-  else if (driver === DatasourceDriverEnum.MySQL) {
-    return useRemoteMySQL()
-  }
-  else if (driver === DatasourceDriverEnum.Supabase) {
-    throw new Error('Supabase is not supported yet')
-  }
-  else if (driver === DatasourceDriverEnum.Neon) {
-    throw new Error('Neon is not supported yet')
-  }
-  else if (driver === DatasourceDriverEnum.PGLite) {
-    return useLocalPGLite()
-  }
-  else if (driver === DatasourceDriverEnum.DuckDBWasm) {
-    throw new Error('DuckDBWasm is not supported yet')
-  }
-  else if (driver === DatasourceDriverEnum.CloudflareD2) {
-    throw new Error('Cloudflare D2 is not supported yet')
-  }
-  else if (driver === DatasourceDriverEnum.SQLite) {
-    throw new Error('SQLite is not supported yet')
-  }
-
-  throw new Error(`Unsupported driver: ${driver}`)
+  return DATASOURCE_DRIVER_CLIENT[driver]
 }
 
 export function sqlDialectFromDriver(driver: DatasourceDriver) {
-  if (driver === DatasourceDriverEnum.Postgres) {
-    return new PgDialect()
-  }
-  else if (driver === DatasourceDriverEnum.MySQL) {
-    throw new Error('MySQL is not supported yet')
-  }
-  else if (driver === DatasourceDriverEnum.Supabase) {
-    throw new Error('Supabase is not supported yet')
-  }
-  else if (driver === DatasourceDriverEnum.Neon) {
-    throw new Error('Neon is not supported yet')
-  }
-  else if (driver === DatasourceDriverEnum.PGLite) {
-    return new PgDialect() // PGLite uses the same dialect as Postgres
-  }
-  else if (driver === DatasourceDriverEnum.DuckDBWasm) {
-    return new PgDialect() // DuckDBWasm uses a similar dialect to Postgres
-  }
-  else if (driver === DatasourceDriverEnum.CloudflareD2) {
-    throw new Error('Cloudflare D2 is not supported yet')
-  }
-  else if (driver === DatasourceDriverEnum.SQLite) {
-    throw new Error('SQLite is not supported yet')
-  }
-
-  throw new Error(`Unsupported driver: ${driver}`)
+  return DATASOURCE_DRIVER_SQL_DIALECT[driver]
 }
 
 export function queryBuilderFromDriver(driver: DatasourceDriver) {
-  if (driver === DatasourceDriverEnum.Postgres) {
-    return new PgQueryBuilder()
-  }
-  else if (driver === DatasourceDriverEnum.MySQL) {
-    throw new Error('MySQL is not supported yet')
-  }
-  else if (driver === DatasourceDriverEnum.Supabase) {
-    throw new Error('Supabase is not supported yet')
-  }
-  else if (driver === DatasourceDriverEnum.Neon) {
-    throw new Error('Neon is not supported yet')
-  }
-  else if (driver === DatasourceDriverEnum.PGLite) {
-    return new PgQueryBuilder() // PGLite uses the same query builder as Postgres
-  }
-  else if (driver === DatasourceDriverEnum.DuckDBWasm) {
-    return new PgQueryBuilder() // DuckDBWasm uses a similar query builder to Postgres
-  }
-  else if (driver === DatasourceDriverEnum.CloudflareD2) {
-    throw new Error('Cloudflare D2 is not supported yet')
-  }
-  else if (driver === DatasourceDriverEnum.SQLite) {
-    throw new Error('SQLite is not supported yet')
-  }
-
-  throw new Error(`Unsupported driver: ${driver}`)
-}
-
-export function toDynamicQueryBuilder(driver: DatasourceDriver, qb: PgSelectBuilder<undefined, 'qb'>) {
-  if (driver === DatasourceDriverEnum.Postgres) {
-    return qb as PgSelectDynamic<any>
-  }
-  else if (driver === DatasourceDriverEnum.MySQL) {
-    throw new Error('MySQL is not supported yet')
-  }
-  else if (driver === DatasourceDriverEnum.Supabase) {
-    throw new Error('Supabase is not supported yet')
-  }
-  else if (driver === DatasourceDriverEnum.Neon) {
-    throw new Error('Neon is not supported yet')
-  }
-  else if (driver === DatasourceDriverEnum.PGLite) {
-    return qb as PgSelectDynamic<any> // PGLite uses the same query builder as Postgres
-  }
-  else if (driver === DatasourceDriverEnum.DuckDBWasm) {
-    return qb as PgSelectDynamic<any> // DuckDBWasm uses a similar query builder to Postgres
-  }
-  else if (driver === DatasourceDriverEnum.CloudflareD2) {
-    throw new Error('Cloudflare D2 is not supported yet')
-  }
-  else if (driver === DatasourceDriverEnum.SQLite) {
-    throw new Error('SQLite is not supported yet')
-  }
-
-  throw new Error(`Unsupported driver: ${driver}`)
+  return DATASOURCE_DRIVER_QUERY_BUILDER[driver]
 }
 
 export const useDatasourceSessionsStore = defineStore('datasource-sessions', () => {
   const sessions = ref<Map<string, Array<DatasourceDriverClient<DatasourceDriver>>>>(new Map())
 
-  function isPostgresSession(session: DatasourceDriverClient<DatasourceDriver>): session is DatasourceDriverClient<DatasourceDriverEnum.Postgres> {
-    return session.driver === DatasourceDriverEnum.Postgres
-  }
-
-  function isMySQLSession(session: DatasourceDriverClient<DatasourceDriver>): session is DatasourceDriverClient<DatasourceDriverEnum.MySQL> {
-    return session.driver === DatasourceDriverEnum.MySQL
-  }
-
-  function isPGLiteSession(session: DatasourceDriverClient<DatasourceDriver>): session is DatasourceDriverClient<DatasourceDriverEnum.PGLite> {
-    return session.driver === DatasourceDriverEnum.PGLite
-  }
-
-  function isDuckDBWasmSession(session: DatasourceDriverClient<DatasourceDriver>): session is DatasourceDriverClient<DatasourceDriverEnum.DuckDBWasm> {
-    return session.driver === DatasourceDriverEnum.DuckDBWasm
-  }
-
-  function isCloudflareD2Session(session: DatasourceDriverClient<DatasourceDriver>): session is DatasourceDriverClient<DatasourceDriverEnum.CloudflareD2> {
-    return session.driver === DatasourceDriverEnum.CloudflareD2
-  }
-
-  function isSQLiteSession(session: DatasourceDriverClient<DatasourceDriver>): session is DatasourceDriverClient<DatasourceDriverEnum.SQLite> {
-    return session.driver === DatasourceDriverEnum.SQLite
-  }
-
-  function isSupabaseSession(session: DatasourceDriverClient<DatasourceDriver>): session is DatasourceDriverClient<DatasourceDriverEnum.Supabase> {
-    return session.driver === DatasourceDriverEnum.Supabase
-  }
-
-  function isNeonSession(session: DatasourceDriverClient<DatasourceDriver>): session is DatasourceDriverClient<DatasourceDriverEnum.Neon> {
-    return session.driver === DatasourceDriverEnum.Neon
-  }
-
   async function connect<D extends DatasourceDriver>(driver: D, dsn: string, options?: { sqawn?: boolean }): Promise<DatasourceDriverClient<D>> {
     if (!sessions.value.has(dsn)) {
-      const client = clientFromDriver(driver)
+      const client = clientFromDriver(driver)()
       await client.connect(dsn)
       sessions.value.set(dsn, [...(sessions.value.get(dsn) || []), { driver, session: client }])
       return { driver, session: client } as DatasourceDriverClient<D>
@@ -213,7 +72,7 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
 
     const connectedSessions = sessions.value.get(dsn)!
     if ((connectedSessions.length >= 1 && options?.sqawn)) {
-      const client = clientFromDriver(driver)
+      const client = clientFromDriver(driver)()
       await client.connect(dsn)
       sessions.value.set(dsn, [...sessions.value.get(dsn)!, { driver, session: client }])
       return { driver, session: client } as DatasourceDriverClient<D>
@@ -332,7 +191,7 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
   }
 
   async function executeSQL<T, S = any, D extends DatasourceDriver = DatasourceDriver>(driver: D, dsn: string, query: SQL<S>): Promise<T[]> {
-    const db = sqlDialectFromDriver(driver)
+    const db = sqlDialectFromDriver(driver)()
     const { sql, params } = db.sqlToQuery(query)
     return execute<T, D>(driver, dsn, sql, params)
   }

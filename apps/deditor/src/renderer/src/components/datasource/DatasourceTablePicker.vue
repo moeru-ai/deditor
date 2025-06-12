@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { ConnectionThroughParameters, DatasourceTable } from '@/libs/datasources'
-import type { Datasource, DatasourceDriver } from '@/stores'
+import type { ConnectionThroughParameters, DatasourceDriver, DatasourceTable } from '@/libs/datasources'
+import type { Datasource } from '@/stores'
 
 import { computedAsync } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
@@ -67,10 +67,14 @@ function selectDatasource(ds: Datasource | null) {
         <SelectContent>
           <template v-if="Object.keys(datasourceGroups).length > 0">
             <SelectGroup v-for="(group, driver) in datasourceGroups" :key="driver">
-              <SelectLabel>{{ DATASOURCE_DRIVER_NAMES[driver] ?? driver }}</SelectLabel>
+              <SelectLabel>
+                <div flex="~ row gap-2" items-center>
+                  <div :class="DATASOURCE_DRIVER_ICONS[driver] ?? 'i-ph:question'" />
+                  <div>{{ DATASOURCE_DRIVER_NAMES[driver] ?? driver }}</div>
+                </div>
+              </SelectLabel>
               <SelectItem v-for="ds in group" :key="ds.id" :value="ds">
                 <div flex="~ row gap-2" items-center>
-                  <div :class="DATASOURCE_DRIVER_ICONS[ds.driver] ?? 'i-ph:question'" />
                   <div>{{ ds.name }}</div>
                 </div>
               </SelectItem>

@@ -1,13 +1,4 @@
-export enum DatasourceDriverEnum {
-  Postgres = 'postgres',
-  Supabase = 'supabase',
-  Neon = 'neon',
-  CloudflareD2 = 'cloudflare-d2',
-  PGLite = 'pglite',
-  DuckDBWasm = 'duckdb-wasm',
-  MySQL = 'mysql',
-  SQLite = 'sqlite',
-}
+import type { DatasourceDriverEnum } from './driver'
 
 export type Datasource<D = DatasourceDriverEnum> =
   | ConnectionThroughConnectionString<D>

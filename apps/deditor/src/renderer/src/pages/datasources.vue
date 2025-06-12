@@ -89,11 +89,27 @@ const paneAreaMenuConfig = computed<MenuItemConfig<any, DatasourceDriverEnum>[]>
       type: 'item',
       value: driver,
       renderLabel: () => {
+        let iconClass = DATASOURCE_DRIVER_ICONS[driver] ?? 'i-ph:question'
+        let driverName = DATASOURCE_DRIVER_NAMES[driver] ?? driver
+
+        if (driver === DatasourceDriverEnum.Parquet) {
+          iconClass += ' text-blue-500'
+        }
+        if (driver === DatasourceDriverEnum.JSONL) {
+          iconClass += ' text-yellow-500'
+        }
+        if (driver === DatasourceDriverEnum.Parquet) {
+          driverName += '...'
+        }
+        if (driver === DatasourceDriverEnum.JSONL) {
+          driverName += '...'
+        }
+
         return h('div', {
           class: 'inline-flex items-center gap-2',
         }, [
-          h('div', { class: DATASOURCE_DRIVER_ICONS[driver] ?? 'i-ph:question' }),
-          h('div', DATASOURCE_DRIVER_NAMES[driver] ?? driver),
+          h('div', { class: iconClass }),
+          h('div', driverName),
         ])
       },
       onClick: () => {

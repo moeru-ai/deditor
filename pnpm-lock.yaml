@@ -180,6 +180,9 @@ importers:
       '@iconify-json/ph':
         specifier: ^1.2.2
         version: 1.2.2
+      '@iconify-json/simple-icons':
+        specifier: ^1.2.38
+        version: 1.2.38
       '@iconify-json/svg-spinners':
         specifier: ^1.2.2
         version: 1.2.2
@@ -896,6 +899,9 @@ packages:
 
   '@iconify-json/ph@1.2.2':
     resolution: {integrity: sha512-PgkEZNtqa8hBGjHXQa4pMwZa93hmfu8FUSjs/nv4oUU6yLsgv+gh9nu28Kqi8Fz9CCVu4hj1MZs9/60J57IzFw==}
+
+  '@iconify-json/simple-icons@1.2.38':
+    resolution: {integrity: sha512-mvMeFQgVjoHanQE9Q7ihmriEXAorjLZW+crUgQspDjFpzWuQp2RZMTppl1MN6TQztMVTsNFgF6LDKsp+v1RYRg==}
 
   '@iconify-json/svg-spinners@1.2.2':
     resolution: {integrity: sha512-DIErwfBWWzLfmAG2oQnbUOSqZhDxlXvr8941itMCrxQoMB0Hiv8Ww6Bln/zIgxwjDvSem2dKJtap+yKKwsB/2A==}
@@ -2403,6 +2409,9 @@ packages:
 
   '@xsai/shared@0.3.0-beta.3':
     resolution: {integrity: sha512-oEwhwLeh2xXb5J0Wt/K/4zQrdBxBvFV9v3aG5UOr4AoZpXsUm3F6Hf+XB2aMX0KegFVhV2dhXe00f7XBa2vFeg==}
+
+  '@xsai/shared@0.3.0-beta.4':
+    resolution: {integrity: sha512-Jf/AMvk/MAZu1prsr67mCXwfjjXyDaKgkL/a/3oJ1PKub0VLrtu7W7J8ZE1YOTqPhfiuSjaDxKMoUJe+BY++QA==}
 
   abbrev@1.1.1:
     resolution: {integrity: sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==}
@@ -6840,6 +6849,10 @@ snapshots:
     dependencies:
       '@iconify/types': 2.0.0
 
+  '@iconify-json/simple-icons@1.2.38':
+    dependencies:
+      '@iconify/types': 2.0.0
+
   '@iconify-json/svg-spinners@1.2.2':
     dependencies:
       '@iconify/types': 2.0.0
@@ -8823,7 +8836,7 @@ snapshots:
 
   '@xsai-ext/shared-providers@0.2.2':
     dependencies:
-      '@xsai/shared': 0.3.0-beta.3
+      '@xsai/shared': 0.3.0-beta.4
 
   '@xsai-transformers/embed@0.0.6':
     dependencies:
@@ -8845,15 +8858,17 @@ snapshots:
 
   '@xsai/embed@0.2.2':
     dependencies:
-      '@xsai/shared': 0.3.0-beta.3
+      '@xsai/shared': 0.3.0-beta.4
 
   '@xsai/embed@0.3.0-beta.3':
     dependencies:
-      '@xsai/shared': 0.3.0-beta.3
+      '@xsai/shared': 0.3.0-beta.4
 
   '@xsai/shared@0.2.2': {}
 
   '@xsai/shared@0.3.0-beta.3': {}
+
+  '@xsai/shared@0.3.0-beta.4': {}
 
   abbrev@1.1.1: {}
 
