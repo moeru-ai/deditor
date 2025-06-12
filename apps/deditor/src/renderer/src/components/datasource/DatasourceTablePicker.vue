@@ -52,8 +52,8 @@ function selectDatasource(ds: Datasource | null) {
 </script>
 
 <template>
-  <div flex="~ row gap-2" items-center justify-start>
-    <div flex="~ row gap-2" items-center justify-center>
+  <div flex="~ row gap-1" items-center justify-start>
+    <div flex="~ row gap-1" items-center justify-center>
       <Select
         :model-value="datasourceModel"
         @update:model-value="selectDatasource($event as Datasource | null)"
@@ -85,7 +85,7 @@ function selectDatasource(ds: Datasource | null) {
 
     <div i-ph:arrow-right />
 
-    <div flex="~ row gap-2" items-center justify-center>
+    <div flex="~ row gap-1" items-center justify-center>
       <Select v-model="tableModel">
         <SelectTrigger>
           <SelectValue placeholder="Select table" />
