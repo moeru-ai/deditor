@@ -8,6 +8,7 @@ import { computed, h } from 'vue'
 import { RouterView, useRoute, useRouter } from 'vue-router'
 
 import { DATASOURCE_DRIVER_ICONS, DATASOURCE_DRIVER_NAMES } from '@/libs/datasources'
+import { cn } from '@/libs/shadcn/utils'
 
 import PaneArea from '../components/container/PaneArea.vue'
 import DatasourcesContextMenu from '../components/context-menu/datasources/index.vue'
@@ -108,7 +109,9 @@ const paneAreaMenuConfig = computed<MenuItemConfig<any, DatasourceDriverEnum>[]>
         return h('div', {
           class: 'inline-flex items-center gap-2',
         }, [
-          h('div', { class: iconClass }),
+          h('div', { class: 'w-4 relative' }, [
+            h('div', { class: cn('absolute left-50% top-50% -translate-x-1/2 -translate-y-1/2', iconClass) }),
+          ]),
           h('div', driverName),
         ])
       },
@@ -162,7 +165,9 @@ const paneDatasourceEditSize = computed(() => isSmallerThan2XL.value ? 80 : 70)
                     transition="all duration-100 ease-in-out"
                     flex cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1 text-sm
                   >
-                    <div :class="DATASOURCE_DRIVER_ICONS[datasource.driver] ?? 'i-ph:question'" />
+                    <div class="relative w-4">
+                      <div class="absolute left-50% top-50% -translate-x-1/2 -translate-y-1/2" :class="DATASOURCE_DRIVER_ICONS[datasource.driver] ?? 'i-ph:question'" />
+                    </div>
                     <div>{{ datasource?.name }}</div>
                   </div>
                 </DatasourcesContextMenu>

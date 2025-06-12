@@ -35,7 +35,7 @@ export const DATASOURCE_DRIVER_ICONS = {
   [DatasourceDriverEnum.Supabase]: 'i-drizzle-orm-icons:supabase',
   [DatasourceDriverEnum.Neon]: 'i-drizzle-orm-icons:neon-dark',
   [DatasourceDriverEnum.CloudflareD2]: 'i-drizzle-orm-icons:cloudflare',
-  [DatasourceDriverEnum.PGLite]: 'i-drizzle-orm-icons:pglite translate-x--2px',
+  [DatasourceDriverEnum.PGLite]: 'i-drizzle-orm-icons:pglite',
   [DatasourceDriverEnum.DuckDBWasm]: 'i-deditor-icons:duckdb-dark',
   [DatasourceDriverEnum.MySQL]: 'i-drizzle-orm-icons:mysql-dark',
   [DatasourceDriverEnum.SQLite]: 'i-drizzle-orm-icons:sqlite',
