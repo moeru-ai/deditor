@@ -21,6 +21,8 @@ import {
 import { useEventListener } from '@vueuse/core'
 import { computed, h, nextTick, ref, toRaw } from 'vue'
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
 import { valueUpdater } from '../../libs/shadcn/utils'
 import Button from '../basic/Button.vue'
 import { Checkbox } from '../ui/checkbox'
@@ -58,6 +60,8 @@ const emits = defineEmits<{
   (e: 'updateData', rowIndex: number, columnId: string, value: unknown): void
   (e: 'sortingChange', sortedColumns: { id: string, desc: boolean }[]): void
 }>()
+
+const filterBy = ref<string>()
 
 // Add column resizing state
 const columnSizing = ref<ColumnSizingState>({})
@@ -132,6 +136,9 @@ const columns = computed<ColumnDef<Record<string, unknown>>[]>(() => {
       minSize: 60,
       maxSize: 800,
       enableResizing: true,
+      meta: {
+        filterable: true,
+      },
     } as ColumnDef<Record<string, unknown>>
   })
 
@@ -302,16 +309,34 @@ useEventListener('keyup', handleGlobalKeyup)
 </script>
 
 <template>
-  <div class="flex flex-1 flex-col gap-2 overflow-y-scroll">
+  <div class="h-full flex flex-1 flex-col gap-2 overflow-y-scroll">
     <div class="flex items-center gap-2">
-      <!-- Filters -->
-      <Input
-        text-sm
-        class="max-w-sm"
-        placeholder="Filter questions..."
-        :model-value="table.getColumn('question')?.getFilterValue() as string"
-        @update:model-value="table.getColumn('question')?.setFilterValue($event)"
-      />
+      <div grid="~ cols-[repeat(2,1fr)] gap-2" class="max-w-70%" flex-grow items-center>
+        <!-- Filter by -->
+        <Select v-model="filterBy">
+          <SelectTrigger>
+            <SelectValue placeholder="Filter by…" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem
+              v-for="c of table.getAllFlatColumns().filter((c) => c.id && c.columnDef.meta?.filterable)"
+              :key="c.id" :value="c.id"
+            >
+              {{ c.id }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+
+        <!-- Filter -->
+        <Input
+          v-if="filterBy"
+          text-sm
+          class="max-w-sm"
+          :placeholder="`Filter ${filterBy}...`"
+          :model-value="table.getColumn(filterBy!)?.getFilterValue() as string"
+          @update:model-value="table.getColumn(filterBy!)?.setFilterValue($event)"
+        />
+      </div>
 
       <!-- Columns -->
       <DropdownMenu>

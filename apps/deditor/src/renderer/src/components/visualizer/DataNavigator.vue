@@ -80,7 +80,7 @@ function handleSortingChange(newSortedColumns: { id: string, desc: boolean }[]) 
       v-model:table="queryFromTable"
     />
 
-    <div flex="grow" border="~ neutral-700/50" w-full overflow-y-scroll rounded-lg>
+    <div flex="grow" w-full overflow-hidden rounded-lg>
       <DataTable
         v-if="results"
         :data="results"

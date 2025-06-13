@@ -49,6 +49,7 @@
     "src/renderer/**/*.ts",
     "src/renderer/**/*.d.ts",
     "src/renderer/**/*.tsx",
-    "src/renderer/**/*.vue"
+    "src/renderer/**/*.vue",
+    "types"
   ]
 }

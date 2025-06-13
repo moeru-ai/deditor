@@ -59,66 +59,36 @@ LIMIT ${pageSize.value} OFFSET ${(page.value - 1) * pageSize.value}
   results.value = res
 }
 
-watch(queryFrom, async () => {
+async function selectQueryFrom(from: 'one-time' | 'files' | 'datasets' | 'datasources' = queryFrom.value) {
+  queryFrom.value = from
   results.value = []
   sortedColumns.value = []
 
-  if (!queryFromTable.value) {
-    return
-  }
-
-  switch (queryFrom.value) {
+  switch (from) {
     case 'one-time':
       await loadFromSelectedOneTime()
       break
     case 'datasources':
+      if (!queryFromTable.value) {
+        return
+      }
       results.value = await findMany(
         queryFromTable.value,
         sortedColumns.value,
         pageSize.value,
         page.value,
       )
-
       break
   }
-})
+}
 
-watch(queryFromTable, async (table) => {
-  results.value = []
-  sortedColumns.value = []
-
-  if (!table) {
-    return
-  }
-
-  results.value = await findMany(
-    table,
-    sortedColumns.value,
-    pageSize.value,
-    page.value,
-  )
+watch(queryFromTable, async () => {
+  selectQueryFrom(queryFrom.value)
 })
 
 onMounted(async () => {
   inMemoryDB.value = drizzle({ connection: { bundles: getImportUrlBundles(), logger: false } })
-
-  if (!queryFromTable.value) {
-    return
-  }
-
-  switch (queryFrom.value) {
-    case 'one-time':
-      await loadFromSelectedOneTime()
-      break
-    case 'datasources':
-      results.value = await findMany(
-        queryFromTable.value,
-        sortedColumns.value,
-        pageSize.value,
-        page.value,
-      )
-      break
-  }
+  selectQueryFrom()
 })
 
 onUnmounted(async () => {
@@ -184,19 +154,19 @@ function handleSortingChange(newSortedColumns: { id: string, desc: boolean }[]) 
                 </div>
               </h2>
               <div w-full flex gap-2 text-sm>
-                <Button w-full @click="queryFrom = 'one-time'">
+                <Button w-full @click="selectQueryFrom('one-time')">
                   <div i-ph:folder-dotted-fill />
                   <div>One-Time</div>
                 </Button>
-                <!-- <Button w-full @click="queryFrom = 'files'">
+                <!-- <Button w-full @click="selectQueryFrom('files')">
                   <div i-ph:folder-notch-plus-fill />
                   <div>Files</div>
                 </Button>
-                <Button w-full @click="queryFrom = 'datasets'">
+                <Button w-full @click="selectQueryFrom('datasets')">
                   <div i-ph:database-fill />
                   <div>Datasets</div>
                 </Button> -->
-                <Button w-full @click="queryFrom = 'datasources'">
+                <Button w-full @click="selectQueryFrom('datasources')">
                   <div i-ph:hard-drives-fill />
                   <div>Datasources</div>
                 </Button>
