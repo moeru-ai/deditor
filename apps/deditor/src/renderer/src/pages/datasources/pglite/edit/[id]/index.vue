@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import type { ConnectionThroughParameters } from '../../../../../libs/datasources'
-import type { DatasourceDriver } from '../../../../../stores/datasources'
+import type { ConnectionThroughParameters, DatasourceDriver } from '../../../../../libs/datasources'
 
 import { useClipboard, useRefHistory } from '@vueuse/core'
 import { computed, onMounted, ref, watch } from 'vue'
