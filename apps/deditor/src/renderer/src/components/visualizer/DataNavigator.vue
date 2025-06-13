@@ -2,10 +2,12 @@
 import type { DatasourceTable } from '@/libs/datasources'
 import type { Datasource } from '@/stores'
 
+import { BasicTextarea } from '@proj-airi/ui'
 import { computedAsync } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { computed, ref } from 'vue'
 
+import Button from '@/components/basic/Button.vue'
 import DatasourceTablePicker from '@/components/datasource/DatasourceTablePicker.vue'
 import DataTable from '@/components/table/DataTable.vue'
 import { useDatasource, useDatasourcesStore } from '@/stores'
@@ -16,15 +18,59 @@ const queryFromDatasource = ref<Datasource>()
 const queryFromTable = ref<DatasourceTable>()
 
 const { datasources } = storeToRefs(datasourcesStore)
-const { findMany } = useDatasource(computed(() => queryFromDatasource.value?.id), datasources)
+const { findMany, count } = useDatasource(computed(() => queryFromDatasource.value?.id), datasources)
 
 const page = ref(1)
 const pageSize = ref(20)
+const sortedColumns = ref<{ id: string, desc: boolean }[]>([])
+
 const results = computedAsync(() => {
   return queryFromTable.value
     ? findMany(queryFromTable.value, [], pageSize.value, page.value)
     : []
 })
+const total = computedAsync(() => {
+  return queryFromTable.value
+    ? count(
+        queryFromTable.value,
+        sortedColumns.value,
+      )
+    : 0
+})
+
+function canPagePrevious() {
+  return page.value > 1
+}
+
+function canPageNext() {
+  return page.value * pageSize.value < (total.value || 0)
+}
+
+function handlePagePrevious() {
+  if (canPagePrevious())
+    page.value--
+}
+
+function handlePageNext() {
+  if (canPageNext())
+    page.value++
+}
+
+function handleSortingChange(newSortedColumns: { id: string, desc: boolean }[]) {
+  sortedColumns.value = newSortedColumns
+
+  if (!queryFromTable.value) {
+    results.value = []
+    return
+  }
+
+  findMany(
+    queryFromTable.value,
+    sortedColumns.value,
+    pageSize.value,
+    page.value,
+  ).then(res => results.value = res)
+}
 </script>
 
 <template>
@@ -41,11 +87,11 @@ const results = computedAsync(() => {
         :total="results.length"
         :page="page"
         :page-size="pageSize"
-        @page-previous="() => {}"
-        @page-next="() => {}"
+        @page-previous="handlePagePrevious"
+        @page-next="handlePageNext"
         @row-click="() => {}"
         @update-data="() => {}"
-        @sorting-change="() => {}"
+        @sorting-change="handleSortingChange"
       />
     </div>
 
