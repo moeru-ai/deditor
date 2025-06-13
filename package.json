@@ -48,7 +48,6 @@
     "tsdown": "^0.12.7",
     "tsx": "^4.19.4",
     "typescript": "~5.8.3",
-    "unbuild": "^3.5.0",
     "unocss": "^66.1.2",
     "unocss-preset-animations": "^1.2.1",
     "unocss-preset-scrollbar": "^3.2.0",

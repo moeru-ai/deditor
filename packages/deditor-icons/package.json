@@ -18,26 +18,26 @@
   "exports": {
     "./*": "./*",
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./dist/index.d.mts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "require": "./dist/index.mjs"
     },
     "./icons.json": "./dist/icons.json",
     "./info.json": "./dist/info.json",
     "./metadata.json": "./dist/metadata.json"
   },
-  "main": "./dist/index.cjs",
+  "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/index.d.mts",
   "files": [
     "README.md",
     "dist",
     "package.json"
   ],
   "scripts": {
-    "dev": "unbuild",
-    "stub": "unbuild",
-    "build": "unbuild",
+    "dev": "tsdown",
+    "stub": "tsdown",
+    "build": "tsdown",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
