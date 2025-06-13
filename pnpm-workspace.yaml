@@ -4,11 +4,11 @@ packages:
   - '!**/dist/**'
 
 catalog:
-  '@proj-airi/drizzle-duckdb-wasm': ^0.4.24
-  '@xsai/embed': ^0.3.0-beta.3
-  '@xsai/shared': ^0.3.0-beta.3
-  '@xsai/shared-chat': ^0.3.0-beta.3
-  '@xsai/utils-chat': ^0.3.0-beta.3
+  '@proj-airi/drizzle-duckdb-wasm': ^0.4.27
+  '@xsai/embed': ^0.3.0-beta.4
+  '@xsai/shared': ^0.3.0-beta.4
+  '@xsai/shared-chat': ^0.3.0-beta.4
+  '@xsai/utils-chat': ^0.3.0-beta.4
 
 onlyBuiltDependencies:
   - electron
