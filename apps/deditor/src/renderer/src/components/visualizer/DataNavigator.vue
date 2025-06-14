@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import type { RowSelectionState } from '@tanstack/vue-table'
+
 import type { ConnectionThroughParameters, DatasourceTable } from '@/libs/datasources'
 import type { Datasource } from '@/stores'
 
-import { BasicTextarea } from '@proj-airi/ui'
 import { computedAsync } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 
 import Button from '@/components/basic/Button.vue'
 import DatasourceTablePicker from '@/components/datasource/DatasourceTablePicker.vue'
@@ -19,11 +20,13 @@ const datasourcesStore = useDatasourcesStore()
 const queryFromDatasource = ref<Datasource>()
 const queryFromTable = ref<DatasourceTable>()
 
+const rowSelection = ref<RowSelectionState>({})
+
 const { datasources } = storeToRefs(datasourcesStore)
 const { datasource, findMany, count } = useDatasource(computed(() => queryFromDatasource.value?.id), datasources)
 const session = useDatasourceSessionsStore()
 
-const tableColumns = computedAsync(async () => {
+const tableColumns = computedAsync(() => {
   if (!datasource.value || !queryFromTable.value) {
     return []
   }
@@ -35,7 +38,7 @@ const tableColumns = computedAsync(async () => {
     return []
   }
 
-  return await session.listColumnsByParameters(
+  return session.listColumnsByParameters(
     driver,
     datasource.value as ConnectionThroughParameters,
     table,
@@ -53,6 +56,7 @@ const results = computedAsync(() => {
     ? findMany(queryFromTable.value, [], pageSize.value, page.value)
     : []
 })
+
 const total = computedAsync(() => {
   return queryFromTable.value
     ? count(
@@ -96,17 +100,28 @@ function handleSortingChange(newSortedColumns: { id: string, desc: boolean }[]) 
   ).then(res => results.value = res)
 }
 
-watch(visualizingColumn, async (column) => {
-  if (!queryFromTable.value || !column)
+function visualize() {
+  const column = visualizingColumn.value
+  if (!queryFromTable.value || !column || !results.value)
     return
 
-  const vectors = (await findMany(queryFromTable.value, []))
-    .filter(row => row[column] !== undefined && row[column] !== null)
-    .slice(0, 10) // I will improve this soon
+  // const tableSchema = pgTable(table, {
+  //   vector: vector(visualizingColumn.value, { dimensions: 1024 }),
+  // })
+
+  // const qb = new QueryBuilder()
+  // const test = qb.select({ vector: tableSchema.vector })
+  //   .from(tableSchema)
+  //   .where(isNotNull(tableSchema.vector))
+  //   .offset(0)
+  //   .limit(10)
+
+  const vectors = results.value
+    .filter((_, i) => rowSelection.value[i])
     .map(row => row[column] as number[])
 
   visualizerStore.resetVectors(vectors)
-})
+}
 </script>
 
 <template>
@@ -128,26 +143,40 @@ watch(visualizingColumn, async (column) => {
         @row-click="() => {}"
         @update-data="() => {}"
         @sorting-change="handleSortingChange"
+        @selection-change="rowSelection = $event"
       />
     </div>
 
     <div grid="~ cols-[repeat(4,1fr)] gap-2">
-      <Select v-if="tableColumns" v-model="visualizingColumn">
-        <SelectTrigger>
-          <SelectValue placeholder="Visualize column…" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem
-            v-for="column of tableColumns.filter(c => c.column_name).map(c => c.column_name!)"
-            :key="column" :value="column"
-          >
-            {{ column }}
-          </SelectItem>
-        </SelectContent>
-      </Select>
+      <div>
+        <Select v-if="tableColumns" v-model="visualizingColumn">
+          <SelectTrigger>
+            <SelectValue>
+              <template v-if="visualizingColumn">
+                Visualizing {{ visualizingColumn }}
+              </template>
+              <template v-else>
+                Select a column to visualize
+              </template>
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem
+              v-for="column of tableColumns.filter(c => c.column_name).map(c => c.column_name!)"
+              :key="column" :value="column"
+            >
+              {{ column }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <Button @click="visualize">
+        Visualize
+      </Button>
     </div>
 
-    <div flex flex-col items-start gap-2>
+    <!-- <div flex flex-col items-start gap-2>
       <BasicTextarea
         bg="neutral-900/80 hover:neutral-900" border="2 solid neutral-700/20 hover:primary-700/50"
         min-h-15 w-full rounded-lg border-none px-3 py-2 text-sm font-mono outline-none
@@ -156,7 +185,7 @@ watch(visualizingColumn, async (column) => {
       <Button self-end text-sm>
         Append
       </Button>
-    </div>
+    </div> -->
   </div>
 </template>
 
