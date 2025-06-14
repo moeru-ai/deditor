@@ -297,6 +297,8 @@ export function useDatasource(
       q.append(sql`${sql.identifier(table.table!)}`)
     }
 
+    const groupByColumns: string[] = []
+
     if (sortedColumns != null) {
       const sorted = sortedColumns
       if (sorted.length > 0) {
@@ -306,6 +308,19 @@ export function useDatasource(
         })
 
         q.append(sql` ORDER BY ${sql.join(orderByClauses, sql`, `)}`)
+      }
+      if (sorted.length > 0) {
+        groupByColumns.push(...sorted.map(col => col.id))
+      }
+    }
+
+    if (groupByColumns.length > 0) {
+      q.append(sql` GROUP BY `)
+      for (const col of groupByColumns) {
+        q.append(sql`${sql.identifier(col)}`)
+        if (col !== groupByColumns[groupByColumns.length - 1]) {
+          q.append(sql`, `)
+        }
       }
     }
 

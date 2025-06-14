@@ -6,6 +6,7 @@ import { nanoid } from '@deditor-app/shared'
 import * as schema from '@deditor-app/shared-schemas'
 import { postgresInformationSchemaColumns } from '@deditor-app/shared-schemas'
 import { PGlite } from '@electric-sql/pglite'
+import { useLogg } from '@guiiai/logg'
 import { and, eq, sql } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/pglite'
 
@@ -14,6 +15,8 @@ import { defineIPCHandler } from '../../define-ipc-handler'
 const databaseSessions = new Map<string, { drizzle: PgliteDatabase<typeof schema>, client: PGlite }>()
 
 export function registerPGLiteDatabaseDialect(window: BrowserWindow) {
+  const log = useLogg('pglite-database-dialect').useGlobalConfig()
+
   defineIPCHandler<PGLiteMethods>(window, 'databaseLocalPGLite', 'connect')
     .handle(async (_, { dsn }) => {
       try {
@@ -36,7 +39,7 @@ export function registerPGLiteDatabaseDialect(window: BrowserWindow) {
         return { databaseSessionId: dbSessionId, dialect: 'pglite' }
       }
       catch (err) {
-        console.error('failed to connect to remote PGLite database:', err)
+        log.withError(err).error('failed to connect to remote PGLite database')
         throw err
       }
     })
@@ -53,7 +56,7 @@ export function registerPGLiteDatabaseDialect(window: BrowserWindow) {
         return { databaseSessionId, results: res.rows }
       }
       catch (err) {
-        console.error('failed to query remote PGLite database:', err)
+        log.withError(err).withFields({ databaseSessionId, statement }).error('failed to query remote PGLite database')
         throw err
       }
     })
@@ -70,7 +73,7 @@ export function registerPGLiteDatabaseDialect(window: BrowserWindow) {
         return { databaseSessionId, results: res }
       }
       catch (err) {
-        console.error('failed to query remote PGLite database to list tables:', err)
+        log.withError(err).withFields({ databaseSessionId }).error('failed to query remote PGLite database to list tables')
         throw err
       }
     })
@@ -97,7 +100,7 @@ export function registerPGLiteDatabaseDialect(window: BrowserWindow) {
         }
       }
       catch (err) {
-        console.error('failed to query remote PGLite database to list columns:', err)
+        log.withError(err).withError({ databaseSessionId, tableName, schema }).error('failed to query remote PGLite database to list columns')
         throw err
       }
     })

@@ -9,12 +9,14 @@ words:
   - Deditor
   - duckdb
   - etcdctl
+  - guiiai
   - healthcheck
   - huggingface
   - iconify
   - initdb
   - isready
   - kebabcase
+  - Logg
   - martinbeentjes
   - matchall
   - milvus

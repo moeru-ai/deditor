@@ -5,6 +5,7 @@ import type { BrowserWindow } from 'electron'
 import { nanoid } from '@deditor-app/shared'
 import * as schema from '@deditor-app/shared-schemas'
 import { postgresInformationSchemaColumns } from '@deditor-app/shared-schemas'
+import { useLogg } from '@guiiai/logg'
 import { and, eq } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
@@ -14,6 +15,8 @@ import { defineIPCHandler } from '../../define-ipc-handler'
 const databaseSessions = new Map<string, { drizzle: PostgresJsDatabase<typeof schema>, client: postgres.Sql }>()
 
 export function registerPostgresJsDatabaseDialect(window: BrowserWindow) {
+  const log = useLogg('postgres-database-dialect').useGlobalConfig()
+
   defineIPCHandler<PostgresMethods>(window, 'databaseRemotePostgres', 'connect')
     .handle(async (_, { dsn }) => {
       try {
@@ -26,7 +29,7 @@ export function registerPostgresJsDatabaseDialect(window: BrowserWindow) {
         return { databaseSessionId: dbSessionId, dialect: 'postgres' }
       }
       catch (err) {
-        console.error('failed to connect to remote Postgres database:', err)
+        log.withError(err).error('failed to connect to remote Postgres database')
         throw err
       }
     })
@@ -43,7 +46,7 @@ export function registerPostgresJsDatabaseDialect(window: BrowserWindow) {
         return { databaseSessionId, results: res }
       }
       catch (err) {
-        console.error('failed to query remote Postgres database:', err)
+        log.withError(err).withFields({ databaseSessionId, statement }).error('failed to query remote Postgres database')
         throw err
       }
     })
@@ -60,7 +63,7 @@ export function registerPostgresJsDatabaseDialect(window: BrowserWindow) {
         return { databaseSessionId, results: res }
       }
       catch (err) {
-        console.error('failed to query remote Postgres database to list tables:', err)
+        log.withError(err).withFields({ databaseSessionId }).error('failed to query remote Postgres database to list tables')
         throw err
       }
     })
@@ -87,7 +90,7 @@ export function registerPostgresJsDatabaseDialect(window: BrowserWindow) {
         }
       }
       catch (err) {
-        console.error('failed to query remote Postgres database to list columns:', err)
+        log.withError(err).withFields({ databaseSessionId, tableName, schema }).error('failed to query remote Postgres database to list columns')
         throw err
       }
     })
