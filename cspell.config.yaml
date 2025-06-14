@@ -13,6 +13,27 @@ words:
   - healthcheck
   - huggingface
   - iconify
+  - indcheckxmin
+  - indclass
+  - indcollation
+  - indexprs
+  - indexrelid
+  - indimmediate
+  - indisclustered
+  - indisexclusion
+  - indislive
+  - indisprimary
+  - indisready
+  - indisreplident
+  - indisunique
+  - indisvalid
+  - indkey
+  - indnatts
+  - indnkeyatts
+  - indnullsnotdistinct
+  - indoption
+  - indpred
+  - indrelid
   - initdb
   - isready
   - kebabcase
@@ -25,13 +46,48 @@ words:
   - mysqladmin
   - nolyfill
   - ofetch
+  - oid
   - oklch
   - PCA
   - pglite
   - pgvecto
   - pgvector
   - pinia
+  - regclass
+  - regnamespace
   - reka
+  - relacl
+  - relallvisible
+  - relam
+  - relchecks
+  - relfilenode
+  - relforcerowsecurity
+  - relfrozenxid
+  - relhasindex
+  - relhasrules
+  - relhassubclass
+  - relhastriggers
+  - relispartition
+  - relispopulated
+  - relisshared
+  - relkind
+  - relminmxid
+  - relname
+  - relnamespace
+  - relnatts
+  - reloftype
+  - reloptions
+  - relowner
+  - relpages
+  - relpartbound
+  - relpersistence
+  - relreplident
+  - relrewrite
+  - relrowsecurity
+  - reltablespace
+  - reltoastrelid
+  - reltuples
+  - reltype
   - shadcn
   - Splitpanes
   - sslmode
