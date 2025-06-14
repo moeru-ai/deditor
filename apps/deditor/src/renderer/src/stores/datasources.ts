@@ -302,6 +302,21 @@ export function useDatasource(
     )
   }
 
+  async function listColumns(
+    table: { schema?: string | null, table: string },
+  ) {
+    if (!datasource.value || !datasource.value.driver || !datasource.value) {
+      return []
+    }
+
+    return await datasourceSessionsStore.listColumnsByParameters(
+      datasource.value.driver,
+      datasource.value as ConnectionThroughParameters,
+      table.table,
+      table.schema ?? 'public',
+    )
+  }
+
   async function findMany<T = Record<string, unknown>>(
     table: { schema?: string | null, table: string },
     sortedColumns: { id: string, desc: boolean }[],
@@ -318,16 +333,26 @@ export function useDatasource(
 
     const groupByColumns: string[] = []
 
+    const columns = await listColumns(table)
+    const foundIdColumn = columns.find(column => column.column_name === 'id')
+    const indexes = await listIndexes(table)
+    const foundPrimary = indexes.find(index => index.isPrimaryKey)
+
+    const sortedIdOrPrimaryColumn = sortedColumns.some((column) => {
+      return column.id === foundIdColumn?.column_name
+        || foundPrimary?.columns.includes(column.id)
+    })
+    if (!sortedIdOrPrimaryColumn) {
+      if (foundIdColumn != null && foundIdColumn.column_name != null) {
+        groupByColumns.push(foundIdColumn.column_name)
+      }
+      else if (foundPrimary != null && foundPrimary.columns.length) {
+        groupByColumns.push(foundPrimary.columns[0])
+      }
+    }
+
     if (sortedColumns != null) {
       const sorted = sortedColumns
-      if (sorted.length > 0) {
-        const orderByClauses = sorted.map((col) => {
-          const direction = col.desc ? sql`DESC` : sql`ASC`
-          return sql`${sql.identifier(table.table)}.${sql.identifier(col.id)} ${direction}`
-        })
-
-        q.append(sql` ORDER BY ${sql.join(orderByClauses, sql`, `)}`)
-      }
 
       if (sorted.length > 0) {
         groupByColumns.push(...sorted.map(col => col.id))
@@ -341,6 +366,22 @@ export function useDatasource(
         if (col !== groupByColumns[groupByColumns.length - 1]) {
           q.append(sql`, `)
         }
+      }
+    }
+
+    if (sortedColumns != null) {
+      const sorted = sortedColumns
+      if (sorted.length > 0) {
+        const orderByClauses = sorted.map((col) => {
+          const direction = col.desc ? sql`DESC` : sql`ASC`
+          return sql`${sql.identifier(table.table)}.${sql.identifier(col.id)} ${direction}`
+        })
+
+        q.append(sql` ORDER BY ${sql.join(orderByClauses, sql`, `)}`)
+      }
+
+      if (sorted.length > 0) {
+        groupByColumns.push(...sorted.map(col => col.id))
       }
     }
 

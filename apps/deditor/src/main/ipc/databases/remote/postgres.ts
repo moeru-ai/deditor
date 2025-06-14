@@ -21,6 +21,36 @@ import { defineIPCHandler } from '../../define-ipc-handler'
 
 const databaseSessions = new Map<string, { drizzle: PostgresJsDatabase<typeof schema>, client: postgres.Sql }>()
 
+/**
+ *
+ * Based on
+ *
+ * ```sql
+ * SELECT
+ *   replace(regexp_replace(regexp_replace(regexp_replace(pg_get_indexdef(indexrelid), ' WHERE .+|INCLUDE .+', ''), ' WITH .+', ''), '.*\((.*)\)', '\1'), ' ', '') AS column_name,
+ * FROM
+ *   pg_index
+ * ```
+ *
+ * @param indexDefinition
+ */
+function columnsFromIndexDefinition(indexDefinition: string) {
+  const trimRegexps = [
+    { matchBy: / WHERE .+|INCLUDE .+/, to: '' },
+    { matchBy: / WITH .+/, to: '' },
+    // TODO: fix this regexp
+    // eslint-disable-next-line regexp/no-super-linear-backtracking
+    { matchBy: /.*\((.*)\)/, to: '$1' },
+  ]
+
+  let parsedColumnsResult = indexDefinition
+  for (const reg of trimRegexps) {
+    parsedColumnsResult = parsedColumnsResult.replace(reg.matchBy, reg.to)
+  }
+
+  return parsedColumnsResult.trim().split(',')
+}
+
 export function registerPostgresJsDatabaseDialect(window: BrowserWindow) {
   const log = useLogg('postgres-database-dialect').useGlobalConfig()
 
@@ -120,6 +150,17 @@ export function registerPostgresJsDatabaseDialect(window: BrowserWindow) {
          *  indisunique AS is_unique,
          *  indisprimary AS is_primary,
          *  pg_get_indexdef(indexrelid) AS index_definition,
+         *  replace(regexp_replace(regexp_replace(regexp_replace(pg_get_indexdef(indexrelid), ' WHERE .+|INCLUDE .+', ''), ' WITH .+', ''), '.*\((.*)\)', '\1'), ' ', '') AS column_name,
+         *  CASE
+         *    WHEN position(' WHERE ' IN pg_get_indexdef(indexrelid)) > 0 THEN regexp_replace(pg_get_indexdef(indexrelid), '.+WHERE ', '')
+         *    WHEN position(' WITH ' IN pg_get_indexdef(indexrelid)) > 0 THEN regexp_replace(pg_get_indexdef(indexrelid), '.+WITH ', '')
+         *    ELSE ''
+         *  END AS condition,
+         *  CASE
+         *    WHEN position(' INCLUDE ' IN pg_get_indexdef(indexrelid)) > 0 THEN regexp_replace(pg_get_indexdef(indexrelid), '.+INCLUDE ', '')
+         *    WHEN position(' WITH ' IN pg_get_indexdef(indexrelid)) > 0 THEN regexp_replace(pg_get_indexdef(indexrelid), '.+WITH ', '')
+         *    ELSE ''
+         *  END AS include,
          *  pg_catalog.obj_description (i.indexrelid, 'pg_class') AS comment
          * FROM pg_index i
          *  JOIN pg_class t ON t.oid = i.indrelid
@@ -159,11 +200,18 @@ export function registerPostgresJsDatabaseDialect(window: BrowserWindow) {
             ),
           )
 
+        const transformedResults = results.map((row) => {
+          return {
+            ...row,
+            columns: columnsFromIndexDefinition(row.indexDefinition),
+          }
+        })
+
         return {
           databaseSessionId,
           tableName,
           schema,
-          results,
+          results: transformedResults,
         }
       }
       catch (err) {

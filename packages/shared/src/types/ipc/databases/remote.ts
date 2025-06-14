@@ -46,8 +46,12 @@ export interface PostgresMethods {
     schema: string
     results: {
       indexName: string
+      indexAlgorithm: string
+      indexDefinition: string
+      comment: string
       isPrimaryKey: boolean
       isUniqueConstraint: boolean
+      columns: string[]
     }[]
   }
 }
