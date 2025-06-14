@@ -4,6 +4,9 @@ dictionaryDefinitions: []
 dictionaries: []
 words:
   - airi
+  - amhandler
+  - amname
+  - amtype
   - Attributify
   - cientos
   - Deditor
@@ -16,6 +19,7 @@ words:
   - indcheckxmin
   - indclass
   - indcollation
+  - indexdef
   - indexprs
   - indexrelid
   - indimmediate
@@ -45,6 +49,9 @@ words:
   - Moeru
   - mysqladmin
   - nolyfill
+  - nspacl
+  - nspname
+  - nspowner
   - ofetch
   - oid
   - oklch

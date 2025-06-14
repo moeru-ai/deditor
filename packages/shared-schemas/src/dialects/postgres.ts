@@ -64,6 +64,20 @@ export const postgresInformationSchemaColumns = postgresInformationSchema.table(
   is_updatable: varchar(),
 })
 
+export const postgresPgCatalogPgAm = pgSchema('pg_catalog').table('pg_am', {
+  oid: text('oid'),
+  amhandler: text('regproc'),
+  amtype:	text('amtype'),
+  amname:	text('amname'),
+})
+
+export const postgresPgCatalogPgNamespace = pgSchema('pg_catalog').table('pg_namespace', {
+  oid: text('oid'),
+  nspowner: text('nspowner'),
+  nspacl: text('nspacl').array(),
+  nspname: text('nspname'),
+})
+
 export const postgresPgCatalogPgClass = pgSchema('pg_catalog').table('pg_class', {
   oid: text('oid'),
   relfrozenxid: text('relfrozenxid'),
@@ -102,7 +116,7 @@ export const postgresPgCatalogPgClass = pgSchema('pg_catalog').table('pg_class',
 
 export const postgresPgCatalogPgIndex = pgSchema('pg_catalog').table('pg_index', {
   indexrelid:	text('indexrelid'),
-  indrelid:	text('indrelid').references(() => postgresPgCatalogPgClass.oid),
+  indrelid:	text('indrelid'),
   indnatts:	smallint('indnatts'),
   indnkeyatts:	smallint('indnkeyatts'),
   indisunique:	boolean('indisunique'),

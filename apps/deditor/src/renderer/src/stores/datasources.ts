@@ -155,6 +155,41 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
     return listColumns<D>(driver, toDSN(driver, parameters, defaultParamsFromDriver(driver)), table, schema)
   }
 
+  async function listIndexes<D extends DatasourceDriver>(driver: D, dsn: string, schema: string, table: string) {
+    const session = await connect(driver, dsn)
+    if (isPostgresSession(session)) {
+      return session.session.listIndexes(table, schema)
+    }
+    else if (isMySQLSession(session)) {
+      throw new Error('MySQL is not supported yet')
+    }
+    else if (isPGLiteSession(session)) {
+      throw new Error('PGLite is not supported yet')
+    }
+    else if (isDuckDBWasmSession(session)) {
+      throw new Error('DuckDBWasm is not supported yet')
+    }
+    else if (isCloudflareD2Session(session)) {
+      throw new Error('Cloudflare D2 is not supported yet')
+    }
+    else if (isSQLiteSession(session)) {
+      throw new Error('SQLite is not supported yet')
+    }
+    else if (isSupabaseSession(session)) {
+      throw new Error('Supabase is not supported yet')
+    }
+    else if (isNeonSession(session)) {
+      throw new Error('Neon is not supported yet')
+    }
+    else {
+      throw new Error(`Unsupported driver: ${driver}`)
+    }
+  }
+
+  async function listIndexesByParameters<D extends DatasourceDriver>(driver: D, parameters: ConnectionThroughParameters, schema: string, table: string) {
+    return listIndexes<D>(driver, toDSN(driver, parameters, defaultParamsFromDriver(driver)), schema, table)
+  }
+
   async function execute<T, D extends DatasourceDriver = DatasourceDriver>(driver: D, dsn: string, query: string, parameters?: unknown[]): Promise<T[]> {
     const session = await connect(driver, dsn)
     if (isPostgresSession(session)) {
@@ -207,6 +242,8 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
     listTablesByParameters,
     listColumns,
     listColumnsByParameters,
+    listIndexes,
+    listIndexesByParameters,
     execute,
     executeByParameters,
     executeSQL,
@@ -250,6 +287,21 @@ export function useDatasource(
     )
   }
 
+  async function listIndexes(
+    table: { schema?: string | null, table: string },
+  ) {
+    if (!datasource.value || !datasource.value.driver || !datasource.value) {
+      return []
+    }
+
+    return await datasourceSessionsStore.listIndexesByParameters(
+      datasource.value.driver,
+      datasource.value as ConnectionThroughParameters,
+      table.schema ?? 'public',
+      table.table,
+    )
+  }
+
   async function findMany<T = Record<string, unknown>>(
     table: { schema?: string | null, table: string },
     sortedColumns: { id: string, desc: boolean }[],
@@ -264,15 +316,31 @@ export function useDatasource(
       q.append(sql`${sql.identifier(table.table!)}`)
     }
 
+    const groupByColumns: string[] = []
+
     if (sortedColumns != null) {
       const sorted = sortedColumns
       if (sorted.length > 0) {
         const orderByClauses = sorted.map((col) => {
           const direction = col.desc ? sql`DESC` : sql`ASC`
-          return sql`${sql.identifier(col.id)} ${direction}`
+          return sql`${sql.identifier(table.table)}.${sql.identifier(col.id)} ${direction}`
         })
 
         q.append(sql` ORDER BY ${sql.join(orderByClauses, sql`, `)}`)
+      }
+
+      if (sorted.length > 0) {
+        groupByColumns.push(...sorted.map(col => col.id))
+      }
+    }
+
+    if (groupByColumns.length > 0) {
+      q.append(sql` GROUP BY `)
+      for (const col of groupByColumns) {
+        q.append(sql`${sql.identifier(table.table)}.${sql.identifier(col)}`)
+        if (col !== groupByColumns[groupByColumns.length - 1]) {
+          q.append(sql`, `)
+        }
       }
     }
 
@@ -287,7 +355,7 @@ export function useDatasource(
 
   async function count(
     table: { schema?: string | null, table: string },
-    sortedColumns: { id: string, desc: boolean }[],
+    _sortedColumns?: { id: string, desc: boolean }[],
   ) {
     const q = sql`SELECT COUNT(*) FROM `
     if (table.schema) {
@@ -295,33 +363,6 @@ export function useDatasource(
     }
     else {
       q.append(sql`${sql.identifier(table.table!)}`)
-    }
-
-    const groupByColumns: string[] = []
-
-    if (sortedColumns != null) {
-      const sorted = sortedColumns
-      if (sorted.length > 0) {
-        const orderByClauses = sorted.map((col) => {
-          const direction = col.desc ? sql`DESC` : sql`ASC`
-          return sql`${sql.identifier(col.id)} ${direction}`
-        })
-
-        q.append(sql` ORDER BY ${sql.join(orderByClauses, sql`, `)}`)
-      }
-      if (sorted.length > 0) {
-        groupByColumns.push(...sorted.map(col => col.id))
-      }
-    }
-
-    if (groupByColumns.length > 0) {
-      q.append(sql` GROUP BY `)
-      for (const col of groupByColumns) {
-        q.append(sql`${sql.identifier(col)}`)
-        if (col !== groupByColumns[groupByColumns.length - 1]) {
-          q.append(sql`, `)
-        }
-      }
     }
 
     const result = await query<{ count: number }>(q)
@@ -340,5 +381,6 @@ export function useDatasource(
     query,
     findMany,
     count,
+    listIndexes,
   }
 }
