@@ -6,6 +6,7 @@ import type {
   ColumnResizeMode,
   ColumnSizingState,
   ExpandedState,
+  RowSelectionState,
   SortingState,
   VisibilityState,
 } from '@tanstack/vue-table'
@@ -19,7 +20,7 @@ import {
   useVueTable,
 } from '@tanstack/vue-table'
 import { useEventListener } from '@vueuse/core'
-import { computed, h, nextTick, ref, toRaw } from 'vue'
+import { computed, h, nextTick, ref, toRaw, watch } from 'vue'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
@@ -59,6 +60,7 @@ const emits = defineEmits<{
   (e: 'rowClick', index: number, row: Record<string, unknown>): void
   (e: 'updateData', rowIndex: number, columnId: string, value: unknown): void
   (e: 'sortingChange', sortedColumns: { id: string, desc: boolean }[]): void
+  (e: 'selectionChange', rowSelection: RowSelectionState): void
 }>()
 
 const filterBy = ref<string>()
@@ -183,8 +185,12 @@ const columns = computed<ColumnDef<Record<string, unknown>>[]>(() => {
 const sorting = ref<SortingState>([])
 const columnFilters = ref<ColumnFiltersState>([])
 const columnVisibility = ref<VisibilityState>({})
-const rowSelection = ref({})
+const rowSelection = ref<RowSelectionState>({})
 const expanded = ref<ExpandedState>({})
+
+watch(rowSelection, (newSelection) => {
+  emits('selectionChange', newSelection)
+}, { deep: true })
 
 const table = useVueTable({
   get data() {
