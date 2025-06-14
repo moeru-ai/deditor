@@ -1,4 +1,5 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
+import { Format, LogLevel, setGlobalFormat, setGlobalLogLevel } from '@guiiai/logg'
 import { app, BrowserWindow, screen, shell } from 'electron'
 import { dirname, join } from 'node:path'
 import { env } from 'node:process'
@@ -8,6 +9,9 @@ import { isMacOS } from 'std-env'
 import icon from '../../resources/icon.png?asset'
 import { registerDatabaseDialects } from './ipc/databases/remote/'
 import { registerApp, registerDialog, registerFs, registerPath, registerSafeStorage } from './ipc/electron'
+
+setGlobalFormat(Format.Pretty)
+setGlobalLogLevel(LogLevel.Log)
 
 app.dock?.setIcon(icon)
 
