@@ -120,16 +120,16 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
     return listTables<D>(driver, toDSN(driver, parameters, defaultParamsFromDriver(driver)))
   }
 
-  async function listColumns<D extends DatasourceDriver>(driver: D, dsn: string, schema: string, table: string) {
+  async function listColumns<D extends DatasourceDriver>(driver: D, dsn: string, table: string, schema?: string) {
     const session = await connect(driver, dsn)
     if (isPostgresSession(session)) {
-      return session.session.listColumns(schema, table)
+      return session.session.listColumns(table, schema)
     }
     else if (isMySQLSession(session)) {
       throw new Error('MySQL is not supported yet')
     }
     else if (isPGLiteSession(session)) {
-      return session.session.listColumns(schema, table)
+      return session.session.listColumns(table, schema)
     }
     else if (isDuckDBWasmSession(session)) {
       throw new Error('DuckDBWasm is not supported yet')
@@ -151,8 +151,8 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
     }
   }
 
-  async function listColumnsByParameters<D extends DatasourceDriver>(driver: D, parameters: ConnectionThroughParameters, schema: string, table: string) {
-    return listColumns<D>(driver, toDSN(driver, parameters, defaultParamsFromDriver(driver)), schema, table)
+  async function listColumnsByParameters<D extends DatasourceDriver>(driver: D, parameters: ConnectionThroughParameters, table: string, schema?: string) {
+    return listColumns<D>(driver, toDSN(driver, parameters, defaultParamsFromDriver(driver)), table, schema)
   }
 
   async function execute<T, D extends DatasourceDriver = DatasourceDriver>(driver: D, dsn: string, query: string, parameters?: unknown[]): Promise<T[]> {
