@@ -1,4 +1,4 @@
-import { integer, pgSchema, text, varchar } from 'drizzle-orm/pg-core'
+import { boolean, integer, json, pgSchema, real, smallint, text, varchar } from 'drizzle-orm/pg-core'
 
 const postgresInformationSchema = pgSchema('information_schema')
 
@@ -62,4 +62,64 @@ export const postgresInformationSchemaColumns = postgresInformationSchema.table(
   is_generated: varchar(),
   generation_expression: varchar(),
   is_updatable: varchar(),
+})
+
+export const postgresPgCatalogPgClass = pgSchema('pg_catalog').table('pg_class', {
+  oid: text('oid'),
+  relfrozenxid: text('relfrozenxid'),
+  relminmxid: text('relminmxid'),
+  relacl: text('relacl').array(),
+  relnamespace: text('relnamespace'),
+  reltype: text('reltype'),
+  reloftype: text('reloftype'),
+  relowner: text('relowner'),
+  relam: text('relam'),
+  relfilenode: text('relfilenode'),
+  reltablespace: text('reltablespace'),
+  relpages: integer('relpages'),
+  reltuples: real('reltuples'),
+  relallvisible: integer('relallvisible'),
+  reltoastrelid: text('reltoastrelid'),
+  relhasindex: boolean('relhasindex'),
+  relisshared: boolean('relisshared'),
+  relpersistence: text('relpersistence'),
+  relkind: text('relkind'),
+  relnatts: smallint('relnatts'),
+  relchecks: smallint('relchecks'),
+  relhasrules: boolean('relhasrules'),
+  relhastriggers: boolean('relhastriggers'),
+  relhassubclass: boolean('relhassubclass'),
+  relrowsecurity: boolean('relrowsecurity'),
+  relforcerowsecurity: boolean('relforcerowsecurity'),
+  relispopulated: boolean('relispopulated'),
+  relreplident: text('relreplident'),
+  relispartition: boolean('relispartition'),
+  relrewrite: text('relrewrite'),
+  relname: text('relname'),
+  relpartbound: json('relpartbound'),
+  reloptions: text('reloptions').array(),
+})
+
+export const postgresPgCatalogPgIndex = pgSchema('pg_catalog').table('pg_index', {
+  indexrelid:	text('indexrelid'),
+  indrelid:	text('indrelid').references(() => postgresPgCatalogPgClass.oid),
+  indnatts:	smallint('indnatts'),
+  indnkeyatts:	smallint('indnkeyatts'),
+  indisunique:	boolean('indisunique'),
+  indnullsnotdistinct:	boolean('indnullsnotdistinct'),
+  indisprimary:	boolean('indisprimary'),
+  indisexclusion:	boolean('indisexclusion'),
+  indimmediate:	boolean('indimmediate'),
+  indisclustered:	boolean('indisclustered'),
+  indisvalid:	boolean('indisvalid'),
+  indcheckxmin:	boolean('indcheckxmin'),
+  indisready:	boolean('indisready'),
+  indislive:	boolean('indislive'),
+  indisreplident:	boolean('indisreplident'),
+  indkey:	text('indkey').array(),
+  indcollation:	text('indcollation').array(),
+  indclass:	text('indclass').array(),
+  indoption:	text('indoption').array(),
+  indexprs:	json('indexprs'),
+  indpred:	json('indpred'),
 })

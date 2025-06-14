@@ -35,6 +35,21 @@ export interface PostgresMethods {
     schema: string
     results: typeof postgresInformationSchemaColumns.$inferSelect[]
   }
+
+  listIndexes: (params: {
+    databaseSessionId: string
+    tableName: string
+    schema?: string
+  }) => {
+    databaseSessionId: string
+    tableName: string
+    schema: string
+    results: {
+      indexName: string
+      isPrimaryKey: boolean
+      isUniqueConstraint: boolean
+    }[]
+  }
 }
 
 export interface MySQL2Methods {
