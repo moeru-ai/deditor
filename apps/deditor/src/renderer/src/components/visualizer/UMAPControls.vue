@@ -12,7 +12,7 @@ const visualizerStore = useVisualizerStore()
 
 const params = reactive({
   dimensions: 3,
-  neighbors: 15,
+  neighbors: 8,
   minDistance: 0.1,
   spread: 1.0,
 })
@@ -27,7 +27,7 @@ watchDebounced(params, (params) => {
   })
 }, { immediate: true, debounce: 100 })
 
-watch([umap, visualizerStore.vectors], ([umap, vectors]) => {
+watch([umap, () => visualizerStore.vectors], ([umap, vectors]) => {
   if (!umap) {
     return
   }

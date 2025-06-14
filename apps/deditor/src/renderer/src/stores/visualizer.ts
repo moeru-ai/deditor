@@ -8,14 +8,19 @@ import { readonly, ref } from 'vue'
 import { toVec3s } from '@/utils/three'
 
 export const useVisualizerStore = defineStore('visualizer', () => {
-  const data_ = ref<any[]>([]) // This can be strings or any visualizable data
+  const data = ref<any[]>([]) // This can be strings or any visualizable data
   const vectors = ref<number[][]>([])
-  const points_ = ref<THREE.Vector3[]>([])
+  const points = ref<THREE.Vector3[]>()
   const styles = ref<string[]>([])
   const styleDefinitions = ref<Record<string, DataPointStyle>>({})
 
+  const resetVectors = (source: number[][]) => {
+    vectors.value = source.map(v => [...v])
+    points.value = undefined
+  }
+
   const add = (data: any, vector: number[], style?: string | [string, DataPointStyle]) => {
-    data_.value.push(data)
+    data.value.push(data)
     vectors.value.push([...vector])
     if (style) {
       if (typeof style === 'string') {
@@ -30,14 +35,14 @@ export const useVisualizerStore = defineStore('visualizer', () => {
   }
 
   const remove = (index: number) => {
-    if (index < 0 || index >= data_.value.length) {
+    if (index < 0 || index >= data.value.length) {
       return
     }
 
-    data_.value.splice(index, 1)
+    data.value.splice(index, 1)
     vectors.value.splice(index, 1)
     styles.value.splice(index, 1)
-    points_.value.splice(index, 1)
+    points.value?.splice(index, 1)
   }
 
   const defineStyle = (key: string, style: DataPointStyle) => {
@@ -58,23 +63,24 @@ export const useVisualizerStore = defineStore('visualizer', () => {
     delete styleDefinitions.value[key]
   }
 
-  const mutatePoints = (points: number[][]) => {
-    if (points.length !== vectors.value.length) {
+  const mutatePoints = (source: number[][]) => {
+    if (points.value && source.length !== vectors.value.length) {
       throw new Error(
-        `Expected new point array to be of the same length (${points_.value.length}) but received ${points.length}.`,
+        `Expected new point array to be of the same length as vectors (${vectors.value.length}) but received ${source.length}.`,
       )
     }
 
     // Copy and prevent outside mutation
-    points_.value = toVec3s(points)
+    points.value = toVec3s(source)
   }
 
   return {
-    data: readonly(data_),
+    data: readonly(data),
     vectors: readonly(vectors),
-    points: readonly(points_),
+    points: readonly(points),
     styles: readonly(styles),
     styleDefinitions: readonly(styleDefinitions),
+    resetVectors,
     add,
     remove,
     defineStyle,

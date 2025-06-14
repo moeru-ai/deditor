@@ -46,6 +46,24 @@ function createPointCanvas(color?: string) {
   return canvas
 }
 
+function createPointTexture(color?: string) {
+  const texture = new THREE.CanvasTexture(createPointCanvas(color))
+  texture.magFilter = THREE.NearestFilter
+  texture.minFilter = THREE.NearestFilter
+  return texture
+}
+
+function createPointMaterial(color?: string) {
+  return new THREE.SpriteMaterial({
+    map: createPointTexture(color),
+    color: color || '#ffffff',
+    transparent: true,
+    sizeAttenuation: true,
+  })
+}
+
+const defaultPointMaterial = createPointMaterial()
+
 watch(visualizerStore.styleDefinitions, (styles) => {
   // Dispose the materials, textures, and unset references to the underlying canvases
   Object.values(pointMaterials.value).forEach((material) => {
@@ -59,16 +77,7 @@ watch(visualizerStore.styleDefinitions, (styles) => {
 
   // Create new materials, textures, and canvases
   pointMaterials.value = Object.entries(styles).reduce((materials, [name, style]) => {
-    const texture = new THREE.CanvasTexture(createPointCanvas(style.color))
-    texture.magFilter = THREE.NearestFilter
-    texture.minFilter = THREE.NearestFilter
-
-    materials[name] = new THREE.SpriteMaterial({
-      map: texture,
-      color: style?.color || '#ffffff',
-      transparent: true,
-      sizeAttenuation: true,
-    })
+    materials[name] = createPointMaterial(style.color)
     return materials
   }, {} as Record<string, SpriteMaterial>)
 }, { deep: true, immediate: true })
@@ -98,7 +107,7 @@ watch(visualizerStore.styleDefinitions, (styles) => {
           :key="index"
           :position="point"
           :scale="[0.05, 0.05, 0.05]"
-          :material="pointMaterials[visualizerStore.styles[index]]"
+          :material="pointMaterials[visualizerStore.styles[index]] ?? defaultPointMaterial"
           @click="onPointClick(point, index)"
           @pointer-enter="onPointHover(point, index, true)"
           @pointer-leave="onPointHover(point, index, false)"

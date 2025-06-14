@@ -320,8 +320,8 @@ export function useDatasource(
   async function findMany<T = Record<string, unknown>>(
     table: { schema?: string | null, table: string },
     sortedColumns: { id: string, desc: boolean }[],
-    pageSize: number,
-    page: number,
+    pageSize?: number,
+    page?: number,
   ) {
     const q = sql`SELECT * FROM `
     if (table.schema) {
@@ -385,7 +385,7 @@ export function useDatasource(
       }
     }
 
-    if (pageSize != null && page != null) {
+    if (typeof pageSize === 'number' && typeof page === 'number') {
       const pageSizeValue = pageSize
       const pageValue = page
       q.append(sql` LIMIT ${pageSizeValue} OFFSET ${(pageValue - 1) * pageSizeValue}`)

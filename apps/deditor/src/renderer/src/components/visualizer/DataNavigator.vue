@@ -1,25 +1,49 @@
 <script setup lang="ts">
-import type { DatasourceTable } from '@/libs/datasources'
+import type { ConnectionThroughParameters, DatasourceTable } from '@/libs/datasources'
 import type { Datasource } from '@/stores'
 
 import { BasicTextarea } from '@proj-airi/ui'
 import { computedAsync } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 import Button from '@/components/basic/Button.vue'
 import DatasourceTablePicker from '@/components/datasource/DatasourceTablePicker.vue'
 import DataTable from '@/components/table/DataTable.vue'
-import { useDatasource, useDatasourcesStore } from '@/stores'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useDatasource, useDatasourceSessionsStore, useDatasourcesStore, useVisualizerStore } from '@/stores'
 
+const visualizerStore = useVisualizerStore()
 const datasourcesStore = useDatasourcesStore()
 
 const queryFromDatasource = ref<Datasource>()
 const queryFromTable = ref<DatasourceTable>()
 
 const { datasources } = storeToRefs(datasourcesStore)
-const { findMany, count } = useDatasource(computed(() => queryFromDatasource.value?.id), datasources)
+const { datasource, findMany, count } = useDatasource(computed(() => queryFromDatasource.value?.id), datasources)
+const session = useDatasourceSessionsStore()
 
+const tableColumns = computedAsync(async () => {
+  if (!datasource.value || !queryFromTable.value) {
+    return []
+  }
+
+  const { driver } = datasource.value
+  const { schema, table } = queryFromTable.value
+
+  if (!schema || !table) {
+    return []
+  }
+
+  return await session.listColumnsByParameters(
+    driver,
+    datasource.value as ConnectionThroughParameters,
+    table,
+    schema,
+  )
+})
+
+const visualizingColumn = ref<string>()
 const page = ref(1)
 const pageSize = ref(20)
 const sortedColumns = ref<{ id: string, desc: boolean }[]>([])
@@ -71,6 +95,18 @@ function handleSortingChange(newSortedColumns: { id: string, desc: boolean }[]) 
     page.value,
   ).then(res => results.value = res)
 }
+
+watch(visualizingColumn, async (column) => {
+  if (!queryFromTable.value || !column)
+    return
+
+  const vectors = (await findMany(queryFromTable.value, []))
+    .filter(row => row[column] !== undefined && row[column] !== null)
+    .slice(0, 10) // I will improve this soon
+    .map(row => row[column] as number[])
+
+  visualizerStore.resetVectors(vectors)
+})
 </script>
 
 <template>
@@ -93,6 +129,22 @@ function handleSortingChange(newSortedColumns: { id: string, desc: boolean }[]) 
         @update-data="() => {}"
         @sorting-change="handleSortingChange"
       />
+    </div>
+
+    <div grid="~ cols-[repeat(4,1fr)] gap-2">
+      <Select v-if="tableColumns" v-model="visualizingColumn">
+        <SelectTrigger>
+          <SelectValue placeholder="Visualize column…" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem
+            v-for="column of tableColumns.filter(c => c.column_name).map(c => c.column_name!)"
+            :key="column" :value="column"
+          >
+            {{ column }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
     </div>
 
     <div flex flex-col items-start gap-2>
