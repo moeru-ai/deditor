@@ -4,6 +4,15 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    '@xsai/embed':
+      specifier: ^0.3.0-beta.4
+      version: 0.3.0-beta.4
+    '@xsai/shared':
+      specifier: ^0.3.0-beta.4
+      version: 0.3.0-beta.4
+
 importers:
 
   .:
@@ -138,10 +147,10 @@ importers:
         specifier: ^0.0.6
         version: 0.0.6
       '@xsai/embed':
-        specifier: ^0.3.0-beta.4
+        specifier: 'catalog:'
         version: 0.3.0-beta.4
       '@xsai/shared':
-        specifier: ^0.3.0-beta.4
+        specifier: 'catalog:'
         version: 0.3.0-beta.4
       mysql2:
         specifier: ^3.14.1
