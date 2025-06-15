@@ -13,6 +13,7 @@
   "main": "out/main/index.js",
   "scripts": {
     "dev": "pnpm -F @deditor-app/deditor dev",
+    "dev:remote": "pnpm -F @deditor-app/deditor dev:remote",
     "dev:web": "pnpm -F @deditor-app/deditor web:dev",
     "build": "pnpm -r -F=\"./packages/*\" -F=\"./apps/*\" run build",
     "build:packages": "pnpm -F=\"./packages/*\" run build",

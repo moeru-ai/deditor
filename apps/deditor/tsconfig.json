@@ -50,6 +50,6 @@
     "src/renderer/**/*.d.ts",
     "src/renderer/**/*.tsx",
     "src/renderer/**/*.vue",
-    "types"
+    "types/tanstack-table.d.ts"
   ]
 }

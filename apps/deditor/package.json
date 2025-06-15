@@ -18,6 +18,7 @@
   "main": "out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev --sourcemap",
+    "dev:remote": "DEDITOR_REMOTE_DEBUG=true electron-vite dev --sourcemap",
     "build": "electron-vite build",
     "start": "electron-vite preview",
     "web:dev": "vite dev",

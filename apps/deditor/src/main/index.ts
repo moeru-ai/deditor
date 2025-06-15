@@ -1,6 +1,7 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import { Format, LogLevel, setGlobalFormat, setGlobalLogLevel } from '@guiiai/logg'
 import { app, BrowserWindow, screen, shell } from 'electron'
+import http from 'node:http'
 import { dirname, join } from 'node:path'
 import { env } from 'node:process'
 import { fileURLToPath } from 'node:url'
@@ -12,6 +13,16 @@ import { registerApp, registerDialog, registerFs, registerPath, registerSafeStor
 
 setGlobalFormat(Format.Pretty)
 setGlobalLogLevel(LogLevel.Log)
+
+if (/^true$/i.test(env.DEDITOR_REMOTE_DEBUG || '')) {
+  const remoteDebugPort = Number(env.DEDITOR_REMOTE_DEBUG_PORT || '9222')
+  if (Number.isNaN(remoteDebugPort) || !Number.isInteger(remoteDebugPort) || remoteDebugPort < 0 || remoteDebugPort > 65535) {
+    throw new Error(`Invalid remote debug port: ${env.DEDITOR_REMOTE_DEBUG_PORT}`)
+  }
+
+  app.commandLine.appendSwitch('remote-debugging-port', String(remoteDebugPort))
+  app.commandLine.appendSwitch('remote-allow-origins', `http://localhost:${remoteDebugPort}`)
+}
 
 app.dock?.setIcon(icon)
 
@@ -78,6 +89,39 @@ function createWindow(): BrowserWindow {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  if (/^true$/i.test(env.DEDITOR_REMOTE_DEBUG || '')) {
+    const remoteDebugEndpoint = `http://localhost:${env.DEDITOR_REMOTE_DEBUG_PORT || '9222'}`
+    http.get(`${remoteDebugEndpoint}/json`, (res) => {
+      let data = ''
+      res.on('data', chunk => data += chunk)
+      res.on('end', () => {
+        try {
+          const targets = JSON.parse(data)
+          if (targets.length > 0) {
+            let wsUrl = targets[0].webSocketDebuggerUrl
+            if (wsUrl.startsWith('ws://')) {
+              wsUrl = wsUrl.substring(5)
+              // eslint-disable-next-line no-console
+              console.log(`Inspect remotely: ${remoteDebugEndpoint}/devtools/inspector.html?ws=${wsUrl}`)
+              shell.openExternal(`${remoteDebugEndpoint}/devtools/inspector.html?ws=${wsUrl}`)
+            }
+            else {
+              console.warn('[Remote Debugging] Invalid WebSocket URL:', wsUrl)
+            }
+          }
+          else {
+            console.warn('[Remote Debugging] No targets found')
+          }
+        }
+        catch (err) {
+          console.error('[Remote Debugging] Failed to parse metadata from /json:', err)
+        }
+      })
+    }).on('error', (err) => {
+      console.error('[Remote Debugging] Failed to fetch metadata from /json:', err)
+    })
+  }
+
   // Set app user model id for windows
   electronApp.setAppUserModelId('ai.moeru.deditor')
 
