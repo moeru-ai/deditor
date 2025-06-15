@@ -7,7 +7,33 @@ words:
   - amhandler
   - amname
   - amtype
+  - attacl
+  - attalign
+  - attbyval
+  - attcacheoff
+  - attcollation
+  - attcompression
+  - attfdwoptions
+  - attgenerated
+  - atthasdef
+  - atthasmissing
+  - attidentity
+  - attinhcount
+  - attisdropped
+  - attislocal
+  - attlen
+  - attmissingval
+  - attname
+  - attndims
+  - attnotnull
+  - attnum
+  - attoptions
+  - attrelid
   - Attributify
+  - attstattarget
+  - attstorage
+  - atttypid
+  - atttypmod
   - cientos
   - Deditor
   - duckdb

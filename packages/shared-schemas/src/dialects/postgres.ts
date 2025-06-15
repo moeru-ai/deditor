@@ -1,4 +1,4 @@
-import { boolean, integer, json, pgSchema, real, smallint, text, varchar } from 'drizzle-orm/pg-core'
+import { boolean, char, integer, json, pgSchema, real, smallint, text, varchar } from 'drizzle-orm/pg-core'
 
 const postgresInformationSchema = pgSchema('information_schema')
 
@@ -136,4 +136,33 @@ export const postgresPgCatalogPgIndex = pgSchema('pg_catalog').table('pg_index',
   indoption: text('indoption').array(),
   indexprs: json('indexprs'),
   indpred: json('indpred'),
+})
+
+export const postgresPgCatalogPgAttribute = pgSchema('pg_catalog').table('pg_attribute', {
+  attrelid: integer('attrelid'),
+  attname: text('attname'),
+  atttypid: integer('atttypid'),
+  attlen: smallint('attlen'),
+  attnum: smallint('attnum'),
+  attcacheoff: integer('attcacheoff'),
+  atttypmod: integer('atttypmod'),
+  attndims: smallint('attndims'),
+  attbyval: boolean('attbyval'),
+  attalign: char('attalign'),
+  attstorage: char('attstorage'),
+  attcompression: char('attcompression'),
+  attnotnull: boolean('attnotnull'),
+  atthasdef: boolean('atthasdef'),
+  atthasmissing: boolean('atthasmissing'),
+  attidentity: char('attidentity'),
+  attgenerated: char('attgenerated'),
+  attisdropped: boolean('attisdropped'),
+  attislocal: boolean('attislocal'),
+  attinhcount: smallint('attinhcount'),
+  attcollation: integer('attcollation'),
+  attstattarget: smallint('attstattarget'),
+  attacl: json('attacl'),
+  attoptions: text('attoptions').array(),
+  attfdwoptions: text('attfdwoptions').array(),
+  attmissingval: json('attmissingval'),
 })
