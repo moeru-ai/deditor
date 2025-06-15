@@ -54,6 +54,21 @@ export interface PostgresMethods {
       columns: string[]
     }[]
   }
+
+  listColumnsWithTypes: (params: {
+    databaseSessionId: string
+    tableName: string
+    schema?: string
+  }) => {
+    databaseSessionId: string
+    tableName: string
+    schema: string
+    results: {
+      columnName: string
+      typeName: string
+      typeMod: number
+    }[]
+  }
 }
 
 export interface MySQL2Methods {

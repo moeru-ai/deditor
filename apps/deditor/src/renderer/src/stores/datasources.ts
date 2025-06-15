@@ -155,6 +155,41 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
     return listColumns<D>(driver, toDSN(driver, parameters, defaultParamsFromDriver(driver)), table, schema)
   }
 
+  async function listColumnsWithTypes<D extends DatasourceDriver>(driver: D, dsn: string, table: string, schema?: string) {
+    const session = await connect(driver, dsn)
+    if (isPostgresSession(session)) {
+      return session.session.listColumnsWithTypes(table, schema)
+    }
+    else if (isMySQLSession(session)) {
+      throw new Error('MySQL is not supported yet')
+    }
+    else if (isPGLiteSession(session)) {
+      throw new Error('PGLite is not supported yet')
+    }
+    else if (isDuckDBWasmSession(session)) {
+      throw new Error('DuckDBWasm is not supported yet')
+    }
+    else if (isCloudflareD2Session(session)) {
+      throw new Error('Cloudflare D2 is not supported yet')
+    }
+    else if (isSQLiteSession(session)) {
+      throw new Error('SQLite is not supported yet')
+    }
+    else if (isSupabaseSession(session)) {
+      throw new Error('Supabase is not supported yet')
+    }
+    else if (isNeonSession(session)) {
+      throw new Error('Neon is not supported yet')
+    }
+    else {
+      throw new Error(`Unsupported driver: ${driver}`)
+    }
+  }
+
+  async function listColumnsWithTypesByParameters<D extends DatasourceDriver>(driver: D, parameters: ConnectionThroughParameters, table: string, schema?: string) {
+    return listColumnsWithTypes<D>(driver, toDSN(driver, parameters, defaultParamsFromDriver(driver)), table, schema)
+  }
+
   async function listIndexes<D extends DatasourceDriver>(driver: D, dsn: string, schema: string, table: string) {
     const session = await connect(driver, dsn)
     if (isPostgresSession(session)) {
@@ -242,6 +277,8 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
     listTablesByParameters,
     listColumns,
     listColumnsByParameters,
+    listColumnsWithTypes,
+    listColumnsWithTypesByParameters,
     listIndexes,
     listIndexesByParameters,
     execute,
@@ -310,6 +347,21 @@ export function useDatasource(
     }
 
     return await datasourceSessionsStore.listColumnsByParameters(
+      datasource.value.driver,
+      datasource.value as ConnectionThroughParameters,
+      table.table,
+      table.schema ?? 'public',
+    )
+  }
+
+  async function listColumnsWithTypes(
+    table: { schema?: string | null, table: string },
+  ) {
+    if (!datasource.value || !datasource.value.driver || !datasource.value) {
+      return []
+    }
+
+    return await datasourceSessionsStore.listColumnsWithTypesByParameters(
       datasource.value.driver,
       datasource.value as ConnectionThroughParameters,
       table.table,
@@ -423,5 +475,6 @@ export function useDatasource(
     findMany,
     count,
     listIndexes,
+    listColumnsWithTypes,
   }
 }

@@ -7,12 +7,14 @@ import * as schema from '@deditor-app/shared-schemas'
 import {
   postgresInformationSchemaColumns,
   postgresPgCatalogPgAm,
+  postgresPgCatalogPgAttribute,
   postgresPgCatalogPgClass,
   postgresPgCatalogPgIndex,
   postgresPgCatalogPgNamespace,
+  postgresPgCatalogPgType,
 } from '@deditor-app/shared-schemas'
 import { useLogg } from '@guiiai/logg'
-import { and, eq, sql } from 'drizzle-orm'
+import { and, eq, gt, not, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
@@ -216,6 +218,45 @@ export function registerPostgresJsDatabaseDialect(window: BrowserWindow) {
       }
       catch (err) {
         log.withError(err).withFields({ databaseSessionId, tableName, schema }).error('failed to query remote Postgres database to list indexes')
+        throw err
+      }
+    })
+
+  defineIPCHandler<PostgresMethods>(window, 'databaseRemotePostgres', 'listColumnsWithTypes')
+    .handle(async (_, { databaseSessionId, tableName, schema }) => {
+      if (!databaseSessions.has(databaseSessionId)) {
+        throw new Error('Database session ID not found in session map, please connect to the database first.')
+      }
+
+      try {
+        const dbSession = databaseSessions.get(databaseSessionId)!
+        const res = await dbSession.drizzle
+          .select({
+            columnName: postgresPgCatalogPgAttribute.attname,
+            typeName: postgresPgCatalogPgType.typname,
+            typeMod: postgresPgCatalogPgAttribute.atttypmod,
+          })
+          .from(postgresPgCatalogPgAttribute)
+          .leftJoin(postgresPgCatalogPgClass, eq(postgresPgCatalogPgAttribute.attrelid, postgresPgCatalogPgClass.oid))
+          .leftJoin(postgresPgCatalogPgNamespace, eq(postgresPgCatalogPgClass.relnamespace, postgresPgCatalogPgNamespace.oid))
+          .leftJoin(postgresPgCatalogPgType, eq(postgresPgCatalogPgAttribute.atttypid, postgresPgCatalogPgType.oid))
+          .where(
+            and(
+              eq(postgresPgCatalogPgNamespace.nspname, schema ?? 'public'),
+              eq(postgresPgCatalogPgClass.relname, tableName),
+              gt(postgresPgCatalogPgAttribute.attnum, 0),
+              not(postgresPgCatalogPgAttribute.attisdropped),
+            ),
+          )
+        return {
+          databaseSessionId,
+          tableName,
+          schema,
+          results: res,
+        }
+      }
+      catch (err) {
+        log.withError(err).withFields({ databaseSessionId, tableName, schema }).error('failed to query remote Postgres database to list columns with types')
         throw err
       }
     })
