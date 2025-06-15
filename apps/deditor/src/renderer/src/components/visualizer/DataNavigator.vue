@@ -6,9 +6,8 @@ import type { Datasource } from '@/stores'
 
 import { computedAsync } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
-import Button from '@/components/basic/Button.vue'
 import DatasourceTablePicker from '@/components/datasource/DatasourceTablePicker.vue'
 import DataTable from '@/components/table/DataTable.vue'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -100,28 +99,16 @@ function handleSortingChange(newSortedColumns: { id: string, desc: boolean }[]) 
   ).then(res => results.value = res)
 }
 
-function visualize() {
-  const column = visualizingColumn.value
+watch([visualizingColumn, rowSelection], ([column, rows]) => {
   if (!queryFromTable.value || !column || !results.value)
     return
 
-  // const tableSchema = pgTable(table, {
-  //   vector: vector(visualizingColumn.value, { dimensions: 1024 }),
-  // })
-
-  // const qb = new QueryBuilder()
-  // const test = qb.select({ vector: tableSchema.vector })
-  //   .from(tableSchema)
-  //   .where(isNotNull(tableSchema.vector))
-  //   .offset(0)
-  //   .limit(10)
-
   const vectors = results.value
-    .filter((_, i) => rowSelection.value[i])
-    .map(row => row[column] as number[])
+    .filter((_, i) => rows[i])
+    .map(row => (Array.isArray(row[column]) ? row[column] : JSON.parse(row[column] as string)) as number[]) // FIXME: Use schema
 
   visualizerStore.resetVectors(vectors)
-}
+}, { deep: true, immediate: true })
 </script>
 
 <template>
@@ -170,10 +157,6 @@ function visualize() {
           </SelectContent>
         </Select>
       </div>
-
-      <Button @click="visualize">
-        Visualize
-      </Button>
     </div>
 
     <!-- <div flex flex-col items-start gap-2>

@@ -1,47 +1,26 @@
 <script setup lang="ts">
+import type { UMAPParameters } from '@/types'
+
 import { Range } from '@proj-airi/ui'
-import { watchDebounced } from '@vueuse/core'
-import { UMAP } from 'umap-js'
-import { reactive, shallowRef, watch } from 'vue'
+import { reactive, watch } from 'vue'
 
 import SegmentedControl from '@/components/basic/SegmentedControl.vue'
 import { FieldDescription, FieldLabel, FormField } from '@/components/form'
+import { ProjectionAlgorithm } from '@/constants'
 import { useVisualizerStore } from '@/stores/visualizer'
 
 const visualizerStore = useVisualizerStore()
 
-const params = reactive({
+const params = reactive<UMAPParameters>({
   dimensions: 3,
   neighbors: 8,
   minDistance: 0.1,
   spread: 1.0,
 })
 
-const umap = shallowRef<UMAP>()
-
-watchDebounced(params, (params) => {
-  umap.value = new UMAP({
-    nComponents: params.dimensions,
-    nNeighbors: params.neighbors,
-    minDist: params.minDistance,
-  })
-}, { immediate: true, debounce: 100 })
-
-watch([umap, () => visualizerStore.vectors], ([umap, vectors]) => {
-  if (!umap) {
-    return
-  }
-  let projections: number[][] = []
-  try {
-    projections = umap.fit(vectors as number[][]) // This function should not mutate the input
-  }
-  catch (error) {
-    // Sometimes this can fail if the params do not fit the data
-    // Not a big problem
-    console.warn('UMAP projection failed:', error)
-  }
-  visualizerStore.mutatePoints(projections)
-}, { immediate: true })
+watch(params, () => {
+  visualizerStore.projection = { type: ProjectionAlgorithm.UMAP, params }
+}, { deep: true, immediate: true })
 </script>
 
 <template>

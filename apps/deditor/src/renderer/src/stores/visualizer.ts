@@ -1,10 +1,13 @@
 import type * as THREE from 'three'
 
-import type { DataPointStyle } from '@/types/visualizer'
+import type { DataPointStyle, ProjectionParameters } from '@/types/visualizer'
 
+import { PCA } from 'ml-pca'
 import { defineStore } from 'pinia'
+import { UMAP } from 'umap-js'
 import { readonly, ref } from 'vue'
 
+import { ProjectionAlgorithm } from '@/constants'
 import { toVec3s } from '@/utils/three'
 
 export const useVisualizerStore = defineStore('visualizer', () => {
@@ -14,10 +17,7 @@ export const useVisualizerStore = defineStore('visualizer', () => {
   const styles = ref<string[]>([])
   const styleDefinitions = ref<Record<string, DataPointStyle>>({})
 
-  const resetVectors = (source: number[][]) => {
-    vectors.value = source.map(v => [...v])
-    points.value = undefined
-  }
+  const projection = ref<ProjectionParameters>()
 
   const add = (data: any, vector: number[], style?: string | [string, DataPointStyle]) => {
     data.value.push(data)
@@ -63,15 +63,41 @@ export const useVisualizerStore = defineStore('visualizer', () => {
     delete styleDefinitions.value[key]
   }
 
-  const mutatePoints = (source: number[][]) => {
-    if (points.value && source.length !== vectors.value.length) {
-      throw new Error(
-        `Expected new point array to be of the same length as vectors (${vectors.value.length}) but received ${source.length}.`,
-      )
-    }
+  const resetVectors = (source: number[][]) => {
+    vectors.value = source.map(v => [...v])
+  }
 
-    // Copy and prevent outside mutation
-    points.value = toVec3s(source)
+  const visualize = () => {
+    switch (projection.value?.type) {
+      case ProjectionAlgorithm.UMAP: {
+        const params = projection.value.params
+        const umap = new UMAP({
+          nComponents: params.dimensions,
+          nNeighbors: params.neighbors,
+          minDist: params.minDistance,
+        })
+
+        try {
+          points.value = toVec3s(umap.fit(vectors.value as number[][]))
+        }
+        catch (error) {
+          // Sometimes this can fail if the params do not fit the data
+          // Not a big problem
+          console.warn('UMAP projection failed:', error)
+        }
+        break
+      }
+      case ProjectionAlgorithm.PCA: {
+        const params = projection.value.params
+        const pca = new PCA(vectors.value as number[][], {
+          center: params.center,
+          scale: params.scale,
+          ignoreZeroVariance: params.ignoreZeroVariance,
+        })
+        points.value = toVec3s(pca.predict(vectors.value as number[][], { nComponents: params.dimensions }).to2DArray())
+        break
+      }
+    }
   }
 
   return {
@@ -80,11 +106,12 @@ export const useVisualizerStore = defineStore('visualizer', () => {
     points: readonly(points),
     styles: readonly(styles),
     styleDefinitions: readonly(styleDefinitions),
+    projection,
     resetVectors,
     add,
     remove,
     defineStyle,
     unsetStyle,
-    mutatePoints,
+    visualize,
   }
 })

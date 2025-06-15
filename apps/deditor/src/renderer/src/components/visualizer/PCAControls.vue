@@ -1,31 +1,26 @@
 <script setup lang="ts">
+import type { PCAParameters } from '@/types'
+
 import { Checkbox } from '@proj-airi/ui'
-import { watchDebounced } from '@vueuse/core'
-import { PCA } from 'ml-pca'
-import { reactive } from 'vue'
+import { reactive, watch } from 'vue'
 
 import SegmentedControl from '@/components/basic/SegmentedControl.vue'
 import { FieldDescription, FieldLabel, FormField } from '@/components/form'
+import { ProjectionAlgorithm } from '@/constants'
 import { useVisualizerStore } from '@/stores'
-import { toVec3s } from '@/utils/three'
 
 const visualizerStore = useVisualizerStore()
 
-const params = reactive({
+const params = reactive<PCAParameters>({
   dimensions: 3,
   center: true,
   scale: true,
   ignoreZeroVariance: true,
 })
 
-watchDebounced<[typeof params, typeof visualizerStore.vectors], true>([params, visualizerStore.vectors], ([params, vectors]) => {
-  const pca = new PCA(vectors as number[][], {
-    center: params.center,
-    scale: params.scale,
-    ignoreZeroVariance: params.ignoreZeroVariance,
-  })
-  visualizerStore.points = toVec3s(pca.predict(vectors as number[][], { nComponents: params.dimensions }).to2DArray())
-}, { immediate: true, debounce: 100 })
+watch(params, () => {
+  visualizerStore.projection = { type: ProjectionAlgorithm.PCA, params }
+}, { deep: true, immediate: true })
 </script>
 
 <template>

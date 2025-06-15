@@ -8,6 +8,8 @@ import PointVisualizer from '@/components/visualizer/PointVisualizer.vue'
 import ProjectionControls from '@/components/visualizer/ProjectionControls.vue'
 import { useVisualizerStore } from '@/stores/visualizer'
 
+import Button from '../components/basic/Button.vue'
+
 const visualizerStore = useVisualizerStore()
 
 onMounted(async () => {
@@ -31,7 +33,7 @@ onMounted(async () => {
             </PaneArea>
           </Pane>
 
-          <Pane :min-size="20" :size="40">
+          <Pane :min-size="20" :size="40" :enter-delay="200">
             <PaneArea flex="~ col gap-4" items-center justify-center>
               <DataNavigator />
             </PaneArea>
@@ -40,9 +42,16 @@ onMounted(async () => {
       </Pane>
 
       <Pane :min-size="20" :size="30">
-        <PaneArea flex flex-col gap-6>
-          <ProjectionControls />
-        </PaneArea>
+        <div flex="~ col gap-2" h-full w-full>
+          <PaneArea flex="~ col grow" :enter-delay="100">
+            <ProjectionControls />
+          </PaneArea>
+          <PaneArea flex="~ col shrink-0" class="h-auto!" :enter-delay="300">
+            <Button @click="visualizerStore.visualize">
+              Visualize
+            </Button>
+          </PaneArea>
+        </div>
       </Pane>
     </Splitpanes>
   </div>
