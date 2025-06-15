@@ -3,6 +3,7 @@ import type * as THREE from 'three'
 import type { DataPointStyle, ProjectionParameters } from '@/types/visualizer'
 
 import { PCA } from 'ml-pca'
+import { TSNE } from 'msvana-tsne'
 import { defineStore } from 'pinia'
 import { UMAP } from 'umap-js'
 import { readonly, ref } from 'vue'
@@ -95,6 +96,17 @@ export const useVisualizerStore = defineStore('visualizer', () => {
           ignoreZeroVariance: params.ignoreZeroVariance,
         })
         points.value = toVec3s(pca.predict(vectors.value as number[][], { nComponents: params.dimensions }).to2DArray())
+        break
+      }
+      case ProjectionAlgorithm.TSNE: {
+        const params = projection.value.params
+        const tsne = new TSNE({
+          nDims: params.dimensions,
+          nIter: params.iterations,
+          perplexity: params.perplexity,
+          learningRate: params.learningRate,
+        })
+        points.value = toVec3s(tsne.transform(vectors.value as number[][]))
         break
       }
     }

@@ -18,6 +18,14 @@ export interface PCAParameters {
   ignoreZeroVariance: boolean
 }
 
+export interface TSNEParameters {
+  dimensions: number
+  iterations: number
+  perplexity: number
+  learningRate: number
+}
+
 export type ProjectionParameters
   = | { type: ProjectionAlgorithm.UMAP, params: UMAPParameters }
     | { type: ProjectionAlgorithm.PCA, params: PCAParameters }
+    | { type: ProjectionAlgorithm.TSNE, params: TSNEParameters }

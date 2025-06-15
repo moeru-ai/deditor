@@ -1,38 +1,25 @@
 <script setup lang="ts">
+import type { TSNEParameters } from '@/types'
+
 import { Range } from '@proj-airi/ui'
-import { watchDebounced } from '@vueuse/core'
-import { TSNE } from 'msvana-tsne'
-import { reactive, shallowRef, watch } from 'vue'
+import { reactive, watch } from 'vue'
 
 import { FieldDescription, FieldLabel, FormField } from '@/components/form'
+import { ProjectionAlgorithm } from '@/constants'
 import { useVisualizerStore } from '@/stores'
 
 const visualizerStore = useVisualizerStore()
 
-const params = reactive({
+const params = reactive<TSNEParameters>({
   dimensions: 3,
   iterations: 1000,
   perplexity: 20,
   learningRate: 100,
 })
 
-const tsne = shallowRef<TSNE>()
-
-watchDebounced(params, (params) => {
-  tsne.value = new TSNE({
-    nDims: params.dimensions,
-    nIter: params.iterations,
-    perplexity: params.perplexity,
-    learningRate: params.learningRate,
-  })
-}, { immediate: true, debounce: 100 })
-
-watch([tsne, visualizerStore.vectors], ([tsne, vectors]) => {
-  if (!tsne) {
-    return
-  }
-  visualizerStore.mutatePoints(tsne.transform(vectors as number[][]))
-}, { immediate: true })
+watch(params, () => {
+  visualizerStore.projection = { type: ProjectionAlgorithm.TSNE, params }
+}, { deep: true, immediate: true })
 </script>
 
 <template>
