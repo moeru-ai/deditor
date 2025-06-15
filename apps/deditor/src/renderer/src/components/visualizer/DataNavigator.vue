@@ -22,7 +22,7 @@ const queryFromTable = ref<DatasourceTable>()
 const rowSelection = ref<RowSelectionState>({})
 
 const { datasources } = storeToRefs(datasourcesStore)
-const { datasource, findMany, count } = useDatasource(computed(() => queryFromDatasource.value?.id), datasources)
+const { datasource, findMany, listColumnsWithTypes, count } = useDatasource(computed(() => queryFromDatasource.value?.id), datasources)
 const session = useDatasourceSessionsStore()
 
 const tableColumns = computedAsync(() => {
@@ -43,6 +43,13 @@ const tableColumns = computedAsync(() => {
     table,
     schema,
   )
+})
+
+const columnsWithTypes = computedAsync(() => {
+  if (!queryFromTable.value)
+    return []
+
+  return listColumnsWithTypes(queryFromTable.value)
 })
 
 const visualizingColumn = ref<string>()
@@ -136,7 +143,7 @@ watch([visualizingColumn, rowSelection], ([column, rows]) => {
 
     <div grid="~ cols-[repeat(4,1fr)] gap-2">
       <div>
-        <Select v-if="tableColumns" v-model="visualizingColumn">
+        <Select v-if="columnsWithTypes" v-model="visualizingColumn">
           <SelectTrigger>
             <SelectValue>
               <template v-if="visualizingColumn">
@@ -149,10 +156,10 @@ watch([visualizingColumn, rowSelection], ([column, rows]) => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem
-              v-for="column of tableColumns.filter(c => c.column_name).map(c => c.column_name!)"
-              :key="column" :value="column"
+              v-for="column of columnsWithTypes.filter(c => c.typeName === 'vector')"
+              :key="column.columnName" :value="column.columnName"
             >
-              {{ column }}
+              {{ column.columnName }}
             </SelectItem>
           </SelectContent>
         </Select>
