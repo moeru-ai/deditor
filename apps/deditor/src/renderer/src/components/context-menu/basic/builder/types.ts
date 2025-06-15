@@ -45,10 +45,10 @@ export interface MenuLabelItem<V = string> extends BaseMenuItem<V> {
   type: 'label'
 }
 
-export type MenuItemConfig<T = any, V = string> =
-  | MenuItem<T>
-  | MenuSubItem<V>
-  | MenuSeparatorItem<V>
-  | MenuCheckboxItem<V>
-  | MenuRadioItem<V>
-  | MenuLabelItem<V>
+export type MenuItemConfig<T = any, V = string>
+  = | MenuItem<T>
+    | MenuSubItem<V>
+    | MenuSeparatorItem<V>
+    | MenuCheckboxItem<V>
+    | MenuRadioItem<V>
+    | MenuLabelItem<V>

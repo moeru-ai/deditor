@@ -1,8 +1,8 @@
 import type { DatasourceDriverEnum } from './driver'
 
-export type Datasource<D = DatasourceDriverEnum> =
-  | ConnectionThroughConnectionString<D>
-  | ConnectionThroughParameters<D>
+export type Datasource<D = DatasourceDriverEnum>
+  = | ConnectionThroughConnectionString<D>
+    | ConnectionThroughParameters<D>
 
 export interface DatasourceBase<D = DatasourceDriverEnum> {
   driver: D
