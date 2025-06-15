@@ -131,6 +131,37 @@ words:
   - tresjs
   - tsdown
   - TSNE
+  - typacl
+  - typalign
+  - typanalyze
+  - typarray
+  - typbasetype
+  - typbyval
+  - typcategory
+  - typcollation
+  - typdefault
+  - typdefaultbin
+  - typdelim
+  - typelem
+  - typinput
+  - typisdefined
+  - typispreferred
+  - typlen
+  - typmodin
+  - typmodout
+  - typname
+  - typnamespace
+  - typndims
+  - typnotnull
+  - typoutput
+  - typowner
+  - typreceive
+  - typrelid
+  - typsend
+  - typstorage
+  - typsubscript
+  - typtype
+  - typtypmod
   - UMAP
   - unocss
   - unplugin
