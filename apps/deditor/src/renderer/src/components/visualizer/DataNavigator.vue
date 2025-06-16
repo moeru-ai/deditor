@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { RowSelectionState } from '@tanstack/vue-table'
 
-import type { ConnectionThroughParameters, DatasourceTable } from '@/libs/datasources'
+import type { DatasourceTable } from '@/libs/datasources'
 import type { Datasource } from '@/stores'
 
 import { computedAsync } from '@vueuse/core'
@@ -11,7 +11,7 @@ import { computed, ref, watch } from 'vue'
 import DatasourceTablePicker from '@/components/datasource/DatasourceTablePicker.vue'
 import DataTable from '@/components/table/DataTable.vue'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useDatasource, useDatasourceSessionsStore, useDatasourcesStore, useVisualizerStore } from '@/stores'
+import { useDatasource, useDatasourcesStore, useVisualizerStore } from '@/stores'
 
 const visualizerStore = useVisualizerStore()
 const datasourcesStore = useDatasourcesStore()
@@ -22,28 +22,7 @@ const queryFromTable = ref<DatasourceTable>()
 const rowSelection = ref<RowSelectionState>({})
 
 const { datasources } = storeToRefs(datasourcesStore)
-const { datasource, findMany, listColumnsWithTypes, count } = useDatasource(computed(() => queryFromDatasource.value?.id), datasources)
-const session = useDatasourceSessionsStore()
-
-const tableColumns = computedAsync(() => {
-  if (!datasource.value || !queryFromTable.value) {
-    return []
-  }
-
-  const { driver } = datasource.value
-  const { schema, table } = queryFromTable.value
-
-  if (!schema || !table) {
-    return []
-  }
-
-  return session.listColumnsByParameters(
-    driver,
-    datasource.value as ConnectionThroughParameters,
-    table,
-    schema,
-  )
-})
+const { findMany, listColumnsWithTypes, count } = useDatasource(computed(() => queryFromDatasource.value?.id), datasources)
 
 const columnsWithTypes = computedAsync(() => {
   if (!queryFromTable.value)
