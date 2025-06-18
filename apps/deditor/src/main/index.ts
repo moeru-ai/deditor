@@ -41,6 +41,8 @@ function createWindow(): BrowserWindow {
     height,
     show: false,
     icon,
+    minWidth: 1024,
+    minHeight: 768,
     // Preload
     webPreferences: {
       preload: join(dirname(fileURLToPath(import.meta.url)), '../preload/index.mjs'),
