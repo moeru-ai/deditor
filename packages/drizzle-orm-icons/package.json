@@ -2,7 +2,7 @@
   "name": "@deditor-app/drizzle-orm-icons",
   "type": "module",
   "version": "0.0.1-alpha1",
-  "packageManager": "pnpm@10.12.1",
+  "packageManager": "pnpm@10.12.2",
   "description": "Iconify JSON IconSet port for @drizzle-orm supported icons",
   "author": {
     "name": "Moeru AI - Project AIRI Team",

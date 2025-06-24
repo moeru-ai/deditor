@@ -1,6 +1,7 @@
 import type { PresetOrFactoryAwaitable } from 'unocss'
 
 import { createExternalPackageIconLoader } from '@iconify/utils/lib/loader/external-pkg'
+import { presetChromatic } from '@proj-airi/unocss-preset-chromatic'
 import { colorToString } from '@unocss/preset-mini/utils'
 import { createLocalFontProcessor } from '@unocss/preset-web-fonts/local'
 import { defineConfig, mergeConfigs, presetAttributify, presetIcons, presetTypography, presetWebFonts, presetWind3, transformerDirectives, transformerVariantGroup } from 'unocss'
@@ -8,23 +9,6 @@ import presetAnimations from 'unocss-preset-animations'
 import { presetScrollbar } from 'unocss-preset-scrollbar'
 import { presetShadcn } from 'unocss-preset-shadcn'
 import { parseColor } from 'unocss/preset-mini'
-
-function createColorSchemeConfig(hueOffset = 0) {
-  return {
-    DEFAULT: `oklch(62% var(--theme-colors-chroma) calc(var(--theme-colors-hue) + ${hueOffset}) / %alpha)`,
-    50: `color-mix(in srgb, oklch(95% var(--theme-colors-chroma-50) calc(var(--theme-colors-hue) + ${hueOffset}) / %alpha) 30%, oklch(100% 0 360 / %alpha))`,
-    100: `color-mix(in srgb, oklch(95% var(--theme-colors-chroma-100) calc(var(--theme-colors-hue) + ${hueOffset}) / %alpha) 80%, oklch(100% 0 360 / %alpha))`,
-    200: `oklch(90% var(--theme-colors-chroma-200) calc(var(--theme-colors-hue) + ${hueOffset}) / %alpha)`,
-    300: `oklch(85% var(--theme-colors-chroma-300) calc(var(--theme-colors-hue) + ${hueOffset}) / %alpha)`,
-    400: `oklch(74% var(--theme-colors-chroma-400) calc(var(--theme-colors-hue) + ${hueOffset}) / %alpha)`,
-    500: `oklch(62% var(--theme-colors-chroma) calc(var(--theme-colors-hue) + ${hueOffset}) / %alpha)`,
-    600: `oklch(54% var(--theme-colors-chroma-600) calc(var(--theme-colors-hue) + ${hueOffset}) / %alpha)`,
-    700: `oklch(49% var(--theme-colors-chroma-700) calc(var(--theme-colors-hue) + ${hueOffset}) / %alpha)`,
-    800: `oklch(42% var(--theme-colors-chroma-800) calc(var(--theme-colors-hue) + ${hueOffset}) / %alpha)`,
-    900: `oklch(37% var(--theme-colors-chroma-900) calc(var(--theme-colors-hue) + ${hueOffset}) / %alpha)`,
-    950: `oklch(29% var(--theme-colors-chroma-950) calc(var(--theme-colors-hue) + ${hueOffset}) / %alpha)`,
-  }
-}
 
 export function presetStoryMockHover(): PresetOrFactoryAwaitable {
   return {
@@ -123,6 +107,13 @@ export function sharedUnoConfig() {
         { color: 'neutral' },
         { componentLibrary: 'reka' },
       ),
+      presetChromatic({
+        baseHue: 295.44,
+        colors: {
+          primary: 0,
+          complementary: 180,
+        },
+      }),
     ],
     transformers: [
       transformerDirectives({
@@ -164,10 +155,6 @@ export function sharedUnoConfig() {
       }],
     ],
     theme: {
-      colors: {
-        primary: createColorSchemeConfig(),
-        complementary: createColorSchemeConfig(180),
-      },
       /**
        * https://github.com/unocss/unocss/blob/1031312057a3bea1082b7d938eb2ad640f57613a/packages-presets/preset-wind4/src/theme/animate.ts
        * https://unocss.dev/presets/wind4#transformdirectives
