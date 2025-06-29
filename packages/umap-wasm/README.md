@@ -13,35 +13,35 @@ See `index.d.ts` for the full API.
 To initialize the algorithm, use `createUMAP`:
 
 ```js
-import { createUMAP } from "umap-wasm";
+import { createUMAP } from 'umap-wasm'
 
-let count = 2000;
-let input_dim = 100;
-let output_dim = 2;
+const count = 2000
+const input_dim = 100
+const output_dim = 2
 
 // The data must be a Float32Array with count * input_dim elements.
-let data = new Float32Array(count * input_dim);
+const data = new Float32Array(count * input_dim)
 // ... fill in the data
 
-let options = {
-  metric: "cosine",
-};
+const options = {
+  metric: 'cosine',
+}
 
 // Use `createUMAP` to initialize the algorithm.
-let umap = await createUMAP(count, input_dim, output_dim, data, options);
+const umap = await createUMAP(count, input_dim, output_dim, data, options)
 ```
 
 After initialization, use the `run` method to update the embedding coordinates:
 
 ```js
 // Run the algorithm to completion.
-umap.run();
+umap.run()
 
 // Alternatively, you can run up to a given number of epochs.
 // This can be useful for animation effects.
 for (let i = 0; i < 100; i++) {
   // Run to the i-th epoch.
-  umap.run(i);
+  umap.run(i)
 }
 ```
 
@@ -49,13 +49,13 @@ At any time, you can get the current embedding by calling the `embedding` method
 
 ```js
 // The result is a Float32Array with count * output_dim elements.
-let embedding = umap.embedding();
+const embedding = umap.embedding()
 ```
 
 After you are done with the instance, use the `destroy` method to release resources.
 
 ```js
-umap.destroy();
+umap.destroy()
 ```
 
 ## Development

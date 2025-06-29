@@ -9,6 +9,7 @@ export default await antfu(
       'build/**',
       'cspell.config.yaml',
       'cspell.config.yml',
+      'packages/umap-wasm/runtime.js', // Build output
     ],
     rules: {
       'import/order': 'off',

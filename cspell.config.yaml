@@ -34,12 +34,16 @@ words:
   - attstorage
   - atttypid
   - atttypmod
+  - Brugger
   - cientos
   - Deditor
   - duckdb
+  - Emscripten
   - etcdctl
   - guiiai
   - healthcheck
+  - HNSW
+  - hnswlib
   - huggingface
   - iconify
   - indcheckxmin
@@ -67,6 +71,7 @@ words:
   - initdb
   - isready
   - kebabcase
+  - knncolle
   - Logg
   - martinbeentjes
   - matchall
@@ -74,6 +79,7 @@ words:
   - minioadmin
   - Moeru
   - mysqladmin
+  - nndescent
   - nolyfill
   - nspacl
   - nspname
@@ -163,6 +169,7 @@ words:
   - typtype
   - typtypmod
   - UMAP
+  - umappp
   - unocss
   - unplugin
   - vueuse
