@@ -189,6 +189,9 @@ importers:
       '@deditor-app/shared':
         specifier: workspace:^
         version: link:../../packages/shared
+      '@deditor-app/umap-wasm':
+        specifier: workspace:^
+        version: link:../../packages/umap-wasm
       '@iconify-json/ph':
         specifier: ^1.2.2
         version: 1.2.2
@@ -264,9 +267,6 @@ importers:
       tw-animate-css:
         specifier: ^1.3.4
         version: 1.3.4
-      umap-js:
-        specifier: ^1.4.0
-        version: 1.4.0
       unplugin-vue-macros:
         specifier: ^2.14.5
         version: 2.14.5(@vueuse/core@13.4.0(vue@3.5.17(typescript@5.8.3)))(esbuild@0.25.5)(rolldown@1.0.0-beta.15)(rollup@4.43.0)(typescript@5.8.3)(vite@6.3.5(@types/node@22.15.32)(jiti@2.4.2)(tsx@4.20.3)(yaml@2.8.0))(vue-tsc@2.2.10(typescript@5.8.3))(vue@3.5.17(typescript@5.8.3))
@@ -316,6 +316,8 @@ importers:
       drizzle-orm:
         specifier: '>=0.44.0'
         version: 0.44.2(@electric-sql/pglite@0.3.3)(mysql2@3.14.1)(postgres@3.4.7)
+
+  packages/umap-wasm: {}
 
 packages:
 
@@ -3798,9 +3800,6 @@ packages:
     resolution: {integrity: sha512-zHtQzGojZXTwZTHQqra+ETKd4Sn3vgi7uBmlPoXVWZqYvuKmtI0l/VZTjqGmJY9x88GGOaZ9+G9ES8hC4T4X8g==}
     engines: {node: '>= 12'}
 
-  is-any-array@0.1.1:
-    resolution: {integrity: sha512-qTiELO+kpTKqPgxPYbshMERlzaFu29JDnpB8s3bjg+JkxBpw29/qqSaOdKv2pCdaG92rLGeG/zG2GauX58hfoA==}
-
   is-any-array@2.0.1:
     resolution: {integrity: sha512-UtilS7hLRu++wb/WBAw9bNuP1Eg04Ivn1vERJck8zJthEvXCBEBpGR/33u/xLKWEQf95803oalHrVDptcAvFdQ==}
 
@@ -4358,9 +4357,6 @@ packages:
 
   ml-array-rescale@1.3.7:
     resolution: {integrity: sha512-48NGChTouvEo9KBctDfHC3udWnQKNKEWN0ziELvY3KG25GR5cA8K8wNVzracsqSW1QEkAXjTNx+ycgAv06/1mQ==}
-
-  ml-levenberg-marquardt@2.1.1:
-    resolution: {integrity: sha512-2+HwUqew4qFFFYujYlQtmFUrxCB4iJAPqnUYro3P831wj70eJZcANwcRaIMGUVaH9NDKzfYuA4N5u67KExmaRA==}
 
   ml-matrix@6.12.1:
     resolution: {integrity: sha512-TJ+8eOFdp+INvzR4zAuwBQJznDUfktMtOB6g/hUcGh3rcyjxbz4Te57Pgri8Q9bhSQ7Zys4IYOGhFdnlgeB6Lw==}
@@ -5274,9 +5270,6 @@ packages:
 
   ufo@1.6.1:
     resolution: {integrity: sha512-9a4/uxlTWJ4+a5i0ooc1rU7C7YOw3wT+UGqdeNNHWnOF9qcMBgLRS+4IYUqbczewFx4mLEig6gawh7X6mFlEkA==}
-
-  umap-js@1.4.0:
-    resolution: {integrity: sha512-xxpviF9wUO6Nxrx+C58SoDgea+h2PnVaRPKDelWv0HotmY6BeWeh0kAPJoumfqUkzUvowGsYfMbnsWI0b9do+A==}
 
   unconfig@7.3.2:
     resolution: {integrity: sha512-nqG5NNL2wFVGZ0NA/aCFw0oJ2pxSf1lwg4Z5ill8wd7K4KX/rQbHlwbh+bjctXL5Ly1xtzHenHGOK0b+lG6JVg==}
@@ -9966,8 +9959,6 @@ snapshots:
       jsbn: 1.1.0
       sprintf-js: 1.1.3
 
-  is-any-array@0.1.1: {}
-
   is-any-array@2.0.1: {}
 
   is-arrayish@0.3.2: {}
@@ -10656,11 +10647,6 @@ snapshots:
       is-any-array: 2.0.1
       ml-array-max: 1.2.4
       ml-array-min: 1.2.3
-
-  ml-levenberg-marquardt@2.1.1:
-    dependencies:
-      is-any-array: 0.1.1
-      ml-matrix: 6.12.1
 
   ml-matrix@6.12.1:
     dependencies:
@@ -11648,10 +11634,6 @@ snapshots:
   uc.micro@2.1.0: {}
 
   ufo@1.6.1: {}
-
-  umap-js@1.4.0:
-    dependencies:
-      ml-levenberg-marquardt: 2.1.1
 
   unconfig@7.3.2:
     dependencies:

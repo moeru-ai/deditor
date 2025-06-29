@@ -2,13 +2,14 @@ import type * as THREE from 'three'
 
 import type { DataPointStyle, ProjectionParameters } from '@/types/visualizer'
 
+import { createUMAP } from '@deditor-app/umap-wasm'
 import { PCA } from 'ml-pca'
 import { TSNE } from 'msvana-tsne'
 import { defineStore } from 'pinia'
-import { UMAP } from 'umap-js'
 import { readonly, ref } from 'vue'
 
 import { ProjectionAlgorithm } from '@/constants'
+import { selectNEpochs } from '@/utils'
 import { toVec3s } from '@/utils/three'
 
 export const useVisualizerStore = defineStore('visualizer', () => {
@@ -68,18 +69,34 @@ export const useVisualizerStore = defineStore('visualizer', () => {
     vectors.value = source.map(v => [...v])
   }
 
-  const visualize = () => {
+  const visualize = async () => {
     switch (projection.value?.type) {
       case ProjectionAlgorithm.UMAP: {
         const params = projection.value.params
-        const umap = new UMAP({
-          nComponents: params.dimensions,
-          nNeighbors: params.neighbors,
-          minDist: params.minDistance,
-        })
+
+        const umap = await createUMAP(
+          vectors.value.length, // Count
+          vectors.value[0].length, // Input dimensions
+          params.dimensions, // Output dimensions
+          Float32Array.from(vectors.value.flat()), // Data
+          {
+            n_neighbors: params.neighbors,
+            min_dist: params.minDistance,
+            // TODO: Add more UI controls for the rest of the parameters
+          },
+        )
+
+        // TODO: Make use of this epoch to animate from the common PCA to a UMAP-like projection
+        umap.run(selectNEpochs(vectors.value.length))
+
+        const embedding = umap.embedding
+        const outVectors: number[][] = []
+        for (let i = 0; i < embedding.length / params.dimensions; i++) {
+          outVectors.push([...embedding.subarray(i * params.dimensions, (i + 1) * params.dimensions)])
+        }
 
         try {
-          points.value = toVec3s(umap.fit(vectors.value as number[][]))
+          points.value = toVec3s(outVectors)
         }
         catch (error) {
           // Sometimes this can fail if the params do not fit the data
