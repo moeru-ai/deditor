@@ -36,9 +36,13 @@ words:
   - atttypmod
   - Brugger
   - cientos
+  - citext
   - Deditor
   - duckdb
+  - earthdistance
   - Emscripten
+  - enumlabel
+  - enumtypid
   - etcdctl
   - guiiai
   - healthcheck
@@ -73,6 +77,7 @@ words:
   - kebabcase
   - knncolle
   - Logg
+  - ltree
   - martinbeentjes
   - matchall
   - milvus

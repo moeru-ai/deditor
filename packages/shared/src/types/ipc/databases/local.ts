@@ -69,4 +69,19 @@ export interface PGLiteMethods {
       typeMod: number
     }[]
   }
+
+  listUserDefinedTypes: (params: {
+    databaseSessionId: string
+  }) => {
+    databaseSessionId: string
+    results: {
+      schemaName: string | null;
+      objName: string;
+      columnName: string;
+      dataType: string;
+      ordinalPosition: number;
+      isRequired: boolean;
+      description: string;
+    }[]
+  }
 }

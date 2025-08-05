@@ -60,5 +60,13 @@ export function useRemotePostgres() {
       const res = await methods('listColumnsWithTypes').call({ databaseSessionId: databaseSessionId.value!, tableName, schema })
       return res.results
     },
+    listUserDefinedTypes: async () => {
+      if (!databaseSessionId.value) {
+        throw new Error('Database session ID is not set. Please connect to a database first.')
+      }
+
+      const res = await methods('listUserDefinedTypes').call({ databaseSessionId: databaseSessionId.value! })
+      return res.results
+    },
   }
 }

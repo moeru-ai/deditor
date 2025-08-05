@@ -6,6 +6,14 @@ import { nanoid } from '@deditor-app/shared'
 import * as schema from '@deditor-app/shared-schemas'
 import { postgresInformationSchemaColumns, postgresPgCatalogPgAm, postgresPgCatalogPgAttribute, postgresPgCatalogPgClass, postgresPgCatalogPgIndex, postgresPgCatalogPgNamespace, postgresPgCatalogPgType } from '@deditor-app/shared-schemas'
 import { PGlite } from '@electric-sql/pglite'
+import { bloom } from '@electric-sql/pglite/contrib/bloom'
+import { citext } from '@electric-sql/pglite/contrib/citext'
+import { cube } from '@electric-sql/pglite/contrib/cube'
+import { earthdistance } from '@electric-sql/pglite/contrib/earthdistance'
+import { hstore } from '@electric-sql/pglite/contrib/hstore'
+import { ltree } from '@electric-sql/pglite/contrib/ltree'
+import { seg } from '@electric-sql/pglite/contrib/seg'
+import { vector } from '@electric-sql/pglite/vector'
 import { useLogg } from '@guiiai/logg'
 import { and, eq, gt, ne, not, notExists, notLike, or, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
@@ -53,7 +61,21 @@ export function registerPGLiteDatabaseDialect(window: BrowserWindow) {
       try {
         const parsedDSN = new URL(dsn)
 
-        const pgliteClient = new PGlite(decodeURIComponent(String(parsedDSN.searchParams.get('dataDir'))))
+        const pgliteClient = new PGlite(
+          decodeURIComponent(String(parsedDSN.searchParams.get('dataDir'))),
+          {
+            extensions: {
+              vector,
+              bloom,
+              citext,
+              cube,
+              earthdistance,
+              hstore,
+              ltree,
+              seg,
+            },
+          },
+        )
 
         const pgDrizzle = drizzle(pgliteClient, { schema })
         const dbSessionId = nanoid()
@@ -262,6 +284,232 @@ export function registerPGLiteDatabaseDialect(window: BrowserWindow) {
         throw err
       }
     })
+
+  defineIPCHandler<PGLiteMethods>(window, 'databaseLocalPGLite', 'listUserDefinedTypes')
+    .handle(async (_, { databaseSessionId }) => {
+      /**
+       * 2013 Approach to list user-defined types in PostgreSQL.
+       * For pgvector, this method is still valid.
+       * But I haven't touched any of the other UDT in scenarios.
+       *
+       * Thanks to
+       *
+       * postgresql - Display user-defined types and their details - Database Administrators Stack Exchange
+       * @link{https://dba.stackexchange.com/a/35510}
+       *
+       * SELECT
+       *   n.nspname AS schema,
+       *   pg_catalog.format_type ( t.oid, NULL ) AS name,
+       *   t.typname AS internal_name,
+       *   CASE
+       *     WHEN t.typrelid != 0
+       *     THEN CAST ( 'tuple' AS pg_catalog.text )
+       *     WHEN t.typlen < 0
+       *     THEN CAST ( 'var' AS pg_catalog.text )
+       *     ELSE CAST ( t.typlen AS pg_catalog.text )
+       *   END AS size,
+       *   pg_catalog.array_to_string (
+       *     ARRAY(
+       *       SELECT e.enumlabel
+       *       FROM pg_catalog.pg_enum e
+       *       WHERE e.enumtypid = t.oid
+       *       ORDER BY e.oid
+       *     ), E'\n'
+       *   ) AS elements,
+       *   -- https://www.postgresql.org/docs/9.5/functions-info.html
+       *   pg_catalog.obj_description(t.oid, 'pg_type') AS description
+       * FROM pg_catalog.pg_type t
+       * LEFT JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace
+       * WHERE
+       *   (
+       *     t.typrelid = 0
+       *     OR (
+       *       SELECT c.relkind = 'c'
+       *       FROM pg_catalog.pg_class c
+       *       WHERE c.oid = t.typrelid
+       *     )
+       *   ) AND
+       *   NOT EXISTS (
+       *     SELECT 1
+       *     FROM pg_catalog.pg_type el
+       *     WHERE
+       *       el.oid = t.typelem AND
+       *       el.typarray = t.oid
+       *   ) AND
+       *   -- Ignores the built-in types
+       *   n.nspname <> 'pg_catalog' AND
+       *   -- Ignores the built-in information_schema comes along types
+       *   n.nspname <> 'information_schema' AND
+       *   pg_catalog.pg_type_is_visible ( t.oid )
+       * ORDER BY 1, 2;
+       */
+
+      /**
+       * Thanks to
+       *
+       * postgresql - Display user-defined types and their details - Database Administrators Stack Exchange
+       * @link{https://dba.stackexchange.com/a/35510}
+       *
+       * WITH
+       *   types AS (
+       *     SELECT
+       *       n.nspname,
+       *       pg_catalog.format_type(t.oid, NULL) AS obj_name,
+       *       CASE
+       *         WHEN t.typrelid != 0 THEN CAST ( 'tuple' AS pg_catalog.text )
+       *         WHEN t.typlen < 0 THEN CAST ( 'var' AS pg_catalog.text )
+       *         ELSE CAST ( t.typlen AS pg_catalog.text )
+       *       END AS obj_type,
+       *       coalesce(pg_catalog.obj_description(t.oid, 'pg_type'), '') AS description
+       *     FROM pg_catalog.pg_type t
+       *     JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace
+       *     WHERE (
+       *       t.typrelid = 0 OR
+       *       (
+       *         SELECT c.relkind = 'c'
+       *         FROM pg_catalog.pg_class c
+       *         WHERE  c.oid = t.typrelid
+       *       )
+       *     ) AND
+       *     NOT EXISTS (
+       *       SELECT 1
+       *       FROM pg_catalog.pg_type el
+       *       WHERE
+       *         el.oid = t.typelem AND
+       *         el.typarray = t.oid
+       *       ) AND
+       *       n.nspname <> 'pg_catalog' AND
+       *       n.nspname <> 'information_schema' AND
+       *       n.nspname !~ '^pg_toast'
+       *   ),
+       *   cols AS (
+       *       SELECT
+       *         n.nspname::text AS schema_name,
+       *         pg_catalog.format_type(t.oid, NULL) AS obj_name,
+       *         a.attname::text AS column_name,
+       *         pg_catalog.format_type(a.atttypid, a.atttypmod) AS data_type,
+       *         a.attnotnull AS is_required,
+       *         a.attnum AS ordinal_position,
+       *         pg_catalog.col_description(a.attrelid, a.attnum) AS description
+       *       FROM pg_catalog.pg_attribute a
+       *       JOIN pg_catalog.pg_type t ON a.attrelid = t.typrelid
+       *       JOIN pg_catalog.pg_namespace n ON ( n.oid = t.typnamespace )
+       *       JOIN types ON ( types.nspname = n.nspname AND types.obj_name = pg_catalog.format_type(t.oid, NULL) )
+       *       WHERE
+       *         a.attnum > 0 AND
+       *         NOT a.attisdropped
+       *   )
+       *
+       * SELECT
+       *   cols.schema_name,
+       *   cols.obj_name,
+       *   cols.column_name,
+       *   cols.data_type,
+       *   cols.ordinal_position,
+       *   cols.is_required,
+       *   coalesce(cols.description, '') AS description
+       * FROM cols
+       * ORDER BY cols.schema_name, cols.obj_name, cols.ordinal_position;
+       */
+      if (!databaseSessions.has(databaseSessionId)) {
+        throw new Error('Database session ID not found in session map, please connect to the database first.')
+      }
+
+      try {
+        const dbSession = databaseSessions.get(databaseSessionId)!
+        const typesSubQuery = dbSession.drizzle
+          .$with('types')
+          .as(
+            dbSession.drizzle.select({
+              nspname: postgresPgCatalogPgNamespace.nspname,
+              objName: sql<string>`${sql.identifier('pg_catalog')}.${sql.identifier('format_type')}(${postgresPgCatalogPgType.oid}, NULL)`.as('obj_name'),
+              objType: sql<string>`
+              CASE
+                WHEN ${postgresPgCatalogPgType.typrelid} != 0 THEN CAST('tuple' AS pg_catalog.text)
+                WHEN ${postgresPgCatalogPgType.typlen} < 0 THEN CAST('var' AS pg_catalog.text)
+                ELSE CAST(${postgresPgCatalogPgType.typlen} AS pg_catalog.text)
+              END`.as('obj_type'),
+              description: sql<string>`${sql.identifier('pg_catalog')}.${sql.identifier('obj_description')}(${postgresPgCatalogPgType.oid}, 'pg_type')`.as('description'),
+            })
+              .from(postgresPgCatalogPgType)
+              .leftJoin(postgresPgCatalogPgNamespace, eq(postgresPgCatalogPgType.typnamespace, postgresPgCatalogPgNamespace.oid))
+              .where(
+                and(
+                  or(
+                    eq(postgresPgCatalogPgType.typrelid, 0),
+                    dbSession.drizzle
+                      .select({ c: eq(postgresPgCatalogPgClass.relkind, 'c') })
+                      .from(postgresPgCatalogPgClass)
+                      .where(eq(postgresPgCatalogPgClass.oid, postgresPgCatalogPgType.typrelid)),
+                  ),
+                  notExists(
+                    dbSession.drizzle
+                      .select({
+                        1: sql`1`,
+                      })
+                      .from(postgresPgCatalogPgType)
+                      .where(
+                        and(
+                          eq(postgresPgCatalogPgType.oid, postgresPgCatalogPgType.typelem),
+                          eq(postgresPgCatalogPgType.typarray, postgresPgCatalogPgType.oid),
+                        ),
+                      ),
+                  ),
+                  ne(postgresPgCatalogPgNamespace.nspname, 'pg_catalog'),
+                  ne(postgresPgCatalogPgNamespace.nspname, 'information_schema'),
+                  notLike(postgresPgCatalogPgNamespace.nspname, 'pg_toast%'),
+                ),
+              ),
+          )
+
+        const colsSubQuery = dbSession.drizzle
+          .$with('cols')
+          .as(
+            dbSession.drizzle.select({
+              schemaName: postgresPgCatalogPgNamespace.nspname,
+              objName: sql<string>`${sql.identifier('pg_catalog')}.${sql.identifier('format_type')}(${postgresPgCatalogPgType.oid}, NULL)`.as('obj_name'),
+              columnName: postgresPgCatalogPgAttribute.attname,
+              dataType: sql<string>`${sql.identifier('pg_catalog')}.${sql.identifier('format_type')}(${postgresPgCatalogPgAttribute.atttypid}, ${postgresPgCatalogPgAttribute.atttypmod})`.as('data_type'),
+              isRequired: postgresPgCatalogPgAttribute.attnotnull,
+              ordinalPosition: postgresPgCatalogPgAttribute.attnum,
+              description: sql<string>`${sql.identifier('pg_catalog')}.${sql.identifier('col_description')}(${postgresPgCatalogPgAttribute.attrelid}, ${postgresPgCatalogPgAttribute.attnum})`.as('description'),
+            })
+              .from(postgresPgCatalogPgAttribute)
+              .leftJoin(postgresPgCatalogPgType, eq(postgresPgCatalogPgAttribute.atttypid, postgresPgCatalogPgType.oid))
+              .leftJoin(postgresPgCatalogPgNamespace, eq(postgresPgCatalogPgType.typnamespace, postgresPgCatalogPgNamespace.oid))
+              .leftJoin(sql`types`, and(
+                eq(typesSubQuery.nspname, postgresPgCatalogPgNamespace.nspname),
+                eq(typesSubQuery.objName, sql<string>`${sql.identifier('pg_catalog')}.${sql.identifier('format_type')}(${postgresPgCatalogPgType.oid}, NULL)`),
+              ))
+              .where(
+                and(
+                  gt(postgresPgCatalogPgAttribute.attnum, 0),
+                  eq(postgresPgCatalogPgAttribute.attisdropped, false),
+                ),
+              ),
+          )
+
+        const results = await dbSession.drizzle
+          .with(typesSubQuery, colsSubQuery)
+          .select({
+            schemaName: colsSubQuery.schemaName,
+            objName: colsSubQuery.objName,
+            columnName: colsSubQuery.columnName,
+            dataType: colsSubQuery.dataType,
+            ordinalPosition: colsSubQuery.ordinalPosition,
+            isRequired: colsSubQuery.isRequired,
+            description: sql<string>`coalesce(${colsSubQuery.description}, '')`.as('description'),
+          })
+          .from(colsSubQuery)
+          .orderBy(colsSubQuery.schemaName, colsSubQuery.objName, colsSubQuery.ordinalPosition)
+
+        return {
+          databaseSessionId,
+          results,
+        }
+      }
+      catch (err) {
+        log.withError(err).withFields({ databaseSessionId }).error('failed to query local PGLite database to list user-defined types')
         throw err
       }
     })

@@ -14,6 +14,7 @@ import {
   DATASOURCE_DRIVER_CLIENT,
   DATASOURCE_DRIVER_QUERY_BUILDER,
   DATASOURCE_DRIVER_SQL_DIALECT,
+  DatasourceDriverEnum,
   isCloudflareD2Session,
   isDuckDBWasmSession,
   isMySQLSession,
@@ -32,6 +33,13 @@ export type Datasource = LibDatasource<keyof DatasourceDriverMap> & {
 export interface DatasourceDriverClient<D extends DatasourceDriver> {
   driver: D
   session: DatasourceDriverMap[D]
+}
+
+class NotSupportedError extends Error {
+  constructor(driver: DatasourceDriver) {
+    super(`Driver ${driver} is not supported yet`)
+    this.name = 'NotSupportedError'
+  }
 }
 
 export const useDatasourcesStore = defineStore('datasources', () => {
@@ -91,28 +99,28 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
       return session.session.listTables()
     }
     else if (isMySQLSession(session)) {
-      throw new Error('MySQL is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else if (isPGLiteSession(session)) {
       return session.session.listTables()
     }
     else if (isDuckDBWasmSession(session)) {
-      throw new Error('DuckDBWasm is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else if (isCloudflareD2Session(session)) {
-      throw new Error('Cloudflare D2 is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else if (isSQLiteSession(session)) {
-      throw new Error('SQLite is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else if (isSupabaseSession(session)) {
-      throw new Error('Supabase is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else if (isNeonSession(session)) {
-      throw new Error('Neon is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else {
-      throw new Error(`Unsupported driver: ${driver}`)
+      throw new NotSupportedError(driver)
     }
   }
 
@@ -126,28 +134,28 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
       return session.session.listColumns(table, schema)
     }
     else if (isMySQLSession(session)) {
-      throw new Error('MySQL is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else if (isPGLiteSession(session)) {
       return session.session.listColumns(table, schema)
     }
     else if (isDuckDBWasmSession(session)) {
-      throw new Error('DuckDBWasm is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else if (isCloudflareD2Session(session)) {
-      throw new Error('Cloudflare D2 is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else if (isSQLiteSession(session)) {
-      throw new Error('SQLite is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else if (isSupabaseSession(session)) {
-      throw new Error('Supabase is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else if (isNeonSession(session)) {
-      throw new Error('Neon is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else {
-      throw new Error(`Unsupported driver: ${driver}`)
+      throw new NotSupportedError(driver)
     }
   }
 
@@ -161,28 +169,28 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
       return session.session.listColumnsWithTypes(table, schema)
     }
     else if (isMySQLSession(session)) {
-      throw new Error('MySQL is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else if (isPGLiteSession(session)) {
-      throw new Error('PGLite is not supported yet')
+      return session.session.listColumnsWithTypes(table, schema)
     }
     else if (isDuckDBWasmSession(session)) {
-      throw new Error('DuckDBWasm is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else if (isCloudflareD2Session(session)) {
-      throw new Error('Cloudflare D2 is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else if (isSQLiteSession(session)) {
-      throw new Error('SQLite is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else if (isSupabaseSession(session)) {
-      throw new Error('Supabase is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else if (isNeonSession(session)) {
-      throw new Error('Neon is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else {
-      throw new Error(`Unsupported driver: ${driver}`)
+      throw new NotSupportedError(driver)
     }
   }
 
@@ -196,33 +204,68 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
       return session.session.listIndexes(table, schema)
     }
     else if (isMySQLSession(session)) {
-      throw new Error('MySQL is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else if (isPGLiteSession(session)) {
-      throw new Error('PGLite is not supported yet')
+      return session.session.listIndexes(table, schema)
     }
     else if (isDuckDBWasmSession(session)) {
-      throw new Error('DuckDBWasm is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else if (isCloudflareD2Session(session)) {
-      throw new Error('Cloudflare D2 is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else if (isSQLiteSession(session)) {
-      throw new Error('SQLite is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else if (isSupabaseSession(session)) {
-      throw new Error('Supabase is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else if (isNeonSession(session)) {
-      throw new Error('Neon is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else {
-      throw new Error(`Unsupported driver: ${driver}`)
+      throw new NotSupportedError(driver)
     }
   }
 
   async function listIndexesByParameters<D extends DatasourceDriver>(driver: D, parameters: ConnectionThroughParameters, schema: string, table: string) {
     return listIndexes<D>(driver, toDSN(driver, parameters, defaultParamsFromDriver(driver)), schema, table)
+  }
+
+  async function listPostgresUserDefinedTypes<D extends DatasourceDriver>(driver: D, dsn: string) {
+    const session = await connect(driver, dsn)
+    if (isPostgresSession(session)) {
+      return session.session.listUserDefinedTypes()
+    }
+    else if (isMySQLSession(session)) {
+      return []
+    }
+    else if (isPGLiteSession(session)) {
+      return session.session.listUserDefinedTypes()
+    }
+    else if (isDuckDBWasmSession(session)) {
+      return []
+    }
+    else if (isCloudflareD2Session(session)) {
+      return []
+    }
+    else if (isSQLiteSession(session)) {
+      return []
+    }
+    else if (isSupabaseSession(session)) {
+      return []
+    }
+    else if (isNeonSession(session)) {
+      return []
+    }
+    else {
+      return []
+    }
+  }
+
+  async function listPostgresUserDefinedTypesByParameters<D extends DatasourceDriver>(driver: D, parameters: ConnectionThroughParameters) {
+    return listPostgresUserDefinedTypes<D>(driver, toDSN(driver, parameters, defaultParamsFromDriver(driver)))
   }
 
   async function execute<T, D extends DatasourceDriver = DatasourceDriver>(driver: D, dsn: string, query: string, parameters?: unknown[]): Promise<T[]> {
@@ -231,28 +274,28 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
       return session.session.execute<T>(query, parameters)
     }
     else if (isMySQLSession(session)) {
-      throw new Error('MySQL is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else if (isPGLiteSession(session)) {
       return session.session.execute<T>(query, parameters)
     }
     else if (isDuckDBWasmSession(session)) {
-      throw new Error('DuckDBWasm is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else if (isCloudflareD2Session(session)) {
-      throw new Error('Cloudflare D2 is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else if (isSQLiteSession(session)) {
-      throw new Error('SQLite is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else if (isSupabaseSession(session)) {
-      throw new Error('Supabase is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else if (isNeonSession(session)) {
-      throw new Error('Neon is not supported yet')
+      throw new NotSupportedError(driver)
     }
     else {
-      throw new Error(`Unsupported driver: ${driver}`)
+      throw new NotSupportedError(driver)
     }
   }
 
@@ -281,6 +324,8 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
     listColumnsWithTypesByParameters,
     listIndexes,
     listIndexesByParameters,
+    listPostgresUserDefinedTypes,
+    listPostgresUserDefinedTypesByParameters,
     execute,
     executeByParameters,
     executeSQL,
@@ -386,19 +431,42 @@ export function useDatasource(
     const groupByColumns: string[] = []
 
     const columns = await listColumns(table)
+    if (datasource.value?.driver === DatasourceDriverEnum.Postgres || datasource.value?.driver === DatasourceDriverEnum.PGLite) {
+      const udtColumns = columns.filter(column => column.data_type === 'USER-DEFINED')
+      if (udtColumns.length > 0) {
+        if (!(!datasource.value || !datasource.value.driver || !datasource.value)) {
+          const udtTypes = await datasourceSessionsStore.listPostgresUserDefinedTypesByParameters(datasource.value.driver, datasource.value as ConnectionThroughParameters)
+          if (udtTypes.length > 0) {
+            const vectorTypedColumns = udtColumns.filter(column => column.udt_name === 'vector' || column.udt_name === 'vectors')
+            const matchedUdtDefinition = udtTypes.filter(udt => vectorTypedColumns.some(column => column.udt_name === udt.dataType))
+            if (matchedUdtDefinition.length > 0) {
+              // https://github.com/tensorchord/pgvecto.rs
+              if (matchedUdtDefinition.find(def => def.dataType === 'vectors')) {
+                await datasourceSessionsStore.executeByParameters(datasource.value.driver, datasource.value as ConnectionThroughParameters, 'CREATE EXTENSION IF NOT EXISTS vectors;')
+              }
+              // https://github.com/pgvector/pgvector
+              if (matchedUdtDefinition.find(def => def.dataType === 'vector')) {
+                await datasourceSessionsStore.executeByParameters(datasource.value.driver, datasource.value as ConnectionThroughParameters, 'CREATE EXTENSION IF NOT EXISTS vector;')
+              }
+            }
+          }
+        }
+      }
+    }
+
     const foundIdColumn = columns.find(column => column.column_name === 'id')
     const indexes = await listIndexes(table)
     const foundPrimary = indexes.find(index => index.isPrimaryKey)
 
     const sortedIdOrPrimaryColumn = sortedColumns.some((column) => {
       return column.id === foundIdColumn?.column_name
-        || foundPrimary?.columns.includes(column.id)
+        || foundPrimary?.columns?.includes(column.id)
     })
     if (!sortedIdOrPrimaryColumn) {
       if (foundIdColumn != null && foundIdColumn.column_name != null) {
         groupByColumns.push(foundIdColumn.column_name)
       }
-      else if (foundPrimary != null && foundPrimary.columns.length) {
+      else if (foundPrimary != null && foundPrimary?.columns?.length) {
         groupByColumns.push(foundPrimary.columns[0])
       }
     }
