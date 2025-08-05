@@ -16,6 +16,7 @@ const id = computed(() => route.params.id)
 
 const results = ref<Record<string, unknown>[]>([])
 const total = ref(0)
+const error = ref<unknown>()
 
 const selectedRow = ref<Record<string, unknown>>()
 
@@ -54,22 +55,30 @@ const datasourceTables = computedAsync(async () => {
 })
 
 async function loadTableData() {
+  error.value = undefined
+
   if (!datasourceTable.value) {
     results.value = []
     return
   }
 
-  results.value = await datasource.findMany(
-    datasourceTable.value,
-    sortedColumns.value,
-    pageSize.value,
-    page.value,
-  )
+  try {
+    results.value = await datasource.findMany(
+      datasourceTable.value,
+      sortedColumns.value,
+      pageSize.value,
+      page.value,
+    )
 
-  total.value = await datasource.count(
-    datasourceTable.value,
-    sortedColumns.value,
-  )
+    total.value = await datasource.count(
+      datasourceTable.value,
+      sortedColumns.value,
+    )
+  }
+  catch (err) {
+    error.value = err
+    console.error('Error loading table data:', err)
+  }
 }
 
 watch([id, datasourceTable, datasourceTables], async () => {
@@ -124,6 +133,7 @@ function handleUpdateData(rowIndex: number, columnId: string, value: unknown) {
 
 function handleSortingChange(newSortedColumns: { id: string, desc: boolean }[]) {
   sortedColumns.value = newSortedColumns
+  error.value = undefined
 
   if (!datasourceTable.value) {
     results.value = []
@@ -135,7 +145,10 @@ function handleSortingChange(newSortedColumns: { id: string, desc: boolean }[]) 
     sortedColumns.value,
     pageSize.value,
     page.value,
-  ).then(res => results.value = res)
+  ).then(res => results.value = res).catch((err) => {
+    error.value = err
+    console.error('Error sorting data:', err)
+  })
 }
 </script>
 
@@ -150,12 +163,35 @@ function handleSortingChange(newSortedColumns: { id: string, desc: boolean }[]) 
       </RouterLink>
     </div>
     <div flex flex-col gap-2 overflow-y-scroll>
-      <div mb-10>
+      <div>
         <select v-model="datasourceTable" class="focus:outline-none" w-full rounded-lg px-2 py-1 font-mono>
           <option v-for="(table, index) of datasourceTables" :key="index" :value="table" font-mono>
             {{ fullyQualifiedTableName(table) }}
           </option>
         </select>
+      </div>
+      <div v-if="error" bg="red-500/10" flex flex-col gap-3 rounded-lg px-5 py-4 text-sm>
+        <div text-base>
+          Encountered an error while loading data:
+        </div>
+        <div op-80>
+          <template v-if="typeof error === 'object'">
+            <div v-if="'stack' in error && error.stack" whitespace-pre-wrap font-mono>
+              {{ error.stack }}
+            </div>
+            <div v-else-if="'message' in error && error.message" whitespace-pre-wrap font-mono>
+              {{ error.message }}
+            </div>
+          </template>
+          <template v-if="typeof error === 'object'">
+            <div v-if="'cause' in error && error.cause && typeof error.cause === 'object' && 'stack' in error.cause && error.cause.stack" whitespace-pre-wrap font-mono>
+              {{ error.cause.stack }}
+            </div>
+            <div v-else-if="'cause' in error && error.cause" font-mono>
+              {{ error.cause }}
+            </div>
+          </template>
+        </div>
       </div>
       <DataTable
         :data="results"
