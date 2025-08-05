@@ -35,4 +35,38 @@ export interface PGLiteMethods {
     schema: string
     results: typeof postgresInformationSchemaColumns.$inferSelect[]
   }
+
+  listIndexes: (params: {
+    databaseSessionId: string
+    tableName: string
+    schema?: string
+  }) => {
+    databaseSessionId: string
+    tableName: string
+    schema: string
+    results: {
+      indexName: string
+      indexAlgorithm: string
+      indexDefinition: string
+      comment: string
+      isPrimaryKey: boolean
+      isUniqueConstraint: boolean
+      columns: string[]
+    }[]
+  }
+
+  listColumnsWithTypes: (params: {
+    databaseSessionId: string
+    tableName: string
+    schema?: string
+  }) => {
+    databaseSessionId: string
+    tableName: string
+    schema: string
+    results: {
+      columnName: string
+      typeName: string
+      typeMod: number
+    }[]
+  }
 }
