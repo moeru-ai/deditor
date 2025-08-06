@@ -1,7 +1,7 @@
 {
   "name": "@deditor-app/deditor",
   "type": "module",
-  "version": "0.0.1-alpha1",
+  "version": "0.0.1-alpha.2",
   "private": true,
   "description": "Opinionated Datasets Editor for managing, labelling, processing massive scale of data and be able to visualize them.",
   "author": {
