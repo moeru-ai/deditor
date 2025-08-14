@@ -437,16 +437,21 @@ export function useDatasource(
         if (!(!datasource.value || !datasource.value.driver || !datasource.value)) {
           const udtTypes = await datasourceSessionsStore.listPostgresUserDefinedTypesByParameters(datasource.value.driver, datasource.value as ConnectionThroughParameters)
           if (udtTypes.length > 0) {
+            // TODO: we might have to read the source code to understand which UDT types and schema are used
+            // for any of the pgvector extensions.
             const vectorTypedColumns = udtColumns.filter(column => column.udt_name === 'vector' || column.udt_name === 'vectors')
             const matchedUdtDefinition = udtTypes.filter(udt => vectorTypedColumns.some(column => column.udt_name === udt.dataType))
             if (matchedUdtDefinition.length > 0) {
-              // https://github.com/tensorchord/pgvecto.rs
               if (matchedUdtDefinition.find(def => def.dataType === 'vectors')) {
-                await datasourceSessionsStore.executeByParameters(datasource.value.driver, datasource.value as ConnectionThroughParameters, 'CREATE EXTENSION IF NOT EXISTS vectors;')
-              }
-              // https://github.com/pgvector/pgvector
-              if (matchedUdtDefinition.find(def => def.dataType === 'vector')) {
-                await datasourceSessionsStore.executeByParameters(datasource.value.driver, datasource.value as ConnectionThroughParameters, 'CREATE EXTENSION IF NOT EXISTS vector;')
+                try {
+                  // https://github.com/tensorchord/pgvecto.rs
+                  await datasourceSessionsStore.executeByParameters(datasource.value.driver, datasource.value as ConnectionThroughParameters, 'CREATE EXTENSION IF NOT EXISTS vectors;')
+                  // https://github.com/pgvector/pgvector
+                  await datasourceSessionsStore.executeByParameters(datasource.value.driver, datasource.value as ConnectionThroughParameters, 'CREATE EXTENSION IF NOT EXISTS vector;')
+                }
+                catch (err) {
+                  console.warn('detected column with vector type', vectorTypedColumns, 'matched with UDT definition', matchedUdtDefinition, 'but failed to create extension', err)
+                }
               }
             }
           }
