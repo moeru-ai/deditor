@@ -36,7 +36,7 @@ const tables = computedAsync(async () => {
     return (
       await datasourceSessionsStore
         .listTablesByParameters(datasource.value.driver, datasource.value as ConnectionThroughParameters))
-      .map<DatasourceTable>(t => ({ schema: t.table_schema, table: t.table_name }))
+      .map<DatasourceTable>(t => ({ schema: t.schema, table: t.tableName }))
       .filter(filterPgTables)
   }
   catch (e) {

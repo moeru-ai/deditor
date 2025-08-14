@@ -75,13 +75,13 @@ export interface PostgresMethods {
   }) => {
     databaseSessionId: string
     results: {
-      schemaName: string | null;
-      objName: string;
-      columnName: string;
-      dataType: string;
-      ordinalPosition: number;
-      isRequired: boolean;
-      description: string;
+      schemaName: string | null
+      objName: string
+      columnName: string
+      dataType: string
+      ordinalPosition: number
+      isRequired: boolean
+      description: string
     }[]
   }
 }
