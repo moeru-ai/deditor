@@ -1,6 +1,8 @@
 import { PgDialect, QueryBuilder as PgQueryBuilder } from 'drizzle-orm/pg-core'
+import { SQLiteAsyncDialect, QueryBuilder as SqliteQueryBuilder } from 'drizzle-orm/sqlite-core'
 
 import { useLocalPGLite } from '@/composables/ipc/databases/local/pglite-fs'
+import { useLocalSQLite } from '@/composables/ipc/databases/local/sqlite-fs'
 import { useRemoteMySQL } from '@/composables/ipc/databases/remote/mysql'
 import { useRemotePostgres } from '@/composables/ipc/databases/remote/postgres'
 
@@ -16,6 +18,8 @@ export enum DatasourceDriverEnum {
   Parquet = 'parquet',
   JSONL = 'jsonl',
 }
+
+export type DatasourceDriver = keyof DatasourceDriverMap
 
 export const DATASOURCE_DRIVER_NAMES = {
   [DatasourceDriverEnum.Postgres]: 'Postgres',
@@ -51,12 +55,75 @@ export interface DatasourceDriverMap {
   [DatasourceDriverEnum.DuckDBWasm]: never
   [DatasourceDriverEnum.CloudflareD2]: never
   [DatasourceDriverEnum.MySQL]: ReturnType<typeof useRemoteMySQL>
-  [DatasourceDriverEnum.SQLite]: never
+  [DatasourceDriverEnum.SQLite]: ReturnType<typeof useLocalSQLite>
   [DatasourceDriverEnum.Parquet]: never
   [DatasourceDriverEnum.JSONL]: never
 }
 
-export type DatasourceDriver = keyof DatasourceDriverMap
+export interface DatasourceDriverSQLDialectMap {
+  [DatasourceDriverEnum.Postgres]: PgDialect
+  [DatasourceDriverEnum.Supabase]: never
+  [DatasourceDriverEnum.Neon]: never
+  [DatasourceDriverEnum.PGLite]: PgDialect // PGLite uses the same dialect
+  [DatasourceDriverEnum.DuckDBWasm]: PgDialect // DuckDBWasm uses a similar dialect to Postgres
+  [DatasourceDriverEnum.CloudflareD2]: never
+  [DatasourceDriverEnum.MySQL]: never
+  [DatasourceDriverEnum.SQLite]: SQLiteAsyncDialect
+  [DatasourceDriverEnum.Parquet]: never
+  [DatasourceDriverEnum.JSONL]: never
+}
+
+export interface DatasourceDriverQueryBuilderMap {
+  [DatasourceDriverEnum.Postgres]: PgQueryBuilder
+  [DatasourceDriverEnum.Supabase]: never
+  [DatasourceDriverEnum.Neon]: never
+  [DatasourceDriverEnum.PGLite]: PgQueryBuilder // PGLite uses the same query builder
+  [DatasourceDriverEnum.DuckDBWasm]: PgQueryBuilder // DuckDBWasm uses a similar query builder to Postgres
+  [DatasourceDriverEnum.CloudflareD2]: never
+  [DatasourceDriverEnum.MySQL]: never
+  [DatasourceDriverEnum.SQLite]: SqliteQueryBuilder
+  [DatasourceDriverEnum.Parquet]: never
+  [DatasourceDriverEnum.JSONL]: never
+}
+
+export const DATASOURCE_DRIVER_CLIENT = {
+  [DatasourceDriverEnum.Postgres]: useRemotePostgres,
+  [DatasourceDriverEnum.Supabase]: () => { throw new Error('Supabase is not supported yet') },
+  [DatasourceDriverEnum.Neon]: () => { throw new Error('Neon is not supported yet') },
+  [DatasourceDriverEnum.PGLite]: useLocalPGLite,
+  [DatasourceDriverEnum.DuckDBWasm]: () => { throw new Error('DuckDBWasm is not supported yet') },
+  [DatasourceDriverEnum.CloudflareD2]: () => { throw new Error('Cloudflare D2 is not supported yet') },
+  [DatasourceDriverEnum.MySQL]: useRemoteMySQL,
+  [DatasourceDriverEnum.SQLite]: useLocalSQLite,
+  [DatasourceDriverEnum.Parquet]: () => { throw new Error('Parquet is not supported yet') },
+  [DatasourceDriverEnum.JSONL]: () => { throw new Error('JSONL is not supported yet') },
+} as const satisfies Record<DatasourceDriver, () => DatasourceDriverMap[DatasourceDriver]>
+
+export const DATASOURCE_DRIVER_SQL_DIALECT = {
+  [DatasourceDriverEnum.Postgres]: () => new PgDialect(),
+  [DatasourceDriverEnum.Supabase]: () => { throw new Error('Supabase is not supported yet') },
+  [DatasourceDriverEnum.Neon]: () => { throw new Error('Neon is not supported yet') },
+  [DatasourceDriverEnum.PGLite]: () => new PgDialect(), // PGLite uses the same dialect as Postgres
+  [DatasourceDriverEnum.DuckDBWasm]: () => new PgDialect(), // DuckDBWasm uses a similar dialect to Postgres
+  [DatasourceDriverEnum.CloudflareD2]: () => { throw new Error('Cloudflare D2 is not supported yet') },
+  [DatasourceDriverEnum.MySQL]: () => { throw new Error('MySQL is not supported yet') },
+  [DatasourceDriverEnum.SQLite]: () => new SQLiteAsyncDialect(),
+  [DatasourceDriverEnum.Parquet]: () => { throw new Error('Parquet is not supported yet') },
+  [DatasourceDriverEnum.JSONL]: () => { throw new Error('JSONL is not supported yet') },
+} as const satisfies Record<DatasourceDriver, () => DatasourceDriverSQLDialectMap[DatasourceDriver]>
+
+export const DATASOURCE_DRIVER_QUERY_BUILDER = {
+  [DatasourceDriverEnum.Postgres]: () => new PgQueryBuilder(),
+  [DatasourceDriverEnum.Supabase]: () => { throw new Error('Supabase is not supported yet') },
+  [DatasourceDriverEnum.Neon]: () => { throw new Error('Neon is not supported yet') },
+  [DatasourceDriverEnum.PGLite]: () => new PgQueryBuilder(), // PGLite uses the same query builder as Postgres
+  [DatasourceDriverEnum.DuckDBWasm]: () => new PgQueryBuilder(), // DuckDBWasm uses a similar query builder to Postgres
+  [DatasourceDriverEnum.CloudflareD2]: () => { throw new Error('Cloudflare D2 is not supported yet') },
+  [DatasourceDriverEnum.MySQL]: () => { throw new Error('MySQL is not supported yet') },
+  [DatasourceDriverEnum.SQLite]: () => new SqliteQueryBuilder(),
+  [DatasourceDriverEnum.Parquet]: () => { throw new Error('Parquet is not supported yet') },
+  [DatasourceDriverEnum.JSONL]: () => { throw new Error('JSONL is not supported yet') },
+} as const satisfies Record<DatasourceDriver, () => DatasourceDriverQueryBuilderMap[DatasourceDriver]>
 
 export interface DatasourceDriverClient<D extends DatasourceDriver> {
   driver: D
@@ -94,42 +161,3 @@ export function isSupabaseSession(session: DatasourceDriverClient<DatasourceDriv
 export function isNeonSession(session: DatasourceDriverClient<DatasourceDriver>): session is DatasourceDriverClient<DatasourceDriverEnum.Neon> {
   return session.driver === DatasourceDriverEnum.Neon
 }
-
-export const DATASOURCE_DRIVER_CLIENT = {
-  [DatasourceDriverEnum.Postgres]: useRemotePostgres,
-  [DatasourceDriverEnum.Supabase]: () => { throw new Error('Supabase is not supported yet') },
-  [DatasourceDriverEnum.Neon]: () => { throw new Error('Neon is not supported yet') },
-  [DatasourceDriverEnum.PGLite]: useLocalPGLite,
-  [DatasourceDriverEnum.DuckDBWasm]: () => { throw new Error('DuckDBWasm is not supported yet') },
-  [DatasourceDriverEnum.CloudflareD2]: () => { throw new Error('Cloudflare D2 is not supported yet') },
-  [DatasourceDriverEnum.MySQL]: useRemoteMySQL,
-  [DatasourceDriverEnum.SQLite]: () => { throw new Error('SQLite is not supported yet') },
-  [DatasourceDriverEnum.Parquet]: () => { throw new Error('Parquet is not supported yet') },
-  [DatasourceDriverEnum.JSONL]: () => { throw new Error('JSONL is not supported yet') },
-} as const satisfies Record<DatasourceDriver, () => DatasourceDriverMap[DatasourceDriver]>
-
-export const DATASOURCE_DRIVER_SQL_DIALECT = {
-  [DatasourceDriverEnum.Postgres]: () => new PgDialect(),
-  [DatasourceDriverEnum.Supabase]: () => { throw new Error('Supabase is not supported yet') },
-  [DatasourceDriverEnum.Neon]: () => { throw new Error('Neon is not supported yet') },
-  [DatasourceDriverEnum.PGLite]: () => new PgDialect(), // PGLite uses the same dialect as Postgres
-  [DatasourceDriverEnum.DuckDBWasm]: () => new PgDialect(), // DuckDBWasm uses a similar dialect to Postgres
-  [DatasourceDriverEnum.CloudflareD2]: () => { throw new Error('Cloudflare D2 is not supported yet') },
-  [DatasourceDriverEnum.MySQL]: () => { throw new Error('MySQL is not supported yet') },
-  [DatasourceDriverEnum.SQLite]: () => { throw new Error('SQLite is not supported yet') },
-  [DatasourceDriverEnum.Parquet]: () => { throw new Error('Parquet is not supported yet') },
-  [DatasourceDriverEnum.JSONL]: () => { throw new Error('JSONL is not supported yet') },
-} as const satisfies Record<DatasourceDriver, () => PgDialect>
-
-export const DATASOURCE_DRIVER_QUERY_BUILDER = {
-  [DatasourceDriverEnum.Postgres]: () => new PgQueryBuilder(),
-  [DatasourceDriverEnum.Supabase]: () => { throw new Error('Supabase is not supported yet') },
-  [DatasourceDriverEnum.Neon]: () => { throw new Error('Neon is not supported yet') },
-  [DatasourceDriverEnum.PGLite]: () => new PgQueryBuilder(), // PGLite uses the same query builder as Postgres
-  [DatasourceDriverEnum.DuckDBWasm]: () => new PgQueryBuilder(), // DuckDBWasm uses a similar query builder to Postgres
-  [DatasourceDriverEnum.CloudflareD2]: () => { throw new Error('Cloudflare D2 is not supported yet') },
-  [DatasourceDriverEnum.MySQL]: () => { throw new Error('MySQL is not supported yet') },
-  [DatasourceDriverEnum.SQLite]: () => { throw new Error('SQLite is not supported yet') },
-  [DatasourceDriverEnum.Parquet]: () => { throw new Error('Parquet is not supported yet') },
-  [DatasourceDriverEnum.JSONL]: () => { throw new Error('JSONL is not supported yet') },
-} as const satisfies Record<DatasourceDriver, () => PgQueryBuilder>

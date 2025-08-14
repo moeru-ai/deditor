@@ -10,6 +10,8 @@ export function defaultParamsFromDriver(driver: string): DSNDefaultParams {
       return mysqlDefaultParams()
     case DatasourceDriverEnum.PGLite:
       return pgliteDefaultParams()
+    case DatasourceDriverEnum.SQLite:
+      return sqliteDefaultParams()
     default:
       throw new Error(`Unsupported driver: ${driver}`)
   }
@@ -47,6 +49,18 @@ export function pgliteDefaultParams(): DSNDefaultParams {
   return {
     params: {
       driver: DatasourceDriverEnum.PGLite,
+      host: '127.0.0.1',
+      password: '',
+      port: 0,
+      user: '',
+    },
+  }
+}
+
+export function sqliteDefaultParams(): DSNDefaultParams {
+  return {
+    params: {
+      driver: DatasourceDriverEnum.SQLite,
       host: '127.0.0.1',
       password: '',
       port: 0,

@@ -70,7 +70,7 @@ export function queryBuilderFromDriver(driver: DatasourceDriver) {
 export const useDatasourceSessionsStore = defineStore('datasource-sessions', () => {
   const sessions = ref<Map<string, Array<DatasourceDriverClient<DatasourceDriver>>>>(new Map())
 
-  async function connect<D extends DatasourceDriver>(driver: D, dsn: string, options?: { sqawn?: boolean }): Promise<DatasourceDriverClient<D>> {
+  async function connect<D extends DatasourceDriver>(driver: D, dsn: string, options?: { spawn?: boolean }): Promise<DatasourceDriverClient<D>> {
     if (!sessions.value.has(dsn)) {
       const client = clientFromDriver(driver)()
       await client.connect(dsn)
@@ -79,7 +79,7 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
     }
 
     const connectedSessions = sessions.value.get(dsn)!
-    if ((connectedSessions.length >= 1 && options?.sqawn)) {
+    if ((connectedSessions.length >= 1 && options?.spawn)) {
       const client = clientFromDriver(driver)()
       await client.connect(dsn)
       sessions.value.set(dsn, [...sessions.value.get(dsn)!, { driver, session: client }])
@@ -111,7 +111,7 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
       throw new NotSupportedError(driver)
     }
     else if (isSQLiteSession(session)) {
-      throw new NotSupportedError(driver)
+      return session.session.listTables()
     }
     else if (isSupabaseSession(session)) {
       throw new NotSupportedError(driver)
@@ -286,7 +286,7 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
       throw new NotSupportedError(driver)
     }
     else if (isSQLiteSession(session)) {
-      throw new NotSupportedError(driver)
+      return session.session.execute<T>(query, parameters)
     }
     else if (isSupabaseSession(session)) {
       throw new NotSupportedError(driver)

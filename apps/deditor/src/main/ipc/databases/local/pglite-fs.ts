@@ -4,7 +4,15 @@ import type { BrowserWindow } from 'electron'
 
 import { nanoid } from '@deditor-app/shared'
 import * as schema from '@deditor-app/shared-schemas'
-import { postgresInformationSchemaColumns, postgresPgCatalogPgAm, postgresPgCatalogPgAttribute, postgresPgCatalogPgClass, postgresPgCatalogPgIndex, postgresPgCatalogPgNamespace, postgresPgCatalogPgType } from '@deditor-app/shared-schemas'
+import {
+  postgresInformationSchemaColumns,
+  postgresPgCatalogPgAm,
+  postgresPgCatalogPgAttribute,
+  postgresPgCatalogPgClass,
+  postgresPgCatalogPgIndex,
+  postgresPgCatalogPgNamespace,
+  postgresPgCatalogPgType,
+} from '@deditor-app/shared-schemas'
 import { PGlite } from '@electric-sql/pglite'
 import { bloom } from '@electric-sql/pglite/contrib/bloom'
 import { citext } from '@electric-sql/pglite/contrib/citext'
@@ -83,11 +91,9 @@ export function registerPGLiteDatabaseDialect(window: BrowserWindow) {
 
         await pgDrizzle.execute('SELECT 1')
         await pgDrizzle.execute(sql`CREATE SCHEMA IF NOT EXISTS "public"`)
-        await pgDrizzle.execute(sql`SET search_path TO "public"`)
-        await pgDrizzle.execute(sql`CREATE TABLE IF NOT EXISTS public."test_table" (
-          id SERIAL PRIMARY KEY,
-          name TEXT NOT NULL DEFAULT ''
-        )`)
+        if (!parsedDSN.searchParams.get('searchPath')) {
+          await pgDrizzle.execute(sql`SET search_path TO "public"`)
+        }
 
         return { databaseSessionId: dbSessionId, dialect: 'pglite' }
       }

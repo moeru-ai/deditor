@@ -65,6 +65,7 @@ export function registerPostgresJsDatabaseDialect(window: BrowserWindow) {
         databaseSessions.set(dbSessionId, { drizzle: pgDrizzle, client: pgClient })
 
         await pgDrizzle.execute('SELECT 1')
+
         return { databaseSessionId: dbSessionId, dialect: 'postgres' }
       }
       catch (err) {
