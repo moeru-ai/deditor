@@ -1,5 +1,5 @@
 import type { SQL } from 'drizzle-orm'
-import type { Ref } from 'vue'
+import type { ComputedRef, Ref } from 'vue'
 
 import type { ConnectionThroughParameters, DatasourceDriver, DatasourceDriverMap, Datasource as LibDatasource } from '../libs/datasources'
 
@@ -96,13 +96,23 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
   async function listTables<D extends DatasourceDriver>(driver: D, dsn: string) {
     const session = await connect(driver, dsn)
     if (isPostgresSession(session)) {
-      return session.session.listTables()
+      const s = session as DatasourceDriverClient<DatasourceDriverEnum.Postgres>
+      const res = await s.session.listTables()
+      return res.map(table => ({
+        tableName: table.table_name,
+        schema: table.table_schema,
+      }))
     }
     else if (isMySQLSession(session)) {
       throw new NotSupportedError(driver)
     }
     else if (isPGLiteSession(session)) {
-      return session.session.listTables()
+      const s = session as DatasourceDriverClient<DatasourceDriverEnum.PGLite>
+      const res = await s.session.listTables()
+      return res.map(table => ({
+        tableName: table.table_name,
+        schema: table.table_schema,
+      }))
     }
     else if (isDuckDBWasmSession(session)) {
       throw new NotSupportedError(driver)
@@ -111,7 +121,12 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
       throw new NotSupportedError(driver)
     }
     else if (isSQLiteSession(session)) {
-      return session.session.listTables()
+      const s = session as DatasourceDriverClient<DatasourceDriverEnum.SQLite>
+      const res = await s.session.listTables()
+      return res.map(table => ({
+        tableName: table.tblName,
+        schema: undefined, // SQLite does not have schemas
+      }))
     }
     else if (isSupabaseSession(session)) {
       throw new NotSupportedError(driver)
@@ -128,16 +143,26 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
     return listTables<D>(driver, toDSN(driver, parameters, defaultParamsFromDriver(driver)))
   }
 
-  async function listColumns<D extends DatasourceDriver>(driver: D, dsn: string, table: string, schema?: string) {
+  async function listColumns<D extends DatasourceDriver>(driver: D, dsn: string, table: string, schema?: string | null) {
     const session = await connect(driver, dsn)
     if (isPostgresSession(session)) {
-      return session.session.listColumns(table, schema)
+      const res = await session.session.listColumns(table, schema ?? 'public')
+      return res.map(column => ({
+        columnName: column.column_name,
+        dataType: column.data_type,
+        udtName: column.udt_name,
+      }))
     }
     else if (isMySQLSession(session)) {
       throw new NotSupportedError(driver)
     }
     else if (isPGLiteSession(session)) {
-      return session.session.listColumns(table, schema)
+      const res = await session.session.listColumns(table, schema ?? 'public')
+      return res.map(column => ({
+        columnName: column.column_name,
+        dataType: column.data_type,
+        udtName: column.udt_name,
+      }))
     }
     else if (isDuckDBWasmSession(session)) {
       throw new NotSupportedError(driver)
@@ -146,7 +171,12 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
       throw new NotSupportedError(driver)
     }
     else if (isSQLiteSession(session)) {
-      throw new NotSupportedError(driver)
+      const res = await session.session.listColumns(table)
+      return res.map(column => ({
+        columnName: column.columnName,
+        dataType: undefined,
+        udtName: undefined,
+      }))
     }
     else if (isSupabaseSession(session)) {
       throw new NotSupportedError(driver)
@@ -159,20 +189,20 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
     }
   }
 
-  async function listColumnsByParameters<D extends DatasourceDriver>(driver: D, parameters: ConnectionThroughParameters, table: string, schema?: string) {
+  async function listColumnsByParameters<D extends DatasourceDriver>(driver: D, parameters: ConnectionThroughParameters, table: string, schema?: string | null) {
     return listColumns<D>(driver, toDSN(driver, parameters, defaultParamsFromDriver(driver)), table, schema)
   }
 
-  async function listColumnsWithTypes<D extends DatasourceDriver>(driver: D, dsn: string, table: string, schema?: string) {
+  async function listColumnsWithTypes<D extends DatasourceDriver>(driver: D, dsn: string, table: string, schema?: string | null) {
     const session = await connect(driver, dsn)
     if (isPostgresSession(session)) {
-      return session.session.listColumnsWithTypes(table, schema)
+      return session.session.listColumnsWithTypes(table, schema ?? 'public')
     }
     else if (isMySQLSession(session)) {
       throw new NotSupportedError(driver)
     }
     else if (isPGLiteSession(session)) {
-      return session.session.listColumnsWithTypes(table, schema)
+      return session.session.listColumnsWithTypes(table, schema ?? 'public')
     }
     else if (isDuckDBWasmSession(session)) {
       throw new NotSupportedError(driver)
@@ -194,20 +224,20 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
     }
   }
 
-  async function listColumnsWithTypesByParameters<D extends DatasourceDriver>(driver: D, parameters: ConnectionThroughParameters, table: string, schema?: string) {
+  async function listColumnsWithTypesByParameters<D extends DatasourceDriver>(driver: D, parameters: ConnectionThroughParameters, table: string, schema?: string | null) {
     return listColumnsWithTypes<D>(driver, toDSN(driver, parameters, defaultParamsFromDriver(driver)), table, schema)
   }
 
   async function listIndexes<D extends DatasourceDriver>(driver: D, dsn: string, schema: string, table: string) {
     const session = await connect(driver, dsn)
     if (isPostgresSession(session)) {
-      return session.session.listIndexes(table, schema)
+      return session.session.listIndexes(table, schema ?? 'public')
     }
     else if (isMySQLSession(session)) {
       throw new NotSupportedError(driver)
     }
     else if (isPGLiteSession(session)) {
-      return session.session.listIndexes(table, schema)
+      return session.session.listIndexes(table, schema ?? 'public')
     }
     else if (isDuckDBWasmSession(session)) {
       throw new NotSupportedError(driver)
@@ -334,7 +364,7 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
 })
 
 export function useDatasource(
-  fromDatasourceId: Ref<string | undefined>,
+  fromDatasourceId: Ref<string | undefined> | ComputedRef<string | undefined>,
   datasources: Ref<Datasource[]>,
 ) {
   const datasourceSessionsStore = useDatasourceSessionsStore()
@@ -395,7 +425,7 @@ export function useDatasource(
       datasource.value.driver,
       datasource.value as ConnectionThroughParameters,
       table.table,
-      table.schema ?? 'public',
+      table.schema,
     )
   }
 
@@ -410,7 +440,7 @@ export function useDatasource(
       datasource.value.driver,
       datasource.value as ConnectionThroughParameters,
       table.table,
-      table.schema ?? 'public',
+      table.schema,
     )
   }
 
@@ -432,15 +462,15 @@ export function useDatasource(
 
     const columns = await listColumns(table)
     if (datasource.value?.driver === DatasourceDriverEnum.Postgres || datasource.value?.driver === DatasourceDriverEnum.PGLite) {
-      const udtColumns = columns.filter(column => column.data_type === 'USER-DEFINED')
+      const udtColumns = columns.filter(column => column.dataType === 'USER-DEFINED')
       if (udtColumns.length > 0) {
         if (!(!datasource.value || !datasource.value.driver || !datasource.value)) {
           const udtTypes = await datasourceSessionsStore.listPostgresUserDefinedTypesByParameters(datasource.value.driver, datasource.value as ConnectionThroughParameters)
           if (udtTypes.length > 0) {
             // TODO: we might have to read the source code to understand which UDT types and schema are used
             // for any of the pgvector extensions.
-            const vectorTypedColumns = udtColumns.filter(column => column.udt_name === 'vector' || column.udt_name === 'vectors')
-            const matchedUdtDefinition = udtTypes.filter(udt => vectorTypedColumns.some(column => column.udt_name === udt.dataType))
+            const vectorTypedColumns = udtColumns.filter(column => column.udtName === 'vector' || column.udtName === 'vectors')
+            const matchedUdtDefinition = udtTypes.filter(udt => vectorTypedColumns.some(column => column.udtName === udt.dataType))
             if (matchedUdtDefinition.length > 0) {
               if (matchedUdtDefinition.find(def => def.dataType === 'vectors')) {
                 try {
@@ -459,17 +489,24 @@ export function useDatasource(
       }
     }
 
-    const foundIdColumn = columns.find(column => column.column_name === 'id')
-    const indexes = await listIndexes(table)
-    const foundPrimary = indexes.find(index => index.isPrimaryKey)
+    const foundIdColumn = columns.find(column => column.columnName === 'id')
+
+    let foundPrimary: { isPrimaryKey: boolean, columns: string[] } | undefined
+    try {
+      const indexes = await listIndexes(table)
+      foundPrimary = indexes.find(index => index.isPrimaryKey)
+    }
+    catch (err) {
+      console.warn('Failed to list indexes for table', table, 'error:', err)
+    }
 
     const sortedIdOrPrimaryColumn = sortedColumns.some((column) => {
-      return column.id === foundIdColumn?.column_name
+      return column.id === foundIdColumn?.columnName
         || foundPrimary?.columns?.includes(column.id)
     })
     if (!sortedIdOrPrimaryColumn) {
-      if (foundIdColumn != null && foundIdColumn.column_name != null) {
-        groupByColumns.push(foundIdColumn.column_name)
+      if (foundIdColumn != null && foundIdColumn.columnName != null) {
+        groupByColumns.push(foundIdColumn.columnName)
       }
       else if (foundPrimary != null && foundPrimary?.columns?.length) {
         groupByColumns.push(foundPrimary.columns[0])

@@ -68,6 +68,9 @@ export function registerPGLiteDatabaseDialect(window: BrowserWindow) {
     .handle(async (_, { dsn }) => {
       try {
         const parsedDSN = new URL(dsn)
+        if (!parsedDSN.searchParams.get('dataDir')) {
+          throw new Error('Missing "dataDir" parameter in DSN.')
+        }
 
         const pgliteClient = new PGlite(
           decodeURIComponent(String(parsedDSN.searchParams.get('dataDir'))),

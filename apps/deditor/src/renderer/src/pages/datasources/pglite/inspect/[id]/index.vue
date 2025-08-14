@@ -41,8 +41,8 @@ const datasourceTables = computedAsync(async () => {
 
   return tables
     .map<DatasourceTable>(t => ({
-      schema: t.table_schema,
-      table: t.table_name,
+      table: t.tableName,
+      schema: t.schema,
     }))
     .filter((t) => {
       if (!t.schema) {

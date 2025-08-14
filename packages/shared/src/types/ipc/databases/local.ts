@@ -29,22 +29,29 @@ export interface SQLiteMethods {
   listColumns: (params: {
     databaseSessionId: string
     tableName: string
-    schema?: string
   }) => {
     databaseSessionId: string
     tableName: string
-    schema: string
-    results: typeof postgresInformationSchemaColumns.$inferSelect[]
+    results: {
+      tableName: string
+      columnName: string
+      columnType: string
+      notNull: number
+      defaultValue: string
+      pk: number
+      seq: number
+      hidden: number
+      sql: string
+      type: 'view' | 'table'
+    }[]
   }
 
   listIndexes: (params: {
     databaseSessionId: string
     tableName: string
-    schema?: string
   }) => {
     databaseSessionId: string
     tableName: string
-    schema: string
     results: {
       indexName: string
       indexAlgorithm: string
@@ -59,11 +66,9 @@ export interface SQLiteMethods {
   listColumnsWithTypes: (params: {
     databaseSessionId: string
     tableName: string
-    schema?: string
   }) => {
     databaseSessionId: string
     tableName: string
-    schema: string
     results: {
       columnName: string
       typeName: string
