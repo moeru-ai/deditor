@@ -4,6 +4,7 @@ import { SQLiteAsyncDialect, QueryBuilder as SqliteQueryBuilder } from 'drizzle-
 import { useLocalPGLite } from '@/composables/ipc/databases/local/pglite-fs'
 import { useLocalSQLite } from '@/composables/ipc/databases/local/sqlite-fs'
 import { useRemoteMySQL } from '@/composables/ipc/databases/remote/mysql'
+import { useRemotePGLiteWebSocket } from '@/composables/ipc/databases/remote/pglite-ws'
 import { useRemotePostgres } from '@/composables/ipc/databases/remote/postgres'
 
 export enum DatasourceDriverEnum {
@@ -12,6 +13,7 @@ export enum DatasourceDriverEnum {
   Neon = 'neon',
   CloudflareD2 = 'cloudflare-d2',
   PGLite = 'pglite',
+  PGLiteWebSocket = 'pglite-ws',
   DuckDBWasm = 'duckdb-wasm',
   MySQL = 'mysql',
   SQLite = 'sqlite',
@@ -27,6 +29,7 @@ export const DATASOURCE_DRIVER_NAMES = {
   [DatasourceDriverEnum.Neon]: 'Neon',
   [DatasourceDriverEnum.CloudflareD2]: 'Cloudflare D2',
   [DatasourceDriverEnum.PGLite]: 'PGLite',
+  [DatasourceDriverEnum.PGLiteWebSocket]: 'PGLite WebSocket',
   [DatasourceDriverEnum.DuckDBWasm]: 'DuckDB WASM',
   [DatasourceDriverEnum.MySQL]: 'MySQL',
   [DatasourceDriverEnum.SQLite]: 'SQLite',
@@ -40,6 +43,7 @@ export const DATASOURCE_DRIVER_ICONS = {
   [DatasourceDriverEnum.Neon]: 'i-drizzle-orm-icons:neon-dark',
   [DatasourceDriverEnum.CloudflareD2]: 'i-drizzle-orm-icons:cloudflare',
   [DatasourceDriverEnum.PGLite]: 'i-drizzle-orm-icons:pglite',
+  [DatasourceDriverEnum.PGLiteWebSocket]: 'i-drizzle-orm-icons:pglite',
   [DatasourceDriverEnum.DuckDBWasm]: 'i-deditor-icons:duckdb-dark',
   [DatasourceDriverEnum.MySQL]: 'i-drizzle-orm-icons:mysql-dark',
   [DatasourceDriverEnum.SQLite]: 'i-drizzle-orm-icons:sqlite',
@@ -52,6 +56,7 @@ export interface DatasourceDriverMap {
   [DatasourceDriverEnum.Supabase]: never
   [DatasourceDriverEnum.Neon]: never
   [DatasourceDriverEnum.PGLite]: ReturnType<typeof useLocalPGLite>
+  [DatasourceDriverEnum.PGLiteWebSocket]: ReturnType<typeof useRemotePGLiteWebSocket>
   [DatasourceDriverEnum.DuckDBWasm]: never
   [DatasourceDriverEnum.CloudflareD2]: never
   [DatasourceDriverEnum.MySQL]: ReturnType<typeof useRemoteMySQL>
@@ -65,6 +70,7 @@ export interface DatasourceDriverSQLDialectMap {
   [DatasourceDriverEnum.Supabase]: never
   [DatasourceDriverEnum.Neon]: never
   [DatasourceDriverEnum.PGLite]: PgDialect // PGLite uses the same dialect
+  [DatasourceDriverEnum.PGLiteWebSocket]: PgDialect // PGLiteWebSocket uses the same dialect
   [DatasourceDriverEnum.DuckDBWasm]: PgDialect // DuckDBWasm uses a similar dialect to Postgres
   [DatasourceDriverEnum.CloudflareD2]: never
   [DatasourceDriverEnum.MySQL]: never
@@ -78,6 +84,7 @@ export interface DatasourceDriverQueryBuilderMap {
   [DatasourceDriverEnum.Supabase]: never
   [DatasourceDriverEnum.Neon]: never
   [DatasourceDriverEnum.PGLite]: PgQueryBuilder // PGLite uses the same query builder
+  [DatasourceDriverEnum.PGLiteWebSocket]: PgQueryBuilder // PGLiteWebSocket uses the same query builder
   [DatasourceDriverEnum.DuckDBWasm]: PgQueryBuilder // DuckDBWasm uses a similar query builder to Postgres
   [DatasourceDriverEnum.CloudflareD2]: never
   [DatasourceDriverEnum.MySQL]: never
@@ -91,6 +98,7 @@ export const DATASOURCE_DRIVER_CLIENT = {
   [DatasourceDriverEnum.Supabase]: () => { throw new Error('Supabase is not supported yet') },
   [DatasourceDriverEnum.Neon]: () => { throw new Error('Neon is not supported yet') },
   [DatasourceDriverEnum.PGLite]: useLocalPGLite,
+  [DatasourceDriverEnum.PGLiteWebSocket]: useRemotePGLiteWebSocket,
   [DatasourceDriverEnum.DuckDBWasm]: () => { throw new Error('DuckDBWasm is not supported yet') },
   [DatasourceDriverEnum.CloudflareD2]: () => { throw new Error('Cloudflare D2 is not supported yet') },
   [DatasourceDriverEnum.MySQL]: useRemoteMySQL,
@@ -104,6 +112,7 @@ export const DATASOURCE_DRIVER_SQL_DIALECT = {
   [DatasourceDriverEnum.Supabase]: () => { throw new Error('Supabase is not supported yet') },
   [DatasourceDriverEnum.Neon]: () => { throw new Error('Neon is not supported yet') },
   [DatasourceDriverEnum.PGLite]: () => new PgDialect(), // PGLite uses the same dialect as Postgres
+  [DatasourceDriverEnum.PGLiteWebSocket]: () => new PgDialect(), // PGLiteWebSocket uses the same dialect as Postgres
   [DatasourceDriverEnum.DuckDBWasm]: () => new PgDialect(), // DuckDBWasm uses a similar dialect to Postgres
   [DatasourceDriverEnum.CloudflareD2]: () => { throw new Error('Cloudflare D2 is not supported yet') },
   [DatasourceDriverEnum.MySQL]: () => { throw new Error('MySQL is not supported yet') },
@@ -117,6 +126,7 @@ export const DATASOURCE_DRIVER_QUERY_BUILDER = {
   [DatasourceDriverEnum.Supabase]: () => { throw new Error('Supabase is not supported yet') },
   [DatasourceDriverEnum.Neon]: () => { throw new Error('Neon is not supported yet') },
   [DatasourceDriverEnum.PGLite]: () => new PgQueryBuilder(), // PGLite uses the same query builder as Postgres
+  [DatasourceDriverEnum.PGLiteWebSocket]: () => new PgQueryBuilder(), // PGLiteWebSocket uses the same query builder as Postgres
   [DatasourceDriverEnum.DuckDBWasm]: () => new PgQueryBuilder(), // DuckDBWasm uses a similar query builder to Postgres
   [DatasourceDriverEnum.CloudflareD2]: () => { throw new Error('Cloudflare D2 is not supported yet') },
   [DatasourceDriverEnum.MySQL]: () => { throw new Error('MySQL is not supported yet') },
@@ -140,6 +150,10 @@ export function isMySQLSession(session: DatasourceDriverClient<DatasourceDriver>
 
 export function isPGLiteSession(session: DatasourceDriverClient<DatasourceDriver>): session is DatasourceDriverClient<DatasourceDriverEnum.PGLite> {
   return session.driver === DatasourceDriverEnum.PGLite
+}
+
+export function isPGLiteWebSocketSession(session: DatasourceDriverClient<DatasourceDriver>): session is DatasourceDriverClient<DatasourceDriverEnum.PGLiteWebSocket> {
+  return session.driver === DatasourceDriverEnum.PGLiteWebSocket
 }
 
 export function isDuckDBWasmSession(session: DatasourceDriverClient<DatasourceDriver>): session is DatasourceDriverClient<DatasourceDriverEnum.DuckDBWasm> {

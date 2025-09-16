@@ -10,6 +10,8 @@ export function defaultParamsFromDriver(driver: string): DSNDefaultParams {
       return mysqlDefaultParams()
     case DatasourceDriverEnum.PGLite:
       return pgliteDefaultParams()
+    case DatasourceDriverEnum.PGLiteWebSocket:
+      return pgliteWebSocketDefaultParams()
     case DatasourceDriverEnum.SQLite:
       return sqliteDefaultParams()
     default:
@@ -49,6 +51,18 @@ export function pgliteDefaultParams(): DSNDefaultParams {
   return {
     params: {
       driver: DatasourceDriverEnum.PGLite,
+      host: '127.0.0.1',
+      password: '',
+      port: 0,
+      user: '',
+    },
+  }
+}
+
+export function pgliteWebSocketDefaultParams(): DSNDefaultParams {
+  return {
+    params: {
+      driver: DatasourceDriverEnum.PGLiteWebSocket,
       host: '127.0.0.1',
       password: '',
       port: 0,

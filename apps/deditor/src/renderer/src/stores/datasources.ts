@@ -20,6 +20,7 @@ import {
   isMySQLSession,
   isNeonSession,
   isPGLiteSession,
+  isPGLiteWebSocketSession,
   isPostgresSession,
   isSQLiteSession,
   isSupabaseSession,
@@ -114,6 +115,14 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
         schema: table.table_schema,
       }))
     }
+    else if (isPGLiteWebSocketSession(session)) {
+      const s = session as DatasourceDriverClient<DatasourceDriverEnum.PGLiteWebSocket>
+      const res = await s.session.listTables()
+      return res.map(table => ({
+        tableName: table.table_name,
+        schema: table.table_schema,
+      }))
+    }
     else if (isDuckDBWasmSession(session)) {
       throw new NotSupportedError(driver)
     }
@@ -164,6 +173,10 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
         udtName: column.udt_name,
       }))
     }
+    else if (isPGLiteWebSocketSession(session)) {
+      const res: any[] = []
+      return res
+    }
     else if (isDuckDBWasmSession(session)) {
       throw new NotSupportedError(driver)
     }
@@ -204,6 +217,10 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
     else if (isPGLiteSession(session)) {
       return session.session.listColumnsWithTypes(table, schema ?? 'public')
     }
+    else if (isPGLiteWebSocketSession(session)) {
+      const res: any[] = []
+      return res
+    }
     else if (isDuckDBWasmSession(session)) {
       throw new NotSupportedError(driver)
     }
@@ -238,6 +255,10 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
     }
     else if (isPGLiteSession(session)) {
       return session.session.listIndexes(table, schema ?? 'public')
+    }
+    else if (isPGLiteWebSocketSession(session)) {
+      const res: any[] = []
+      return res
     }
     else if (isDuckDBWasmSession(session)) {
       throw new NotSupportedError(driver)
@@ -274,6 +295,10 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
     else if (isPGLiteSession(session)) {
       return session.session.listUserDefinedTypes()
     }
+    else if (isPGLiteWebSocketSession(session)) {
+      const res: any[] = []
+      return res
+    }
     else if (isDuckDBWasmSession(session)) {
       return []
     }
@@ -307,6 +332,9 @@ export const useDatasourceSessionsStore = defineStore('datasource-sessions', () 
       throw new NotSupportedError(driver)
     }
     else if (isPGLiteSession(session)) {
+      return session.session.execute<T>(query, parameters)
+    }
+    else if (isPGLiteWebSocketSession(session)) {
       return session.session.execute<T>(query, parameters)
     }
     else if (isDuckDBWasmSession(session)) {

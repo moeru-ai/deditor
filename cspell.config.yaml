@@ -37,6 +37,7 @@ words:
   - Brugger
   - cientos
   - citext
+  - crossws
   - Deditor
   - duckdb
   - earthdistance
@@ -44,6 +45,7 @@ words:
   - enumlabel
   - enumtypid
   - etcdctl
+  - eventa
   - guiiai
   - healthcheck
   - HNSW
@@ -175,6 +177,7 @@ words:
   - typtypmod
   - UMAP
   - umappp
+  - unbird
   - unocss
   - unplugin
   - vueuse
