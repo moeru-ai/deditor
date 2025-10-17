@@ -2,7 +2,7 @@ import { defineConfig } from 'tsdown'
 
 export default defineConfig({
   entry: [
-    './src/',
+    './src/index.ts',
   ],
   sourcemap: true,
   unused: true,
