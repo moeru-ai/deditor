@@ -16,7 +16,7 @@ asarUnpack:
 win:
   executableName: Deditor
 nsis:
-  artifactName: ${productName}-v${version}-windows-${arch}-setup.${ext}
+  artifactName: ${productName}-${version}-windows-${arch}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
@@ -29,17 +29,14 @@ mac:
   notarize: false
   executableName: Deditor
 dmg:
-  artifactName: ${productName}-v${version}-darwin-${arch}.${ext}
+  artifactName: ${productName}-${version}-darwin-${arch}.${ext}
 linux:
   target:
     - AppImage
   maintainer: moeru.ai
   category: Utility
   executableName: Deditor
-  artifactName: ${productName}-v${version}-linux-${arch}.${ext}
+  artifactName: ${productName}-${version}-linux-${arch}.${ext}
 appImage:
-  artifactName: ${productName}-v${version}-linux-${arch}.${ext}
+  artifactName: ${productName}-${version}-linux-${arch}.${ext}
 npmRebuild: false
-publish:
-  provider: generic
-  url: https://example.com/auto-updates
