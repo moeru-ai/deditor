@@ -384,7 +384,7 @@ useEventListener('keyup', handleGlobalKeyup)
               :data-column-id="header.column.id"
               class="relative select-none bg-neutral-900/50 font-mono"
               :class="{ 'cursor-pointer': header.column.getCanSort() }"
-              @click="(e) => header.column.getToggleSortingHandler()?.(e)"
+              @click="(e: MouseEvent) => header.column.getToggleSortingHandler()?.(e)"
             >
               <div class="flex items-center justify-between gap-2">
                 <div v-if="!header.isPlaceholder" class="w-full flex items-center justify-between truncate">
