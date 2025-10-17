@@ -21,10 +21,10 @@ function filterIgnoredTablesByField(fieldName: string) {
   // libsql_ is a prefix for internal libSQL tables (e.g. libsql_wasm_func_table)
   // sqlite_ is a prefix for internal SQLite tables (e.g. sqlite_sequence, sqlite_stat1)
   return `${fieldName} != '__drizzle_migrations'
-			AND ${fieldName} NOT LIKE '\\_cf\\_%' ESCAPE '\\'
-			AND ${fieldName} NOT LIKE '\\_litestream\\_%' ESCAPE '\\'
-			AND ${fieldName} NOT LIKE 'libsql\\_%' ESCAPE '\\'
-			AND ${fieldName} NOT LIKE 'sqlite\\_%' ESCAPE '\\'`
+      AND ${fieldName} NOT LIKE '\\_cf\\_%' ESCAPE '\\'
+      AND ${fieldName} NOT LIKE '\\_litestream\\_%' ESCAPE '\\'
+      AND ${fieldName} NOT LIKE 'libsql\\_%' ESCAPE '\\'
+      AND ${fieldName} NOT LIKE 'sqlite\\_%' ESCAPE '\\'`
 }
 
 export function registerSQLiteDatabaseDialect(window: BrowserWindow) {

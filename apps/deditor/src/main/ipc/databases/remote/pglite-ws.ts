@@ -372,32 +372,32 @@ export function registerPGLiteWebSocketDatabaseDialect(window: BrowserWindow) {
         const queryBuilder = new QueryBuilder()
         const { sql: statement, params: parameters } = new PgDialect().sqlToQuery(
           queryBuilder
-          .select({
-            columnName: postgresPgCatalogPgAttribute.attname,
-            typeName: postgresPgCatalogPgType.typname,
-            typeMod: postgresPgCatalogPgAttribute.atttypmod,
-          })
-          .from(postgresPgCatalogPgAttribute)
-          .leftJoin(postgresPgCatalogPgClass, eq(postgresPgCatalogPgAttribute.attrelid, postgresPgCatalogPgClass.oid))
-          .leftJoin(postgresPgCatalogPgNamespace, eq(postgresPgCatalogPgClass.relnamespace, postgresPgCatalogPgNamespace.oid))
-          .leftJoin(postgresPgCatalogPgType, eq(postgresPgCatalogPgAttribute.atttypid, postgresPgCatalogPgType.oid))
-          .where(
-            and(
-              eq(postgresPgCatalogPgNamespace.nspname, schema ?? 'public'),
-              eq(postgresPgCatalogPgClass.relname, tableName),
-              gt(postgresPgCatalogPgAttribute.attnum, 0),
-              not(postgresPgCatalogPgAttribute.attisdropped),
-            ),
-          )
-          .getSQL()
+            .select({
+              columnName: postgresPgCatalogPgAttribute.attname,
+              typeName: postgresPgCatalogPgType.typname,
+              typeMod: postgresPgCatalogPgAttribute.atttypmod,
+            })
+            .from(postgresPgCatalogPgAttribute)
+            .leftJoin(postgresPgCatalogPgClass, eq(postgresPgCatalogPgAttribute.attrelid, postgresPgCatalogPgClass.oid))
+            .leftJoin(postgresPgCatalogPgNamespace, eq(postgresPgCatalogPgClass.relnamespace, postgresPgCatalogPgNamespace.oid))
+            .leftJoin(postgresPgCatalogPgType, eq(postgresPgCatalogPgAttribute.atttypid, postgresPgCatalogPgType.oid))
+            .where(
+              and(
+                eq(postgresPgCatalogPgNamespace.nspname, schema ?? 'public'),
+                eq(postgresPgCatalogPgClass.relname, tableName),
+                gt(postgresPgCatalogPgAttribute.attnum, 0),
+                not(postgresPgCatalogPgAttribute.attisdropped),
+              ),
+            )
+            .getSQL(),
         )
 
         const query = defineInvoke(dbSession.context, queryInvoke)
         const res = await query({ statement, parameters }) as {
           result: Results<{
-            columnName: string;
-            typeName: string | null;
-            typeMod: number;
+            columnName: string
+            typeName: string | null
+            typeMod: number
           }>
         }
 
@@ -621,31 +621,31 @@ export function registerPGLiteWebSocketDatabaseDialect(window: BrowserWindow) {
 
         const { sql: statement, params: parameters } = new PgDialect().sqlToQuery(
           queryBuilder
-          .with(typesSubQuery, colsSubQuery)
-          .select({
-            schemaName: colsSubQuery.schemaName,
-            objName: colsSubQuery.objName,
-            columnName: colsSubQuery.columnName,
-            dataType: colsSubQuery.dataType,
-            ordinalPosition: colsSubQuery.ordinalPosition,
-            isRequired: colsSubQuery.isRequired,
-            description: sql<string>`coalesce(${colsSubQuery.description}, '')`.as('description'),
-          })
-          .from(colsSubQuery)
-          .orderBy(colsSubQuery.schemaName, colsSubQuery.objName, colsSubQuery.ordinalPosition)
-          .getSQL()
+            .with(typesSubQuery, colsSubQuery)
+            .select({
+              schemaName: colsSubQuery.schemaName,
+              objName: colsSubQuery.objName,
+              columnName: colsSubQuery.columnName,
+              dataType: colsSubQuery.dataType,
+              ordinalPosition: colsSubQuery.ordinalPosition,
+              isRequired: colsSubQuery.isRequired,
+              description: sql<string>`coalesce(${colsSubQuery.description}, '')`.as('description'),
+            })
+            .from(colsSubQuery)
+            .orderBy(colsSubQuery.schemaName, colsSubQuery.objName, colsSubQuery.ordinalPosition)
+            .getSQL(),
         )
 
         const query = defineInvoke(dbSession.context, queryInvoke)
         const res = await query({ statement, parameters }) as {
           result: Results<{
-            schemaName: string | null;
-            objName: string;
-            columnName: string;
-            dataType: string;
-            ordinalPosition: number;
-            isRequired: boolean;
-            description: string;
+            schemaName: string | null
+            objName: string
+            columnName: string
+            dataType: string
+            ordinalPosition: number
+            isRequired: boolean
+            description: string
           }>
         }
 
