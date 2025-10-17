@@ -6,6 +6,7 @@ import PaneArea from '@/components/container/PaneArea.vue'
 import DataNavigator from '@/components/visualizer/DataNavigator.vue'
 import PointVisualizer from '@/components/visualizer/PointVisualizer.vue'
 import ProjectionControls from '@/components/visualizer/ProjectionControls.vue'
+
 import { useVisualizerStore } from '@/stores/visualizer'
 
 import Button from '../components/basic/Button.vue'

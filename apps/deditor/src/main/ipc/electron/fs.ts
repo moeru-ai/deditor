@@ -1,6 +1,7 @@
+import type { PathLike } from 'node:fs'
+
 import type { FsMethods } from '@deditor-app/shared'
 import type { App, BrowserWindow } from 'electron'
-import type { PathLike } from 'node:fs'
 
 import { Buffer } from 'node:buffer'
 import { writeFileSync } from 'node:fs'

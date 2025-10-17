@@ -1,8 +1,9 @@
 import type { BrowserWindow, IpcMainEvent } from 'electron'
 
-import { toErrorObject } from '@deditor-app/shared'
 import strings from '@stdlib/string'
 import debug from 'debug'
+
+import { toErrorObject } from '@deditor-app/shared'
 import { ipcMain } from 'electron'
 
 export function defineIPCHandler<

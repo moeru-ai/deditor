@@ -140,8 +140,9 @@ import {
 import { provide, ref, watch } from 'vue'
 
 import ContextMenuContent from '../ContextMenuContent.vue'
-import { contextMenuStates } from './constants'
 import ContextMenuRenderer from './ContextMenuRenderer.vue'
+
+import { contextMenuStates } from './constants'
 
 const props = defineProps<{
   menuConfig: MenuItemConfig[]

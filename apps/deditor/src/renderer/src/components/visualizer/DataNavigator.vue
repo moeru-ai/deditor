@@ -10,6 +10,7 @@ import { computed, ref, watch } from 'vue'
 
 import DatasourceTablePicker from '@/components/datasource/DatasourceTablePicker.vue'
 import DataTable from '@/components/table/DataTable.vue'
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useDatasource, useDatasourcesStore, useVisualizerStore } from '@/stores'
 

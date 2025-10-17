@@ -5,6 +5,7 @@ import { Checkbox } from '@proj-airi/ui'
 import { reactive, watch } from 'vue'
 
 import SegmentedControl from '@/components/basic/SegmentedControl.vue'
+
 import { FieldDescription, FieldLabel, FormField } from '@/components/form'
 import { ProjectionAlgorithm } from '@/constants'
 import { useVisualizerStore } from '@/stores'

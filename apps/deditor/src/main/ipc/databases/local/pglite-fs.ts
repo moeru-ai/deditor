@@ -3,7 +3,6 @@ import type { PgliteDatabase } from 'drizzle-orm/pglite'
 import type { BrowserWindow } from 'electron'
 
 import { nanoid } from '@deditor-app/shared'
-import * as schema from '@deditor-app/shared-schemas'
 import {
   postgresInformationSchemaColumns,
   postgresPgCatalogPgAm,
@@ -26,6 +25,8 @@ import { useLogg } from '@guiiai/logg'
 import { and, eq, gt, ne, not, notExists, notLike, or, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import { drizzle } from 'drizzle-orm/pglite'
+
+import * as schema from '@deditor-app/shared-schemas'
 
 import { defineIPCHandler } from '../../define-ipc-handler'
 

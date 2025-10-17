@@ -1,11 +1,12 @@
 import type { PresetOrFactoryAwaitable } from 'unocss'
 
+import presetAnimations from 'unocss-preset-animations'
+
 import { createExternalPackageIconLoader } from '@iconify/utils/lib/loader/external-pkg'
 import { presetChromatic } from '@proj-airi/unocss-preset-chromatic'
 import { colorToString } from '@unocss/preset-mini/utils'
 import { createLocalFontProcessor } from '@unocss/preset-web-fonts/local'
 import { defineConfig, mergeConfigs, presetAttributify, presetIcons, presetTypography, presetWebFonts, presetWind3, transformerDirectives, transformerVariantGroup } from 'unocss'
-import presetAnimations from 'unocss-preset-animations'
 import { presetScrollbar } from 'unocss-preset-scrollbar'
 import { presetShadcn } from 'unocss-preset-shadcn'
 import { parseColor } from 'unocss/preset-mini'

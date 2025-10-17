@@ -3,8 +3,9 @@ import type { CanvasTexture, SpriteMaterial } from 'three'
 
 import { OrbitControls } from '@tresjs/cientos'
 import { TresCanvas } from '@tresjs/core'
-import * as THREE from 'three'
 import { shallowRef, watch } from 'vue'
+
+import * as THREE from 'three'
 
 import { useVisualizerStore } from '@/stores/visualizer'
 

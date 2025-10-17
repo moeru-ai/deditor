@@ -2,9 +2,10 @@
 import { onMounted, ref, watch } from 'vue'
 
 import Progress from '../../components/basic/Progress.vue'
+import embedWorkerURL from '../../workers/embed?worker&url'
+
 import { useDuckDB } from '../../composables/use-duckdb'
 import { useXsAITransformers } from '../../composables/use-xsai-transformers'
-import embedWorkerURL from '../../workers/embed?worker&url'
 
 const modelId = ref('Xenova/bge-large-zh')
 const { db } = useDuckDB({ autoConnect: true })

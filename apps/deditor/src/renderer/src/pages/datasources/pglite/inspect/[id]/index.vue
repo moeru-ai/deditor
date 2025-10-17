@@ -9,6 +9,7 @@ import { useRoute } from 'vue-router'
 import { fullyQualifiedTableName } from '@/libs/datasources/utils'
 
 import DataTable from '../../../../../components/table/DataTable.vue'
+
 import { useDatasource, useDatasourceSessionsStore, useDatasourcesStore } from '../../../../../stores'
 
 const route = useRoute('/datasources/pglite/edit/[id]/')

@@ -2,8 +2,9 @@ import type { PostgresMethods } from '@deditor-app/shared'
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
 import type { BrowserWindow } from 'electron'
 
+import postgres from 'postgres'
+
 import { nanoid } from '@deditor-app/shared'
-import * as schema from '@deditor-app/shared-schemas'
 import {
   postgresInformationSchemaColumns,
   postgresPgCatalogPgAm,
@@ -17,7 +18,8 @@ import { useLogg } from '@guiiai/logg'
 import { and, eq, gt, ne, not, notExists, notLike, or, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import { drizzle } from 'drizzle-orm/postgres-js'
-import postgres from 'postgres'
+
+import * as schema from '@deditor-app/shared-schemas'
 
 import { defineIPCHandler } from '../../define-ipc-handler'
 

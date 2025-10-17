@@ -7,6 +7,7 @@ import { RouterLink, useRoute } from 'vue-router'
 
 import Button from '../../../../../components/basic/Button.vue'
 import Editable from '../../../../../components/basic/Editable.vue'
+
 import { Input } from '../../../../../components/ui/input'
 import { useLocalPGLite } from '../../../../../composables/ipc/databases/local'
 import { dialog } from '../../../../../composables/ipc/electron'

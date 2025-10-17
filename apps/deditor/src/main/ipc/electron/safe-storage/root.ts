@@ -1,8 +1,9 @@
 import type { SafeStorageMethods } from '@deditor-app/shared'
 import type { App, BrowserWindow } from 'electron'
 
-import { safeStorage } from 'electron'
 import { Buffer } from 'node:buffer'
+
+import { safeStorage } from 'electron'
 
 import { defineIPCHandler } from '../../define-ipc-handler'
 

@@ -2,10 +2,11 @@
 import { Select } from '@proj-airi/ui'
 import { ref } from 'vue'
 
-import { FieldLabel, FormField } from '@/components/form'
 import PCAControls from '@/components/visualizer/PCAControls.vue'
 import TSNEControls from '@/components/visualizer/TSNEControls.vue'
 import UMAPControls from '@/components/visualizer/UMAPControls.vue'
+
+import { FieldLabel, FormField } from '@/components/form'
 import { ProjectionAlgorithm } from '@/constants'
 
 const algorithm = ref<ProjectionAlgorithm>(ProjectionAlgorithm.UMAP)

@@ -1,12 +1,14 @@
-import { templateCompilerOptions } from '@tresjs/core'
-import Vue from '@vitejs/plugin-vue'
 import { join, resolve } from 'node:path'
+
+import Vue from '@vitejs/plugin-vue'
 import UnoCSS from 'unocss/vite'
 import VueMacros from 'unplugin-vue-macros/vite'
 import VueRouter from 'unplugin-vue-router/vite'
-import { defineConfig } from 'vite'
-// import DevTools from 'vite-plugin-vue-devtools'
+import DevTools from 'vite-plugin-vue-devtools'
 import Layouts from 'vite-plugin-vue-layouts'
+
+import { templateCompilerOptions } from '@tresjs/core'
+import { defineConfig } from 'vite'
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
@@ -40,7 +42,7 @@ export default defineConfig(async () => ({
       extensions: ['.vue'],
       dts: resolve(import.meta.dirname, join('src', 'renderer', 'src', 'typed-router.d.ts')),
     }),
-    // DevTools(),
+    DevTools(),
     // https://github.com/JohnCampionJr/vite-plugin-vue-layouts
     Layouts(),
     UnoCSS(),

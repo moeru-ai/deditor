@@ -1,7 +1,8 @@
 import type { IpcRendererListener } from '@electron-toolkit/preload'
 
-import { fromErrorObject, nanoid } from '@deditor-app/shared'
 import strings from '@stdlib/string'
+
+import { fromErrorObject, nanoid } from '@deditor-app/shared'
 
 const eventListeners = new Map<string, { on: IpcRendererListener, off: () => void }>()
 const requestPromiseResolvers = new Map<string, (value: any) => void>()

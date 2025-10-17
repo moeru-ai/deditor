@@ -24,8 +24,9 @@ import { computed, h, nextTick, ref, toRaw, watch } from 'vue'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-import { valueUpdater } from '../../libs/shadcn/utils'
 import Button from '../basic/Button.vue'
+
+import { valueUpdater } from '../../libs/shadcn/utils'
 import { Checkbox } from '../ui/checkbox'
 import {
   DropdownMenu,

@@ -13,6 +13,7 @@ import { cn } from '@/libs/shadcn/utils'
 import PaneArea from '../components/container/PaneArea.vue'
 import DatasourcesContextMenu from '../components/context-menu/datasources/index.vue'
 import DatasourcesContextMenuPaneArea from '../components/context-menu/datasources/pane-area.vue'
+
 import { DatasourceDriverEnum } from '../libs/datasources'
 import { useDatasourcesStore } from '../stores'
 

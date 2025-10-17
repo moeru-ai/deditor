@@ -4,11 +4,12 @@ import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { BrowserWindow } from 'electron'
 
 import { nanoid } from '@deditor-app/shared'
-import * as schema from '@deditor-app/shared-schemas'
 import { useLogg } from '@guiiai/logg'
 import { createClient } from '@libsql/client'
 import { sql } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/libsql'
+
+import * as schema from '@deditor-app/shared-schemas'
 
 import { defineIPCHandler } from '../../define-ipc-handler'
 

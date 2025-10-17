@@ -4,6 +4,10 @@ import type { PeerContext } from '@unbird/eventa/adapters/websocket/h3'
 import type { Hooks } from 'crossws'
 import type { BrowserWindow } from 'electron'
 
+import { createServer } from 'node:http'
+
+import crossws from 'crossws/adapters/node'
+
 import {
   postgresInformationSchemaColumns,
   postgresInformationSchemaTables,
@@ -17,10 +21,8 @@ import {
 import { useLogg } from '@guiiai/logg'
 import { defineInvoke, defineInvokeEventa } from '@unbird/eventa'
 import { createPeerContext } from '@unbird/eventa/adapters/websocket/h3'
-import crossws from 'crossws/adapters/node'
 import { and, eq, gt, ne, not, notExists, notLike, or, sql } from 'drizzle-orm'
 import { alias, PgDialect, QueryBuilder } from 'drizzle-orm/pg-core'
-import { createServer } from 'node:http'
 
 import { defineIPCHandler } from '../../define-ipc-handler'
 
