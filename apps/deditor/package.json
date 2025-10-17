@@ -79,6 +79,7 @@
     "@types/three": "^0.180.0",
     "@unocss/reset": "^66.5.3",
     "@vitejs/plugin-vue": "^6.0.1",
+    "cac": "^6.7.14",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "debug": "^4.4.3",
@@ -86,6 +87,7 @@
     "electron": "^38.2.2",
     "electron-builder": "^26.0.12",
     "electron-vite": "^4.0.1",
+    "execa": "^9.6.0",
     "ml-pca": "^4.1.1",
     "msvana-tsne": "^0.1.2",
     "postgres": "^3.4.7",
@@ -98,6 +100,7 @@
     "unplugin-vue-router": "^0.15.0",
     "vite-plugin-vue-devtools": "^8.0.2",
     "vite-plugin-vue-layouts": "^0.11.0",
-    "vue-tsc": "^3.1.1"
+    "vue-tsc": "^3.1.1",
+    "yaml": "^2.8.1"
   }
 }
