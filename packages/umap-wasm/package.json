@@ -11,6 +11,6 @@
     "runtime.js"
   ],
   "scripts": {
-    "build": "make"
+    "make": "make"
   }
 }
