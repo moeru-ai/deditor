@@ -85,13 +85,6 @@ jobs:
         with:
           node-version: lts/*
           cache: pnpm
-
-      - name: Setup emsdk
-        uses: pyodide/setup-emsdk@v15
-        with:
-          version: 4.0.16
-          actions-cache-folder: 'emsdk-cache'
-
       - run: pnpm install --frozen-lockfile
 
       # ---------
