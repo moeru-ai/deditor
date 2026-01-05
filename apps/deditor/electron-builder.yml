@@ -1,8 +1,14 @@
 appId: ai.moeru.deditor
 productName: Deditor
+
 directories:
+  output: dist
   buildResources: build
+
 files:
+  - out/**
+  - resources/**
+  - package.json
   - '!**/.vscode/*'
   - '!src/*'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
@@ -11,8 +17,18 @@ files:
   - '!{.eslintcache,eslint.config.ts,.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json}'
+
+asar: true
 asarUnpack:
-  - resources/**
+  - '**/*.node' # native binaries
+
+extraMetadata:
+  name: ai.moeru.deditor
+  main: 'out/main/index.js'
+  homepage: 'https://github.com/moeru-ai/deditor'
+  repository: 'https://github.com/moeru-ai/deditor'
+  license: 'MIT'
+
 win:
   executableName: Deditor
 nsis:
@@ -21,22 +37,35 @@ nsis:
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
   deleteAppDataOnUninstall: true
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+
 mac:
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
+  # If still fails, check:
+  # https://github.com/electron-userland/electron-builder/issues/3989#issuecomment-557013674
   notarize: false
-  executableName: Deditor
+  hardenedRuntime: false
+  executableName: deditor
 dmg:
   artifactName: ${productName}-${version}-darwin-${arch}.${ext}
+
 linux:
   target:
-    - AppImage
-  maintainer: moeru.ai
+    - deb
+    - rpm
   category: Utility
-  executableName: Deditor
+  synopsis: 'Datasets visualizer & editor, made by Project AIRI team.'
+  description: 'Deditor is a datasets visualizer & editor, made by Project AIRI team.'
+  executableName: deditor
   artifactName: ${productName}-${version}-linux-${arch}.${ext}
+  icon: build/icons/icon.png
+
 appImage:
   artifactName: ${productName}-${version}-linux-${arch}.${ext}
+
 npmRebuild: false
+

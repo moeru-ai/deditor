@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Deditor
+Exec=deditor %U
+Terminal=false
+Type=Application
+Icon=ai.moeru.deditor
+StartupWMClass=Deditor
+Comment=Deditor is a datasets visualizer & editor, made by Project AIRI team.
+Categories=Utility;
+
