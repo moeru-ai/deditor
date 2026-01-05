@@ -68,4 +68,3 @@ appImage:
   artifactName: ${productName}-${version}-linux-${arch}.${ext}
 
 npmRebuild: false
-
