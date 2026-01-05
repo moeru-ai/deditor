@@ -1,3 +1,5 @@
+import type { RouteRecordRaw } from 'vue-router'
+
 import { MotionPlugin } from '@vueuse/motion'
 import { createPinia } from 'pinia'
 import { setupLayouts } from 'virtual:generated-layouts'
@@ -13,7 +15,8 @@ import 'uno.css'
 import 'splitpanes/dist/splitpanes.css'
 
 const pinia = createPinia()
-const routeRecords = setupLayouts(routes)
+// TODO: vite-plugin-vue-layouts is long deprecated, replace with another layout solution
+const routeRecords = setupLayouts(routes as RouteRecordRaw[])
 const router = createRouter({ routes: routeRecords, history: createWebHistory() })
 
 createApp(App)

@@ -5,6 +5,7 @@ export default await antfu(
     unocss: true,
     vue: true,
     toml: false,
+    pnpm: false,
     ignores: [
       'build/**',
       'cspell.config.yaml',

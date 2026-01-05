@@ -11,7 +11,7 @@ import { templateCompilerOptions } from '@tresjs/core'
 import { defineConfig } from 'vite'
 
 // https://vitejs.dev/config/
-export default defineConfig(async () => ({
+export default defineConfig({
   root: resolve(join('src', 'renderer')),
   optimizeDeps: {
     exclude: [
@@ -47,4 +47,4 @@ export default defineConfig(async () => ({
     Layouts(),
     UnoCSS(),
   ],
-}))
+})

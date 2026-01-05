@@ -70,7 +70,6 @@ watch(visualizerStore.styleDefinitions, (styles) => {
   Object.values(pointMaterials.value).forEach((material) => {
     const texture = material.map as CanvasTexture | undefined
     if (texture) {
-      texture.image = null
       texture.dispose()
     }
     material.dispose()

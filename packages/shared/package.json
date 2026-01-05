@@ -44,6 +44,6 @@
     "nanoid": "^5.1.6"
   },
   "devDependencies": {
-    "electron": "^38.2.2"
+    "electron": "^39.2.7"
   }
 }
